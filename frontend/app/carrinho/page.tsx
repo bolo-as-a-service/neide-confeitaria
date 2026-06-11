@@ -12,9 +12,9 @@ export default function CarrinhoPage() {
   const router = useRouter();
   const { items, updateQuantity, removeItem } = useCart();
   const [deliveryOption, setDeliveryOption] = React.useState<"sim" | "nao">("sim");
-  const [address, setAddress] = React.useState("Rua borba gato, Av. Guanabara Nº 7");
-  const [deliveryDate, setDeliveryDate] = React.useState("10/08/2026 - 10:00");
-  const [observations, setObservations] = React.useState("Entregar discretamente, o bolo é surpresa.");
+  const [address, setAddress] = React.useState("");
+  const [deliveryDate, setDeliveryDate] = React.useState("");
+  const [observations, setObservations] = React.useState("");
 
   const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -169,11 +169,10 @@ export default function CarrinhoPage() {
             <div className="flex items-center gap-8 mb-6">
               <label className="flex items-center gap-2.5 cursor-pointer group">
                 <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                    deliveryOption === "nao"
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${deliveryOption === "nao"
                       ? "border-[var(--brand-700)]"
                       : "border-gray-300 group-hover:border-gray-400"
-                  }`}
+                    }`}
                   onClick={() => setDeliveryOption("nao")}
                 >
                   {deliveryOption === "nao" && (
@@ -184,11 +183,10 @@ export default function CarrinhoPage() {
               </label>
               <label className="flex items-center gap-2.5 cursor-pointer group">
                 <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                    deliveryOption === "sim"
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${deliveryOption === "sim"
                       ? "border-[var(--brand-700)]"
                       : "border-gray-300 group-hover:border-gray-400"
-                  }`}
+                    }`}
                   onClick={() => setDeliveryOption("sim")}
                 >
                   {deliveryOption === "sim" && (
@@ -199,77 +197,119 @@ export default function CarrinhoPage() {
               </label>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
-                    ENDEREÇO :
-                  </label>
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
-                  />
+            {deliveryOption === "sim" ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                      ENDEREÇO :
+                    </label>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder="Digite seu endereço"
+                      className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                      DATA e HORA :
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={deliveryDate}
+                      onChange={(e) => setDeliveryDate(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                      OBSERVAÇÕES GERAIS :
+                    </label>
+                    <textarea
+                      value={observations}
+                      onChange={(e) => setObservations(e.target.value)}
+                      placeholder="Ex: Deixar na portaria"
+                      rows={3}
+                      className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm resize-none transition-colors"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
-                    DATA e HORA :
-                  </label>
-                  <input
-                    type="text"
-                    value={deliveryDate}
-                    onChange={(e) => setDeliveryDate(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
-                    OBSERVAÇÕES GERAIS :
-                  </label>
-                  <textarea
-                    value={observations}
-                    onChange={(e) => setObservations(e.target.value)}
-                    rows={3}
-                    className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm resize-none transition-colors"
-                  />
-                </div>
-              </div>
 
-              <div>
-                <h3 className="text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-3">
-                  MARQUE O ENDEREÇO DE ENTREGA
-                </h3>
-                <div className="relative w-full h-[260px] rounded-xl overflow-hidden bg-[#e8e4df] border border-gray-300">
-                  <svg viewBox="0 0 400 260" className="w-full h-full">
-                    <rect width="400" height="260" fill="#e8e4df" />
-                    <path d="M0 60 H400" stroke="#d0cac4" strokeWidth="1.5" />
-                    <path d="M0 130 H400" stroke="#d0cac4" strokeWidth="1.5" />
-                    <path d="M0 200 H400" stroke="#d0cac4" strokeWidth="1.5" />
-                    <path d="M120 0 V260" stroke="#d0cac4" strokeWidth="1.5" />
-                    <path d="M280 0 V260" stroke="#d0cac4" strokeWidth="1.5" />
-                    <path d="M0 30 H400" stroke="#dbd5cf" strokeWidth="1" />
-                    <path d="M0 95 H400" stroke="#dbd5cf" strokeWidth="1" />
-                    <path d="M0 165 H400" stroke="#dbd5cf" strokeWidth="1" />
-                    <path d="M0 230 H400" stroke="#dbd5cf" strokeWidth="1" />
-                    <path d="M55 0 V260" stroke="#dbd5cf" strokeWidth="1" />
-                    <path d="M200 0 V260" stroke="#dbd5cf" strokeWidth="1" />
-                    <path d="M340 0 V260" stroke="#dbd5cf" strokeWidth="1" />
-                    <g transform="translate(200, 115)">
-                      <path d="M0-20C-12-20-20-11-20 0C-20 14 0 24 0 24C0 24 20 14 20 0C20-11 12-20 0-20Z" fill="#ef4444" stroke="white" strokeWidth="2.5" />
-                      <circle cx="0" cy="-3" r="5" fill="white" />
-                    </g>
-                    <text x="70" y="45" fill="#9c928c" fontSize="9" fontFamily="sans-serif">Rua das Flores</text>
-                    <text x="290" y="115" fill="#9c928c" fontSize="9" fontFamily="sans-serif">Av. Central</text>
-                    <text x="130" y="215" fill="#9c928c" fontSize="9" fontFamily="sans-serif">Rua do Comércio</text>
-                  </svg>
-                  <div className="absolute bottom-3 right-3 flex flex-col shadow-sm rounded-md overflow-hidden">
-                    <button className="w-8 h-8 bg-white border-b border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 text-lg leading-none">+</button>
-                    <button className="w-8 h-8 bg-white flex items-center justify-center text-gray-600 hover:bg-gray-50 text-lg leading-none">−</button>
+                <div>
+                  <h3 className="text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-3">
+                    MARQUE O ENDEREÇO DE ENTREGA
+                  </h3>
+                  <div className="relative w-full h-[260px] rounded-xl overflow-hidden border border-gray-300">
+                    {address.trim() ? (
+                      <iframe
+                        src={`https://maps.google.com/maps?q=${encodeURIComponent(address)}&output=embed`}
+                        className="w-full h-full"
+                        allowFullScreen
+                        loading="lazy"
+                        title="Mapa do endereço de entrega"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-[#f5f0eb] text-sm text-[var(--muted)]">
+                        Insira um endereço para ver o mapa
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                      RETIRAR EM :
+                    </label>
+                    <p className="px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-[var(--rose-50)] text-[var(--ink)] text-sm">
+                      Neide Confeitaria — Rua 7, Bragança Paulista
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                      DATA e HORA :
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={deliveryDate}
+                      onChange={(e) => setDeliveryDate(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                      OBSERVAÇÕES GERAIS :
+                    </label>
+                    <textarea
+                      value={observations}
+                      onChange={(e) => setObservations(e.target.value)}
+                      placeholder="Ex: Quanto antes, melhor"
+                      rows={3}
+                      className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm resize-none transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-3">
+                    LOCAL DE RETIRADA
+                  </h3>
+                  <div className="relative w-full h-[260px] rounded-xl overflow-hidden border border-gray-300">
+                    <iframe
+                      src="https://maps.google.com/maps?q=Neide+Confeitaria+Bragança+Paulista&output=embed"
+                      className="w-full h-full"
+                      allowFullScreen
+                      loading="lazy"
+                      title="Mapa da confeitaria"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="mt-6 flex justify-center">
               <Button
