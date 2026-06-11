@@ -56,22 +56,28 @@ export function ProductCategorySection({
       </h2>
       <div className="relative">
         {canScrollLeft && (
-          <button
-            onClick={() => scrollBy("left")}
-            className="absolute left-1 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-md border border-[var(--rose-200)] text-[var(--brand-700)] hover:bg-white hover:text-[var(--brand-800)] transition-all"
-            aria-label="Produtos anteriores"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
+          <>
+            <div className="absolute -left-4 top-0 bottom-4 w-24 bg-gradient-to-r from-[var(--page-bg)] to-transparent z-[5] pointer-events-none" />
+            <button
+              onClick={() => scrollBy("left")}
+              className="absolute left-1 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-md border border-[var(--rose-200)] text-[var(--brand-700)] hover:bg-white hover:text-[var(--brand-800)] transition-all"
+              aria-label="Produtos anteriores"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+          </>
         )}
         {canScrollRight && (
-          <button
-            onClick={() => scrollBy("right")}
-            className="absolute right-1 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-md border border-[var(--rose-200)] text-[var(--brand-700)] hover:bg-white hover:text-[var(--brand-800)] transition-all"
-            aria-label="Próximos produtos"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
+          <>
+            <div className="absolute -right-4 top-0 bottom-4 w-24 bg-gradient-to-l from-[var(--page-bg)] to-transparent z-[5] pointer-events-none" />
+            <button
+              onClick={() => scrollBy("right")}
+              className="absolute right-1 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-md border border-[var(--rose-200)] text-[var(--brand-700)] hover:bg-white hover:text-[var(--brand-800)] transition-all"
+              aria-label="Próximos produtos"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </>
         )}
         <div
           ref={scrollRef}

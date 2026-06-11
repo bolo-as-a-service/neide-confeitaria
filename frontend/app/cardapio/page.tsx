@@ -10,6 +10,7 @@ import { ProductModal } from "@/components/menu/ProductModal";
 import { ShoppingCartSidebar } from "@/components/menu/ShoppingCartSidebar";
 import { Product } from "@/components/menu/ProductCard";
 import { useCart, CartItem } from "@/lib/cart-context";
+import { cn } from "@/lib/utils";
 
 const MOCK_PRODUCTS: Product[] = [
   { id: "1", name: "Bolo de chocolate", price: 70, image: "/bolo.webp", category: "bolos-cobertura", description: "Bolo de chocolate cremoso c/ cobertura de chocolate / 18cm x 6cm, com recheio", ingredients: ["Ovo", "Leite", "Chocolate", "Trigo"] },
@@ -92,8 +93,11 @@ export default function CardapioPage() {
     <div className="min-h-screen bg-[var(--page-bg)] font-body">
       <Header cartCount={cartCount} onCartClick={() => setCartOpen(true)} />
 
-      <main className="flex flex-1">
-        <div className="flex-1 lg:pr-4">
+      <main className="flex flex-1 max-w-[85%] mx-auto">
+        <div className={cn(
+          "flex-1 transition-all duration-300 ease-in-out",
+          cartOpen ? "lg:max-w-[calc(100%-380px)] lg:px-4" : "lg:pr-4"
+        )}>
           <div className="max-w-[1020px] mx-auto px-4 pb-12">
             <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
             <SearchBar value={searchQuery} onChange={setSearchQuery} />

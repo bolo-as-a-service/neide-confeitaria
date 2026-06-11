@@ -56,7 +56,7 @@ export function ShoppingCartSidebar({
         className={cn(
           "fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-50",
           "flex flex-col transition-transform duration-300",
-          "lg:relative lg:max-w-[380px] lg:shadow-lg lg:rounded-2xl lg:border lg:border-[var(--rose-200)]"
+          "lg:relative lg:shrink-0 lg:max-w-[380px] lg:shadow-lg lg:rounded-2xl lg:border lg:border-[var(--rose-200)]"
         )}
       >
         <div className="flex items-center justify-between p-4 border-b border-[var(--rose-200)]">
