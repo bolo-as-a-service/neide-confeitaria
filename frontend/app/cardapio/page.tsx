@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/menu/Header";
 import { CategoryTabs, CATEGORIES } from "@/components/menu/CategoryTabs";
 import { SearchBar } from "@/components/menu/SearchBar";
 import { ProductCategorySection } from "@/components/menu/ProductCategorySection";
 import { ProductModal } from "@/components/menu/ProductModal";
-import { ShoppingCartSidebar, CartItem } from "@/components/menu/ShoppingCartSidebar";
+import { ShoppingCartSidebar } from "@/components/menu/ShoppingCartSidebar";
 import { Product } from "@/components/menu/ProductCard";
+import { useCart, CartItem } from "@/lib/cart-context";
 
 const MOCK_PRODUCTS: Product[] = [
   { id: "1", name: "Bolo de chocolate", price: 70, image: "/bolo.webp", category: "bolos-cobertura", description: "Bolo de chocolate cremoso c/ cobertura de chocolate / 18cm x 6cm, com recheio", ingredients: ["Ovo", "Leite", "Chocolate", "Trigo"] },
@@ -48,12 +50,13 @@ const CATEGORY_TITLES: Record<string, string> = {
 };
 
 export default function CardapioPage() {
+  const router = useRouter();
   const [activeCategory, setActiveCategory] = React.useState("bolos-cobertura");
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [cartItems, setCartItems] = React.useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = React.useState(false);
   const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
   const [isMobile, setIsMobile] = React.useState(false);
+  const { items, addItem, updateQuantity, removeItem } = useCart();
 
   React.useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
@@ -71,55 +74,19 @@ export default function CardapioPage() {
   }, []);
 
   const handleAddToCart = (product: Product) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prev, { id: `${product.id}-${Date.now()}`, product, quantity: 1, observations: "" }];
-    });
+    addItem(product);
     if (isMobile) setCartOpen(true);
   };
 
   const handleAddToCartFromModal = (product: Product, quantity: number, observations: string) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity, observations }
-            : item
-        );
-      }
-      return [...prev, { id: `${product.id}-${Date.now()}`, product, quantity, observations }];
-    });
-  };
-
-  const handleUpdateQuantity = (itemId: string, quantity: number) => {
-    if (quantity <= 0) {
-      setCartItems((prev) => prev.filter((item) => item.id !== itemId));
-    } else {
-      setCartItems((prev) =>
-        prev.map((item) => (item.id === itemId ? { ...item, quantity } : item))
-      );
-    }
-  };
-
-  const handleRemoveItem = (itemId: string) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== itemId));
-  };
-
-  const handleEditItem = (item: CartItem) => {
-    setSelectedProduct(item.product);
+    addItem(product, quantity, observations);
   };
 
   const handleCheckout = () => {
-    alert(`Finalizando pedido no valor de R$ ${cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0).toFixed(2).replace(".", ",")}`);
+    router.push("/carrinho");
   };
 
-  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <div className="min-h-screen bg-[var(--page-bg)] font-body">
@@ -148,12 +115,12 @@ export default function CardapioPage() {
         </div>
 
         <ShoppingCartSidebar
-          items={cartItems}
+          items={items}
           isOpen={cartOpen}
           onClose={() => setCartOpen(false)}
-          onUpdateQuantity={handleUpdateQuantity}
-          onRemoveItem={handleRemoveItem}
-          onEditItem={handleEditItem}
+          onUpdateQuantity={updateQuantity}
+          onRemoveItem={removeItem}
+          onEditItem={(item: CartItem) => setSelectedProduct(item.product)}
           onCheckout={handleCheckout}
         />
       </main>

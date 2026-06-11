@@ -17,9 +17,11 @@ export function Header({ cartCount, onCartClick }: HeaderProps) {
         <div className="max-w-[1400px] mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-6 flex-1 md:flex-none">
-              <span className="font-script text-2xl md:text-3xl whitespace-nowrap">
-                Neide Confeitaria
-              </span>
+              <a href="/cardapio">
+                <span className="font-script text-2xl md:text-3xl whitespace-nowrap">
+                  Neide Confeitaria
+                </span>
+              </a>
               <div className="hidden md:flex items-center gap-6 text-sm text-[var(--rose-100)]">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />

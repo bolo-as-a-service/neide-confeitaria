@@ -6,13 +6,9 @@ import { X, Trash2, Edit, ShoppingBag, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Product } from "./ProductCard";
+import { CartItem } from "@/lib/cart-context";
 
-export interface CartItem {
-  id: string;
-  product: Product;
-  quantity: number;
-  observations: string;
-}
+export type { CartItem };
 
 interface ShoppingCartSidebarProps {
   items: CartItem[];
