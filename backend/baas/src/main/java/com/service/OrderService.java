@@ -1,15 +1,26 @@
-@RestController
-@RequestMapping("/orders")
-public class OrderController {
+package com.baas.service;
 
-    private final OrderService orderService;
+import java.util.List;
 
-    public OrderController(OrderService orderService) {
-        this.orderService = orderService;
+import org.springframework.stereotype.Service;
+
+import com.baas.model.Order;
+import com.baas.repository.OrderRepository;
+
+@Service
+public class OrderService {
+
+    private final OrderRepository orderRepository;
+
+    public OrderService(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
     }
 
-    @PostMapping
-    public Order createOrder(@RequestBody Order order) {
-        return orderService.createOrder(order);
+    public Order createOrder(Order order) {
+        return orderRepository.save(order);
+    }
+
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
     }
 }
