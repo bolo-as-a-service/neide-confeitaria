@@ -4,23 +4,23 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.baas.model.Product;
-import com.baas.repository.ProductRepository;
+import com.baas.model.Category;
+import com.baas.repository.CategoryRepository;
 
 @Service
-public class ProductService {
+public class CategoryService {
 
-    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
-    public ProductService(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public CategoryService(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
     }
 
-    public Product createProduct(Product product) {
-        return productRepository.save(product);
+    public Category createCategory(Category category) {
+        return categoryRepository.save(category);
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
     }
 }
