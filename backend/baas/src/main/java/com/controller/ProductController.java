@@ -23,15 +23,20 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<Product> getAllProducts() {
+    public List<Product> getProducts(@RequestParam(required = false) Long categoryId) {
+        if (categoryId != null) {
+            return productService.getProductsByCategory(categoryId);
+        }
         return productService.getAllProducts();
     }
 
-    @PutMapping("/{id}")
-    public Product updateProduct(
-            @PathVariable Long id,
-            @RequestBody Product product) {
+    @GetMapping("/{id}")
+    public Product getProductById(@PathVariable Long id) {
+        return productService.getProductById(id);
+    }
 
+    @PutMapping("/{id}")
+    public Product updateProduct(@PathVariable Long id, @RequestBody Product product) {
         return productService.updateProduct(id, product);
     }
 
