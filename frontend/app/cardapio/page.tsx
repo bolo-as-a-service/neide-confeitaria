@@ -8,6 +8,7 @@ import { SearchBar } from "@/components/menu/SearchBar";
 import { ProductCategorySection } from "@/components/menu/ProductCategorySection";
 import { ProductModal } from "@/components/menu/ProductModal";
 import { ShoppingCartSidebar } from "@/components/menu/ShoppingCartSidebar";
+import { Footer } from "@/components/menu/Footer";
 import { Product } from "@/components/menu/ProductCard";
 import { useCart, CartItem } from "@/lib/cart-context";
 import { cn } from "@/lib/utils";
@@ -93,12 +94,12 @@ export default function CardapioPage() {
     <div className="min-h-screen bg-[var(--page-bg)] font-body">
       <Header cartCount={cartCount} onCartClick={() => setCartOpen(true)} />
 
-      <main className="flex flex-1 max-w-[85%] mx-auto">
+      <main className="flex flex-1 w-full max-w-full lg:max-w-[85%] mx-auto">
         <div className={cn(
-          "flex-1 transition-all duration-300 ease-in-out",
+          "flex-1 transition-all duration-300 ease-in-out min-w-0",
           cartOpen ? "lg:max-w-[calc(100%-380px)] lg:px-4" : "lg:pr-4"
         )}>
-          <div className="max-w-[1020px] mx-auto px-4 pb-12">
+          <div className="max-w-[1020px] mx-auto px-4 sm:px-6 pb-12">
             <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
             <SearchBar value={searchQuery} onChange={setSearchQuery} />
 
@@ -128,6 +129,8 @@ export default function CardapioPage() {
           onCheckout={handleCheckout}
         />
       </main>
+
+      <Footer />
 
       <ProductModal
         product={selectedProduct}

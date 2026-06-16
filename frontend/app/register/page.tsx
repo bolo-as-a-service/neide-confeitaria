@@ -100,10 +100,10 @@ export default function RegisterPage() {
         <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-[var(--rose-200)]/40 blur-[140px]" />
       </div>
 
-      <div className="z-10 w-full flex items-stretch justify-center flex-row max-w-[65%] bg-white/85 rounded-3xl border border-[var(--rose-200)] gap-3">
-        <div className="text-center bg-[#31130c] m-0 p-12 rounded-3xl w-[50%] flex flex-col justify-between">
+      <div className="z-10 w-full flex flex-col lg:flex-row items-stretch justify-center max-w-[90%] lg:max-w-[65%] bg-white/85 rounded-3xl border border-[var(--rose-200)] gap-3">
+        <div className="text-center bg-[#31130c] p-8 lg:p-12 rounded-3xl lg:w-[50%] flex flex-col justify-between">
           <div className="flex flex-col items-center justify-center mt-12">
-            <h1 className="font-script text-6xl leading-none text-[var(--page-bg)]">
+            <h1 className="font-script text-4xl lg:text-6xl leading-none text-[var(--page-bg)]">
               Neide
             </h1>
             <p className="mt-1 font-display text-[0.65rem] uppercase tracking-[0.45em] text-[var(--page-bg)]">
@@ -124,7 +124,7 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <div className="p-8 w-[50%]">
+        <div className="p-6 lg:p-8 lg:w-[50%]">
           <div className="mb-6">
             <h2 className="font-display text-2xl font-semibold text-[var(--brand-900)]">
               Criar conta

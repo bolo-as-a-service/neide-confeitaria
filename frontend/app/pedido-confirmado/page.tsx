@@ -18,7 +18,7 @@ export default function PedidoConfirmadoPage() {
 
   return (
     <div className="min-h-screen bg-[var(--page-bg)] font-body flex flex-col">
-      <Header cartCount={0} onCartClick={() => {}} />
+      <Header cartCount={0} onCartClick={() => { }} />
 
       <main className="flex-1 flex items-center justify-center px-4">
         <motion.div
@@ -59,7 +59,7 @@ export default function PedidoConfirmadoPage() {
             transition={{ delay: 0.5, duration: 0.4 }}
           >
             <Button
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/cardapio")}
               className="h-12 px-8 text-base font-semibold rounded-xl"
               size="lg"
             >

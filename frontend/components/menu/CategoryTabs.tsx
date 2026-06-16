@@ -41,7 +41,7 @@ export function CategoryTabs({ activeCategory, onCategoryChange }: CategoryTabsP
             key={category.id}
             onClick={() => onCategoryChange(category.id)}
             className={cn(
-              "flex flex-col items-center gap-1.5 px-3 py-3 min-w-[80px] transition-all duration-200",
+              "flex flex-col items-center gap-1.5 px-3 py-3 min-w-[90px] sm:min-w-[80px] transition-all duration-200",
               "rounded-2xl border-2",
               activeCategory === category.id
                 ? "bg-white border-[var(--brand-700)] text-[var(--brand-800)] shadow-md"
@@ -52,7 +52,7 @@ export function CategoryTabs({ activeCategory, onCategoryChange }: CategoryTabsP
             <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--rose-100)] text-[var(--brand-700)]">
               {category.icon}
             </span>
-            <span className="text-xs font-semibold text-center leading-tight whitespace-nowrap">
+            <span className="text-[11px] sm:text-xs font-semibold text-center leading-tight line-clamp-2">
               {category.label}
             </span>
           </button>
