@@ -7,21 +7,26 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Product } from "./ProductCard";
+import { CartItem } from "@/lib/cart-context";
 
 interface ProductModalProps {
   product: Product | null;
   isOpen: boolean;
   onClose: () => void;
   onAddToCart: (product: Product, quantity: number, observations: string) => void;
+  editItem?: CartItem | null;
+  onSaveEdit?: (itemId: string, quantity: number, observations: string) => void;
 }
 
 function ProductModalContent({
   product,
   onClose,
   onAddToCart,
+  editItem,
+  onSaveEdit,
 }: Omit<ProductModalProps, "isOpen">) {
-  const [quantity, setQuantity] = React.useState(1);
-  const [observations, setObservations] = React.useState("");
+  const [quantity, setQuantity] = React.useState(editItem?.quantity ?? 1);
+  const [observations, setObservations] = React.useState(editItem?.observations ?? "");
 
   const formattedPrice = product
     ? new Intl.NumberFormat("pt-BR", {
@@ -41,7 +46,11 @@ function ProductModalContent({
   const handleDecrement = () => setQuantity((prev) => Math.max(1, prev - 1));
   const handleAddToCart = () => {
     if (product) {
-      onAddToCart(product, quantity, observations);
+      if (editItem && onSaveEdit) {
+        onSaveEdit(editItem.id, quantity, observations);
+      } else {
+        onAddToCart(product, quantity, observations);
+      }
       onClose();
     }
   };
@@ -142,7 +151,7 @@ function ProductModalContent({
           size="lg"
         >
           <ShoppingCart className="h-5 w-5 mr-2" />
-          ADICIONAR AO CARRINHO
+          {editItem ? "SALVAR" : "ADICIONAR AO CARRINHO"}
         </Button>
 
         <div className="flex items-center justify-center gap-2 text-[var(--muted)]">
@@ -156,10 +165,10 @@ function ProductModalContent({
   );
 }
 
-export function ProductModal({ product, isOpen, onClose, onAddToCart }: ProductModalProps) {
+export function ProductModal({ product, isOpen, onClose, onAddToCart, editItem, onSaveEdit }: ProductModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      {product && <ProductModalContent key={product.id} product={product} onClose={onClose} onAddToCart={onAddToCart} />}
+      {product && <ProductModalContent key={editItem?.id ?? product.id} product={product} onClose={onClose} onAddToCart={onAddToCart} editItem={editItem} onSaveEdit={onSaveEdit} />}
     </Dialog>
   );
 }

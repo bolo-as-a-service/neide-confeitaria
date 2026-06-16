@@ -3,18 +3,28 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowLeft, Minus, Plus, Edit3, Trash2 } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Edit3, Trash2, AlertTriangle } from "lucide-react";
 import { Header } from "@/components/menu/Header";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/lib/cart-context";
+import { useCart, CartItem } from "@/lib/cart-context";
+import { ProductModal } from "@/components/menu/ProductModal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function CarrinhoPage() {
   const router = useRouter();
-  const { items, updateQuantity, removeItem } = useCart();
+  const { items, updateQuantity, removeItem, updateItem } = useCart();
   const [deliveryOption, setDeliveryOption] = React.useState<"sim" | "nao">("sim");
   const [address, setAddress] = React.useState("");
   const [deliveryDate, setDeliveryDate] = React.useState("");
   const [observations, setObservations] = React.useState("");
+
+  const [editItem, setEditItem] = React.useState<CartItem | null>(null);
+  const [deleteItem, setDeleteItem] = React.useState<CartItem | null>(null);
 
   const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -34,6 +44,10 @@ export default function CarrinhoPage() {
     router.push("/pedido-confirmado");
   };
 
+  const handleSaveEdit = (itemId: string, quantity: number, observations: string) => {
+    updateItem(itemId, quantity, observations);
+  };
+
   return (
     <div className="min-h-screen bg-[var(--page-bg)] font-body">
       <Header cartCount={cartCount} onCartClick={() => router.push("/carrinho")} />
@@ -48,7 +62,6 @@ export default function CarrinhoPage() {
         </button>
 
         <div className="space-y-6">
-          {/* ── Bloco: ITENS DO PEDIDO ── */}
           <div className="bg-white rounded-2xl border border-[var(--rose-200)] shadow-sm overflow-hidden">
             <div className="p-6 pb-4">
               <h2 className="font-display text-lg font-bold text-[var(--brand-800)] uppercase tracking-wide mb-5">
@@ -95,13 +108,14 @@ export default function CarrinhoPage() {
                             </div>
                             <div className="flex items-center gap-1 flex-shrink-0">
                               <button
+                                onClick={() => setEditItem(item)}
                                 className="p-1.5 rounded-full text-blue-500 hover:bg-blue-50 transition-colors"
                                 aria-label="Editar item"
                               >
                                 <Edit3 className="h-4 w-4" />
                               </button>
                               <button
-                                onClick={() => removeItem(item.id)}
+                                onClick={() => setDeleteItem(item)}
                                 className="p-1.5 rounded-full text-red-500 hover:bg-red-50 transition-colors"
                                 aria-label="Remover item"
                               >
@@ -160,7 +174,6 @@ export default function CarrinhoPage() {
             )}
           </div>
 
-          {/* ── Bloco: DADOS DE ENTREGA E AGENDAMENTO ── */}
           <div className="bg-white rounded-2xl border border-[var(--rose-200)] shadow-sm p-6">
             <h2 className="font-display text-lg font-bold text-[var(--brand-800)] uppercase tracking-wide mb-6">
               DESEJA RECEBER O PEDIDO EM CASA?
@@ -323,6 +336,47 @@ export default function CarrinhoPage() {
           </div>
         </div>
       </main>
+
+      <ProductModal
+        product={editItem?.product ?? null}
+        isOpen={!!editItem}
+        onClose={() => setEditItem(null)}
+        onAddToCart={() => {}}
+        editItem={editItem}
+        onSaveEdit={handleSaveEdit}
+      />
+
+      <Dialog open={!!deleteItem} onOpenChange={() => setDeleteItem(null)}>
+        <DialogContent className="max-w-sm p-6 text-center">
+          <DialogHeader>
+            <div className="flex justify-center mb-4">
+              <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
+                <AlertTriangle className="h-7 w-7 text-red-500" />
+              </div>
+            </div>
+            <DialogTitle className="text-lg font-bold text-[var(--ink)]">
+              Remover item
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-[var(--muted)] mb-6">
+            Tem certeza que deseja remover <strong>{deleteItem?.product.name}</strong> do carrinho?
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Button variant="outline" onClick={() => setDeleteItem(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (deleteItem) removeItem(deleteItem.id);
+                setDeleteItem(null);
+              }}
+            >
+              Sim, remover
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

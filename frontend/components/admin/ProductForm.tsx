@@ -7,18 +7,21 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
+import { AdminProduct } from "./AdminProductTable";
+
 interface ProductFormProps {
   onBack: () => void;
+  editProduct?: AdminProduct | null;
 }
 
 const CATEGORIES = ["Caseiro", "Diet", "Vulcão", "Bolo", "Salgado", "Pudim", "Cesta", "Congelado"];
 
-export function ProductForm({ onBack }: ProductFormProps) {
-  const [name, setName] = React.useState("");
-  const [description, setDescription] = React.useState("");
-  const [category, setCategory] = React.useState("");
-  const [price, setPrice] = React.useState("");
-  const [ingredients, setIngredients] = React.useState(["Ingrediente X", "Ingrediente Y", "Ingrediente Z"]);
+export function ProductForm({ onBack, editProduct }: ProductFormProps) {
+  const [name, setName] = React.useState(editProduct?.name ?? "");
+  const [description, setDescription] = React.useState(editProduct?.description ?? "");
+  const [category, setCategory] = React.useState(editProduct?.category ?? "");
+  const [price, setPrice] = React.useState(editProduct ? String(editProduct.price) : "");
+  const [ingredients, setIngredients] = React.useState<string[]>([]);
   const [newIngredient, setNewIngredient] = React.useState("");
 
   const descriptionLength = description.length;
@@ -52,7 +55,7 @@ export function ProductForm({ onBack }: ProductFormProps) {
               <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
             <div>
-              <h1 className="text-lg sm:text-2xl font-bold text-[var(--ink)]">Novo Produto</h1>
+              <h1 className="text-lg sm:text-2xl font-bold text-[var(--ink)]">{editProduct ? "Editar Produto" : "Novo Produto"}</h1>
               <p className="text-xs sm:text-sm text-[var(--muted)]">Preencha as informações do produto</p>
             </div>
           </div>

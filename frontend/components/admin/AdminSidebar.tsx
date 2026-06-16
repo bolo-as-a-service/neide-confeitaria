@@ -17,7 +17,7 @@ const sidebarItems: SidebarItem[] = [
     id: "menu-produtos",
     label: "Menu de Produtos",
     icon: <Cake className="h-5 w-5" />,
-    href: "/admin",
+    href: "/admin/menu",
   },
   {
     id: "pedidos",
@@ -37,9 +37,9 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   const isActive = (item: SidebarItem) => {
-    if (item.href === "/admin") {
-      return pathname === "/admin";
-    }
+      if (item.href === "/admin/menu") {
+        return pathname === "/admin/menu";
+      }
     return pathname.startsWith(item.href);
   };
 

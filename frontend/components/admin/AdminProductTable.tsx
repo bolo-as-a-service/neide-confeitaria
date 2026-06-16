@@ -21,6 +21,8 @@ interface AdminProductTableProps {
   onSearchChange: (value: string) => void;
   categoryFilter: string;
   onCategoryFilterChange: (value: string) => void;
+  onEdit?: (product: AdminProduct) => void;
+  onDelete?: (product: AdminProduct) => void;
 }
 
 const categoryTagStyles: Record<string, string> = {
@@ -36,6 +38,8 @@ export function AdminProductTable({
   onSearchChange,
   categoryFilter,
   onCategoryFilterChange,
+  onEdit,
+  onDelete,
 }: AdminProductTableProps) {
   const formattedPrice = (price: number) =>
     new Intl.NumberFormat("pt-BR", {
@@ -136,12 +140,14 @@ export function AdminProductTable({
                 </div>
                 <div className="flex items-center gap-2">
                   <button
+                    onClick={() => onEdit?.(product)}
                     className="w-8 h-8 rounded-full bg-green-50 text-green-600 hover:bg-green-100 flex items-center justify-center transition-colors"
                     aria-label={`Editar ${product.name}`}
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
                   <button
+                    onClick={() => onDelete?.(product)}
                     className="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors"
                     aria-label={`Excluir ${product.name}`}
                   >
@@ -169,12 +175,14 @@ export function AdminProductTable({
 
               <div className="hidden lg:flex items-center justify-center gap-2">
                 <button
+                  onClick={() => onEdit?.(product)}
                   className="w-8 h-8 rounded-full bg-green-50 text-green-600 hover:bg-green-100 flex items-center justify-center transition-colors"
                   aria-label={`Editar ${product.name}`}
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
                 <button
+                  onClick={() => onDelete?.(product)}
                   className="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors"
                   aria-label={`Excluir ${product.name}`}
                 >
