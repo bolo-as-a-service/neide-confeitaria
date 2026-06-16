@@ -1,9 +1,8 @@
 package com.controller;
 
 import java.util.List;
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import com.model.Product;
 import com.service.ProductService;
 
@@ -18,30 +17,36 @@ public class ProductController {
     }
 
     @PostMapping
-    public Product createProduct(@RequestBody Product product) {
-        return productService.createProduct(product);
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        return ResponseEntity.ok(productService.createProduct(product));
     }
 
     @GetMapping
-    public List<Product> getProducts(@RequestParam(required = false) Long categoryId) {
+    public ResponseEntity<List<Product>> getProducts(@RequestParam(required = false) Long categoryId) {
         if (categoryId != null) {
-            return productService.getProductsByCategory(categoryId);
+            return ResponseEntity.ok(productService.getProductsByCategory(categoryId));
         }
-        return productService.getAllProducts();
+        return ResponseEntity.ok(productService.getAllProducts());
     }
 
     @GetMapping("/{id}")
-    public Product getProductById(@PathVariable Long id) {
-        return productService.getProductById(id);
+    public ResponseEntity<Product> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.getProductById(id));
     }
 
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable Long id, @RequestBody Product product) {
-        return productService.updateProduct(id, product);
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
+        return ResponseEntity.ok(productService.updateProduct(id, product));
+    }
+
+    @PatchMapping("/{id}/toggle")
+    public ResponseEntity<Product> toggleAvailability(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.toggleAvailability(id));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
     }
 }

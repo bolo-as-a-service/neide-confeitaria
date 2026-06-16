@@ -1,9 +1,9 @@
 package com.controller;
 
 import java.util.List;
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.dto.OrderDTO;
 import com.model.Order;
 import com.service.OrderService;
 
@@ -18,22 +18,35 @@ public class OrderController {
     }
 
     @PostMapping
-    public Order createOrder(@RequestBody Order order) {
-        return orderService.createOrder(order);
+    public ResponseEntity<Order> createOrder(@RequestBody OrderDTO dto) {
+        return ResponseEntity.ok(orderService.createOrder(dto));
+    }
+
+    @GetMapping("/customer/{name}")
+    public ResponseEntity<List<Order>> getByCustomer(@PathVariable String name) {
+        return ResponseEntity.ok(orderService.getOrdersByCustomerName(name));
     }
 
     @GetMapping
-    public List<Order> getAllOrders() {
-        return orderService.getAllOrders();
+    public ResponseEntity<List<Order>> getAllOrders(@RequestParam(required = false) String status) {
+        if (status != null) {
+            return ResponseEntity.ok(orderService.getOrdersByStatus(status));
+        }
+        return ResponseEntity.ok(orderService.getAllOrders());
     }
 
     @GetMapping("/{id}")
-    public Order getOrderById(@PathVariable Long id) {
-        return orderService.getOrderById(id);
+    public ResponseEntity<Order> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderById(id));
     }
 
-    @PutMapping("/{id}/status")
-    public Order updateStatus(@PathVariable Long id, @RequestBody String status) {
-        return orderService.updateStatus(id, status);
+    @PatchMapping("/{id}/advance")
+    public ResponseEntity<Order> advanceStatus(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.advanceStatus(id));
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Order> updateStatus(@PathVariable Long id, @RequestParam String status) {
+        return ResponseEntity.ok(orderService.updateStatus(id, status));
     }
 }

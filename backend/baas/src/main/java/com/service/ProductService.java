@@ -1,22 +1,28 @@
 package com.service;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
-
 import com.model.Product;
+import com.repository.CategoryRepository;
 import com.repository.ProductRepository;
 
 @Service
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public Product createProduct(Product product) {
+        if (product.getCategory() != null && product.getCategory().getId() != null) {
+            product.setCategory(categoryRepository.findById(product.getCategory().getId())
+                    .orElseThrow(() -> new RuntimeException("Categoria não encontrada")));
+        }
+        if (product.getAvailable() == null) product.setAvailable(true);
         return productRepository.save(product);
     }
 
@@ -30,7 +36,7 @@ public class ProductService {
 
     public Product getProductById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found: " + id));
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado: " + id));
     }
 
     public Product updateProduct(Long id, Product product) {
@@ -39,9 +45,19 @@ public class ProductService {
         existing.setDescription(product.getDescription());
         existing.setPrice(product.getPrice());
         existing.setImageUrl(product.getImageUrl());
-        existing.setAvailable(product.getAvailable());
-        existing.setCategory(product.getCategory());
+        existing.setIngredients(product.getIngredients());
+        if (product.getAvailable() != null) existing.setAvailable(product.getAvailable());
+        if (product.getCategory() != null && product.getCategory().getId() != null) {
+            existing.setCategory(categoryRepository.findById(product.getCategory().getId())
+                    .orElseThrow(() -> new RuntimeException("Categoria não encontrada")));
+        }
         return productRepository.save(existing);
+    }
+
+    public Product toggleAvailability(Long id) {
+        Product product = getProductById(id);
+        product.setAvailable(!product.getAvailable());
+        return productRepository.save(product);
     }
 
     public void deleteProduct(Long id) {
