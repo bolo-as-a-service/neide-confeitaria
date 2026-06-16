@@ -1,11 +1,11 @@
-package com.baas.controller;
+package com.controller;
 
 import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.baas.model.Order;
-import com.baas.service.OrderService;
+import com.model.Order;
+import com.service.OrderService;
 
 @RestController
 @RequestMapping("/orders")

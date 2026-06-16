@@ -1,11 +1,11 @@
-package com.baas.service;
+package com.service;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.baas.model.Category;
-import com.baas.repository.CategoryRepository;
+import com.model.Category;
+import com.repository.CategoryRepository;
 
 @Service
 public class CategoryService {
@@ -26,7 +26,7 @@ public class CategoryService {
 
     public Category updateCategory(Long id, Category category) {
         Category existing = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada: " + id));
+                .orElseThrow(() -> new RuntimeException("Category not found: " + id));
         existing.setName(category.getName());
         return categoryRepository.save(existing);
     }

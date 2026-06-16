@@ -1,12 +1,12 @@
-package com.baas.service;
+package com.service;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.baas.model.Order;
-import com.baas.model.OrderItem;
-import com.baas.repository.OrderRepository;
+import com.model.Order;
+import com.model.OrderItem;
+import com.repository.OrderRepository;
 
 @Service
 public class OrderService {
@@ -23,7 +23,7 @@ public class OrderService {
                 item.setOrder(order);
             }
         }
-        order.setStatus("PENDENTE");
+        order.setStatus("PENDING");
         return orderRepository.save(order);
     }
 
@@ -33,7 +33,7 @@ public class OrderService {
 
     public Order getOrderById(Long id) {
         return orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado: " + id));
+                .orElseThrow(() -> new RuntimeException("Order not found: " + id));
     }
 
     public Order updateStatus(Long id, String status) {

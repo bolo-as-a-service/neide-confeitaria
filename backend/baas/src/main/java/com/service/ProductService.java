@@ -1,11 +1,11 @@
-package com.baas.service;
+package com.service;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.baas.model.Product;
-import com.baas.repository.ProductRepository;
+import com.model.Product;
+import com.repository.ProductRepository;
 
 @Service
 public class ProductService {
@@ -30,7 +30,7 @@ public class ProductService {
 
     public Product getProductById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado: " + id));
+                .orElseThrow(() -> new RuntimeException("Product not found: " + id));
     }
 
     public Product updateProduct(Long id, Product product) {

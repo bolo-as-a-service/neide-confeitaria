@@ -1,11 +1,11 @@
-package com.baas.controller;
+package com.controller;
 
 import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.baas.model.Category;
-import com.baas.service.CategoryService;
+import com.model.Category;
+import com.service.CategoryService;
 
 @RestController
 @RequestMapping("/categories")

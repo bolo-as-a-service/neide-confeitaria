@@ -1,8 +1,8 @@
-package com.baas.repository;
+package com.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.baas.model.Order;
+import com.model.Order;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 

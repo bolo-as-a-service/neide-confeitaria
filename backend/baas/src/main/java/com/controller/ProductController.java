@@ -1,11 +1,11 @@
-package com.baas.controller;
+package com.controller;
 
 import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.baas.model.Product;
-import com.baas.service.ProductService;
+import com.model.Product;
+import com.service.ProductService;
 
 @RestController
 @RequestMapping("/products")
