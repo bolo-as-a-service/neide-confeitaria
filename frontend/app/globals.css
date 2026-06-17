@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fae9e5;
+  --foreground: #2b1514;
+  --ink: #2b1514;
+  --muted: #8d6f6b;
+  --brand-900: #4b1e1c;
+  --brand-800: #632725;
+  --brand-700: #74312d;
+  --brand-600: #8a3b35;
+  --rose-50: #fdf7f5;
+  --rose-100: #fae9e5;
+  --rose-200: #f2d4cd;
+  --cream: #f9efec;
+  --surface: #fff7f5;
+  --ring: #e3bdb6;
+  --page-bg: #fae9e5;
+  --font-body: var(--font-manrope);
+  --font-display: var(--font-cormorant);
+  --font-script: var(--font-allura);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-body);
+}
+
+body {
+  background: radial-gradient(circle at 12% -10%, #fff6f3 0%, #fae9e5 45%, #f5d9d2 100%);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-script {
+  font-family: var(--font-script);
+}
+
+.scallop-edge {
+  position: relative;
+  isolation: isolate;
+}
+
+.scallop-edge::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 26px;
+  background: radial-gradient(circle at 13px -8px, transparent 19px, var(--page-bg) 20px) repeat-x;
+  background-size: 32px 32px;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--rose-50);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brand-800);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-900);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand-800) var(--rose-50);
+}
