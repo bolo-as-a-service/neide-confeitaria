@@ -24,6 +24,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/orders").permitAll()
                 .requestMatchers(HttpMethod.GET, "/orders/customer/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/images/upload").permitAll()
+                .requestMatchers(HttpMethod.GET, "/images/**").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();
