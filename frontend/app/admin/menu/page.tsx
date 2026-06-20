@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Cake, Plus, AlertTriangle } from "lucide-react";
+import { Cake, Plus, AlertTriangle, Loader2 } from "lucide-react";
 import { AdminProductTable, AdminProduct } from "@/components/admin/AdminProductTable";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { Button } from "@/components/ui/button";
@@ -11,54 +11,34 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { api } from "@/lib/api";
+import type { BackendCategory, BackendProduct } from "@/lib/types";
 
-const MOCK_ADMIN_PRODUCTS: AdminProduct[] = [
-  {
-    id: "1",
-    name: "Bolo de cenoura",
-    description: "Bolo de cenoura 45x45 com cobertura...",
-    price: 65,
-    image: "/bolo.webp",
-    category: "Caseiro",
-    categoryColor: "rose",
-  },
-  {
-    id: "2",
-    name: "Bolo de coco",
-    description: "Bolo de coco 35x47 com cobertura...",
-    price: 75,
-    image: "/bolo.webp",
-    category: "Caseiro",
-    categoryColor: "red",
-  },
-  {
-    id: "3",
-    name: "Bolo Diet",
-    description: "Bolo de Fit Low Carbo 15x15",
-    price: 65,
-    image: "/bolo.webp",
-    category: "Diet",
-    categoryColor: "green",
-  },
-  {
-    id: "4",
-    name: "Bolo Vulcão 1",
-    description: "Bolo de Vulcão c/ cobertura de morango 45x4..",
-    price: 85,
-    image: "/bolo.webp",
-    category: "Vulcão",
-    categoryColor: "amber",
-  },
-  {
-    id: "5",
-    name: "Bolo Vulcão 2",
-    description: "Bolo de Vulcão c/ cobertura de coco 45x4..",
-    price: 45,
-    image: "/bolo.webp",
-    category: "Vulcão",
-    categoryColor: "amber",
-  },
-];
+const categoryColorMap: Record<string, string> = {
+  "bolos-cobertura": "rose",
+  "bolos-vulcao": "amber",
+  "bolos-piscina": "rose",
+  "bolos-fit": "green",
+  pudins: "rose",
+  cestas: "rose",
+  congelados: "rose",
+  salgados: "amber",
+};
+
+function toAdminProduct(p: BackendProduct): AdminProduct {
+  const catName = p.category?.name || "Sem categoria";
+  return {
+    id: String(p.id),
+    name: p.name,
+    description: p.description || "",
+    price: p.price,
+    image: p.imageUrl || "/bolo.webp",
+    category: catName,
+    categoryColor: (categoryColorMap[catName.toLowerCase()] as AdminProduct["categoryColor"]) || "rose",
+    available: p.available,
+    ingredients: p.ingredients,
+  };
+}
 
 export default function AdminMenuPage() {
   const [showForm, setShowForm] = React.useState(false);
@@ -66,6 +46,23 @@ export default function AdminMenuPage() {
   const [categoryFilter, setCategoryFilter] = React.useState("");
   const [editProduct, setEditProduct] = React.useState<AdminProduct | null>(null);
   const [deleteProduct, setDeleteProduct] = React.useState<AdminProduct | null>(null);
+  const [products, setProducts] = React.useState<AdminProduct[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  const loadProducts = React.useCallback(async () => {
+    try {
+      const data = await api.getProducts();
+      setProducts(data.map(toAdminProduct));
+    } catch (err) {
+      console.error("Failed to load products", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   const handleEdit = (product: AdminProduct) => {
     setEditProduct(product);
@@ -76,15 +73,63 @@ export default function AdminMenuPage() {
     setDeleteProduct(product);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteProduct) {
-      console.log("Deleting product:", deleteProduct.id);
+      try {
+        await api.deleteProduct(Number(deleteProduct.id));
+        setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id));
+      } catch (err) {
+        console.error("Failed to delete product", err);
+      }
       setDeleteProduct(null);
     }
   };
 
+  const handleSave = async (data: {
+    name: string;
+    description: string;
+    category?: BackendCategory;
+    price: string;
+    ingredients: string[];
+    image?: string;
+  }) => {
+    const payload: Partial<BackendProduct> = {
+      name: data.name,
+      description: data.description,
+      price: parseFloat(data.price.replace(",", ".")),
+      ingredients: data.ingredients,
+      imageUrl: data.image,
+    };
+    if (data.category) {
+      payload.category = data.category;
+    }
+    try {
+      if (editProduct) {
+        const updated = await api.updateProduct(Number(editProduct.id), payload);
+        setProducts((prev) =>
+          prev.map((p) => (p.id === editProduct.id ? toAdminProduct(updated) : p))
+        );
+      } else {
+        const created = await api.createProduct(payload);
+        setProducts((prev) => [...prev, toAdminProduct(created)]);
+      }
+      setShowForm(false);
+      setEditProduct(null);
+    } catch (err) {
+      console.error("Failed to save product", err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--brand-700)]" />
+      </div>
+    );
+  }
+
   if (showForm) {
-    return <ProductForm onBack={() => { setShowForm(false); setEditProduct(null); }} editProduct={editProduct} />;
+    return <ProductForm onBack={() => { setShowForm(false); setEditProduct(null); }} editProduct={editProduct} onSave={handleSave} />;
   }
 
   return (
@@ -109,7 +154,7 @@ export default function AdminMenuPage() {
       </div>
 
       <AdminProductTable
-        products={MOCK_ADMIN_PRODUCTS}
+        products={products}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         categoryFilter={categoryFilter}

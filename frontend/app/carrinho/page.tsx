@@ -3,11 +3,12 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowLeft, Minus, Plus, Edit3, Trash2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Edit3, Trash2, AlertTriangle, Loader2 } from "lucide-react";
 import { Header } from "@/components/menu/Header";
 import { Button } from "@/components/ui/button";
 import { useCart, CartItem } from "@/lib/cart-context";
 import { ProductModal } from "@/components/menu/ProductModal";
+import { api } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -17,11 +18,15 @@ import {
 
 export default function CarrinhoPage() {
   const router = useRouter();
-  const { items, updateQuantity, removeItem, updateItem } = useCart();
+  const { items, updateQuantity, removeItem, updateItem, clearCart } = useCart();
+
+  const [customerName, setCustomerName] = React.useState("");
+  const [customerPhone, setCustomerPhone] = React.useState("");
   const [deliveryOption, setDeliveryOption] = React.useState<"sim" | "nao">("sim");
   const [address, setAddress] = React.useState("");
   const [deliveryDate, setDeliveryDate] = React.useState("");
   const [observations, setObservations] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
 
   const [editItem, setEditItem] = React.useState<CartItem | null>(null);
   const [deleteItem, setDeleteItem] = React.useState<CartItem | null>(null);
@@ -40,8 +45,33 @@ export default function CarrinhoPage() {
       currency: "BRL",
     }).format(price * quantity);
 
-  const handleFinalize = () => {
-    router.push("/pedido-confirmado");
+  const handleFinalize = async () => {
+    if (!customerName.trim()) return;
+    if (!customerPhone.trim()) return;
+
+    setSubmitting(true);
+    try {
+      await api.createOrder({
+        customerName: customerName.trim(),
+        phone: customerPhone.trim(),
+        delivery: deliveryOption === "sim",
+        address: deliveryOption === "sim" ? address : undefined,
+        deliveryDateTime: deliveryDate ? new Date(deliveryDate).toISOString() : undefined,
+        observation: observations || undefined,
+        items: items.map((item) => ({
+          productId: Number(item.product.id),
+          quantity: item.quantity,
+          observation: item.observations || undefined,
+        })),
+      });
+      clearCart();
+      router.push("/pedido-confirmado");
+    } catch (err) {
+      console.error("Failed to create order", err);
+      alert("Erro ao criar pedido. Tente novamente.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleSaveEdit = (itemId: string, quantity: number, observations: string) => {
@@ -91,6 +121,7 @@ export default function CarrinhoPage() {
                             src={item.product.image}
                             alt={item.product.name}
                             fill
+                            unoptimized={item.product.image.startsWith("http")}
                             className="object-cover"
                             sizes="64px"
                           />
@@ -174,166 +205,209 @@ export default function CarrinhoPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-2xl border border-[var(--rose-200)] shadow-sm p-6">
-            <h2 className="font-display text-lg font-bold text-[var(--brand-800)] uppercase tracking-wide mb-6">
-              DESEJA RECEBER O PEDIDO EM CASA?
-            </h2>
-
-            <div className="flex items-center gap-8 mb-6">
-              <label className="flex items-center gap-2.5 cursor-pointer group">
-                <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${deliveryOption === "nao"
-                      ? "border-[var(--brand-700)]"
-                      : "border-gray-300 group-hover:border-gray-400"
-                    }`}
-                  onClick={() => setDeliveryOption("nao")}
-                >
-                  {deliveryOption === "nao" && (
-                    <div className="w-2.5 h-2.5 rounded-full bg-[var(--brand-700)]" />
-                  )}
-                </div>
-                <span className="text-sm text-[var(--ink)]">NÃO</span>
-              </label>
-              <label className="flex items-center gap-2.5 cursor-pointer group">
-                <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${deliveryOption === "sim"
-                      ? "border-[var(--brand-700)]"
-                      : "border-gray-300 group-hover:border-gray-400"
-                    }`}
-                  onClick={() => setDeliveryOption("sim")}
-                >
-                  {deliveryOption === "sim" && (
-                    <div className="w-2.5 h-2.5 rounded-full bg-[var(--brand-700)]" />
-                  )}
-                </div>
-                <span className="text-sm text-[var(--ink)]">SIM</span>
-              </label>
-            </div>
-
-            {deliveryOption === "sim" ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-5">
+          {items.length > 0 && (
+            <>
+              <div className="bg-white rounded-2xl border border-[var(--rose-200)] shadow-sm p-6 space-y-5">
+                <h2 className="font-display text-lg font-bold text-[var(--brand-800)] uppercase tracking-wide">
+                  SEUS DADOS
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
-                      ENDEREÇO :
+                      NOME <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      placeholder="Digite seu endereço"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Seu nome"
                       className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
+                      required
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
-                      DATA e HORA :
+                      TELEFONE <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="datetime-local"
-                      value={deliveryDate}
-                      onChange={(e) => setDeliveryDate(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
-                      OBSERVAÇÕES GERAIS :
-                    </label>
-                    <textarea
-                      value={observations}
-                      onChange={(e) => setObservations(e.target.value)}
-                      placeholder="Ex: Deixar na portaria"
-                      rows={3}
-                      className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm resize-none transition-colors"
+                      type="tel"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="(11) 99999-9999"
+                      className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
+                      required
                     />
                   </div>
                 </div>
+              </div>
 
-                <div>
-                  <h3 className="text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-3">
-                    MARQUE O ENDEREÇO DE ENTREGA
-                  </h3>
-                  <div className="relative w-full h-[260px] rounded-xl overflow-hidden border border-gray-300">
-                    {address.trim() ? (
-                      <iframe
-                        src={`https://maps.google.com/maps?q=${encodeURIComponent(address)}&output=embed`}
-                        className="w-full h-full"
-                        allowFullScreen
-                        loading="lazy"
-                        title="Mapa do endereço de entrega"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[#f5f0eb] text-sm text-[var(--muted)]">
-                        Insira um endereço para ver o mapa
+              <div className="bg-white rounded-2xl border border-[var(--rose-200)] shadow-sm p-6">
+                <h2 className="font-display text-lg font-bold text-[var(--brand-800)] uppercase tracking-wide mb-6">
+                  DESEJA RECEBER O PEDIDO EM CASA?
+                </h2>
+
+                <div className="flex items-center gap-8 mb-6">
+                  <label className="flex items-center gap-2.5 cursor-pointer group">
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${deliveryOption === "nao"
+                          ? "border-[var(--brand-700)]"
+                          : "border-gray-300 group-hover:border-gray-400"
+                        }`}
+                      onClick={() => setDeliveryOption("nao")}
+                    >
+                      {deliveryOption === "nao" && (
+                        <div className="w-2.5 h-2.5 rounded-full bg-[var(--brand-700)]" />
+                      )}
+                    </div>
+                    <span className="text-sm text-[var(--ink)]">NÃO</span>
+                  </label>
+                  <label className="flex items-center gap-2.5 cursor-pointer group">
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${deliveryOption === "sim"
+                          ? "border-[var(--brand-700)]"
+                          : "border-gray-300 group-hover:border-gray-400"
+                        }`}
+                      onClick={() => setDeliveryOption("sim")}
+                    >
+                      {deliveryOption === "sim" && (
+                        <div className="w-2.5 h-2.5 rounded-full bg-[var(--brand-700)]" />
+                      )}
+                    </div>
+                    <span className="text-sm text-[var(--ink)]">SIM</span>
+                  </label>
+                </div>
+
+                {deliveryOption === "sim" ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-5">
+                      <div>
+                        <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                          ENDEREÇO :
+                        </label>
+                        <input
+                          type="text"
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                          placeholder="Digite seu endereço"
+                          className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
+                        />
                       </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                          DATA e HORA :
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={deliveryDate}
+                          onChange={(e) => setDeliveryDate(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                          OBSERVAÇÕES GERAIS :
+                        </label>
+                        <textarea
+                          value={observations}
+                          onChange={(e) => setObservations(e.target.value)}
+                          placeholder="Ex: Deixar na portaria"
+                          rows={3}
+                          className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm resize-none transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-3">
+                        MARQUE O ENDEREÇO DE ENTREGA
+                      </h3>
+                      <div className="relative w-full h-[260px] rounded-xl overflow-hidden border border-gray-300">
+                        {address.trim() ? (
+                          <iframe
+                            src={`https://maps.google.com/maps?q=${encodeURIComponent(address)}&output=embed`}
+                            className="w-full h-full"
+                            allowFullScreen
+                            loading="lazy"
+                            title="Mapa do endereço de entrega"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-[#f5f0eb] text-sm text-[var(--muted)]">
+                            Insira um endereço para ver o mapa
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-5">
+                      <div>
+                        <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                          RETIRAR EM :
+                        </label>
+                        <p className="px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-[var(--rose-50)] text-[var(--ink)] text-sm">
+                          Neide Confeitaria — Rua 7, Bragança Paulista
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                          DATA e HORA :
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={deliveryDate}
+                          onChange={(e) => setDeliveryDate(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                          OBSERVAÇÕES GERAIS :
+                        </label>
+                        <textarea
+                          value={observations}
+                          onChange={(e) => setObservations(e.target.value)}
+                          placeholder="Ex: Quanto antes, melhor"
+                          rows={3}
+                          className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm resize-none transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-3">
+                        LOCAL DE RETIRADA
+                      </h3>
+                      <div className="relative w-full h-[260px] rounded-xl overflow-hidden border border-gray-300">
+                        <iframe
+                          src="https://maps.google.com/maps?q=Neide+Confeitaria+Bragança+Paulista&output=embed"
+                          className="w-full h-full"
+                          allowFullScreen
+                          loading="lazy"
+                          title="Mapa da confeitaria"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-6 flex justify-center">
+                  <Button
+                    onClick={handleFinalize}
+                    disabled={submitting || !customerName.trim() || !customerPhone.trim()}
+                    className="w-full max-w-md h-14 text-lg font-bold rounded-xl uppercase tracking-wide"
+                    size="lg"
+                  >
+                    {submitting ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      "FAZER PEDIDO"
                     )}
-                  </div>
+                  </Button>
                 </div>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
-                      RETIRAR EM :
-                    </label>
-                    <p className="px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-[var(--rose-50)] text-[var(--ink)] text-sm">
-                      Neide Confeitaria — Rua 7, Bragança Paulista
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
-                      DATA e HORA :
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={deliveryDate}
-                      onChange={(e) => setDeliveryDate(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
-                      OBSERVAÇÕES GERAIS :
-                    </label>
-                    <textarea
-                      value={observations}
-                      onChange={(e) => setObservations(e.target.value)}
-                      placeholder="Ex: Quanto antes, melhor"
-                      rows={3}
-                      className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm resize-none transition-colors"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-3">
-                    LOCAL DE RETIRADA
-                  </h3>
-                  <div className="relative w-full h-[260px] rounded-xl overflow-hidden border border-gray-300">
-                    <iframe
-                      src="https://maps.google.com/maps?q=Neide+Confeitaria+Bragança+Paulista&output=embed"
-                      className="w-full h-full"
-                      allowFullScreen
-                      loading="lazy"
-                      title="Mapa da confeitaria"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="mt-6 flex justify-center">
-              <Button
-                onClick={handleFinalize}
-                className="w-full max-w-md h-14 text-lg font-bold rounded-xl uppercase tracking-wide"
-                size="lg"
-              >
-                FAZER PEDIDO
-              </Button>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </main>
 

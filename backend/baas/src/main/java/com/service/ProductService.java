@@ -19,8 +19,12 @@ public class ProductService {
 
     public Product createProduct(Product product) {
         if (product.getCategory() != null && product.getCategory().getId() != null) {
-            product.setCategory(categoryRepository.findById(product.getCategory().getId())
-                    .orElseThrow(() -> new RuntimeException("Categoria não encontrada")));
+            if (product.getCategory().getId() > 0) {
+                product.setCategory(categoryRepository.findById(product.getCategory().getId())
+                        .orElse(null));
+            } else {
+                product.setCategory(null);
+            }
         }
         if (product.getAvailable() == null) product.setAvailable(true);
         return productRepository.save(product);
@@ -48,8 +52,12 @@ public class ProductService {
         existing.setIngredients(product.getIngredients());
         if (product.getAvailable() != null) existing.setAvailable(product.getAvailable());
         if (product.getCategory() != null && product.getCategory().getId() != null) {
-            existing.setCategory(categoryRepository.findById(product.getCategory().getId())
-                    .orElseThrow(() -> new RuntimeException("Categoria não encontrada")));
+            if (product.getCategory().getId() > 0) {
+                existing.setCategory(categoryRepository.findById(product.getCategory().getId())
+                        .orElseThrow(() -> new RuntimeException("Categoria não encontrada")));
+            } else {
+                existing.setCategory(null);
+            }
         }
         return productRepository.save(existing);
     }

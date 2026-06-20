@@ -1,5 +1,6 @@
 package com.model;
 
+import com.config.StringListConverter;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -28,9 +29,8 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @ElementCollection
-    @CollectionTable(name = "product_ingredients", joinColumns = @JoinColumn(name = "product_id"))
-    @Column(name = "ingredient")
+    @Column(columnDefinition = "TEXT")
+    @Convert(converter = StringListConverter.class)
     private List<String> ingredients;
 
     public Long getId() { return id; }

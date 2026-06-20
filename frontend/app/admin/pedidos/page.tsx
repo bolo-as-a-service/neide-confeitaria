@@ -1,185 +1,124 @@
 "use client";
 
 import * as React from "react";
-import { ClipboardList, User, Check, ChefHat, Package } from "lucide-react";
+import { ClipboardList, User, Check, ChefHat, Package, Loader2 } from "lucide-react";
 import { KanbanColumn } from "@/components/admin/KanbanColumn";
 import { Order } from "@/components/admin/OrderCard";
+import { api } from "@/lib/api";
+import type { BackendOrder, BackendOrderItem } from "@/lib/types";
 
-const MOCK_ORDERS: Record<string, Order[]> = {
-  fila: [
-    {
-      id: "1",
-      number: 54,
-      type: "RETIRADA",
-      customerName: "Marina Silva",
-      customerPhone: "(11) 9 1223 1231",
-      deliveryDate: "20/06/2025",
-      deliveryTime: "14h",
-      items: [
-        { name: "Bolo de maracujá", quantity: 2, price: 70, observation: "Não usar açucar de confeiteiro" },
-        { name: "Bolo de coco", quantity: 1, price: 70, observation: "Sem cobertura" },
-      ],
-      generalObservations: "Sem cobertura",
-      total: 210,
-    },
-    {
-      id: "2",
-      number: 54,
-      type: "ENTREGA",
-      customerName: "Marina Silva",
-      customerPhone: "(11) 9 1223 1231",
-      deliveryDate: "20/06/2025",
-      deliveryTime: "14h",
-      location: "Rua borba gato carrapato",
-      items: [
-        { name: "Bolo de maracujá", quantity: 2, price: 70, observation: "Não usar açucar de confeiteiro" },
-        { name: "Bolo de coco", quantity: 1, price: 70, observation: "Sem cobertura" },
-      ],
-      generalObservations: "Sem cobertura",
-      total: 210,
-    },
-    {
-      id: "3",
-      number: 55,
-      type: "RETIRADA",
-      customerName: "João Santos",
-      customerPhone: "(11) 9 8765 4321",
-      deliveryDate: "21/06/2025",
-      deliveryTime: "10h",
-      items: [
-        { name: "Bolo de chocolate", quantity: 1, price: 85 },
-      ],
-      total: 85,
-    },
-  ],
-  aprovados: [
-    {
-      id: "4",
-      number: 54,
-      type: "RETIRADA",
-      customerName: "Marina Silva",
-      customerPhone: "(11) 9 1223 1231",
-      deliveryDate: "20/06/2025",
-      deliveryTime: "14h",
-      items: [
-        { name: "Bolo de maracujá", quantity: 2, price: 70, observation: "Não usar açucar de confeiteiro" },
-        { name: "Bolo de coco", quantity: 1, price: 70, observation: "Sem cobertura" },
-      ],
-      generalObservations: "Sem cobertura",
-      total: 210,
-    },
-  ],
-  fazendo: [
-    {
-      id: "5",
-      number: 54,
-      type: "RETIRADA",
-      customerName: "Marina Silva",
-      customerPhone: "(11) 9 1223 1231",
-      deliveryDate: "20/06/2025",
-      deliveryTime: "14h",
-      items: [
-        { name: "Bolo de maracujá", quantity: 2, price: 70, observation: "Não usar açucar de confeiteiro" },
-        { name: "Bolo de coco", quantity: 1, price: 70, observation: "Sem cobertura" },
-      ],
-      generalObservations: "Sem cobertura",
-      total: 210,
-    },
-    {
-      id: "6",
-      number: 53,
-      type: "ENTREGA",
-      customerName: "Ana Costa",
-      customerPhone: "(11) 9 3344 5566",
-      deliveryDate: "20/06/2025",
-      deliveryTime: "16h",
-      location: "Av. Paulista, 1000",
-      items: [
-        { name: "Bolo vulcão", quantity: 1, price: 85 },
-      ],
-      total: 85,
-    },
-  ],
-  prontos: [
-    {
-      id: "7",
-      number: 54,
-      type: "RETIRADA",
-      customerName: "Marina Silva",
-      customerPhone: "(11) 9 1223 1231",
-      deliveryDate: "20/06/2025",
-      deliveryTime: "14h",
-      items: [
-        { name: "Bolo de maracujá", quantity: 2, price: 70, observation: "Não usar açucar de confeiteiro" },
-        { name: "Bolo de coco", quantity: 1, price: 70, observation: "Sem cobertura" },
-      ],
-      generalObservations: "Sem cobertura",
-      total: 210,
-    },
-    {
-      id: "8",
-      number: 52,
-      type: "ENTREGA",
-      customerName: "Pedro Oliveira",
-      customerPhone: "(11) 9 9988 7766",
-      deliveryDate: "19/06/2025",
-      deliveryTime: "18h",
-      location: "Rua Augusta, 500",
-      items: [
-        { name: "Mini Esfihas", quantity: 2, price: 70 },
-      ],
-      total: 140,
-    },
-  ],
-};
+function mapOrder(o: BackendOrder): Order {
+  const dt = o.deliveryDateTime ? new Date(o.deliveryDateTime) : null;
+  return {
+    id: String(o.id),
+    number: o.id,
+    type: o.delivery ? "ENTREGA" : "RETIRADA",
+    customerName: o.customerName || "Cliente",
+    customerPhone: o.phone || "",
+    deliveryDate: dt
+      ? dt.toLocaleDateString("pt-BR")
+      : o.createdAt
+        ? new Date(o.createdAt).toLocaleDateString("pt-BR")
+        : "—",
+    deliveryTime: dt
+      ? `${String(dt.getHours()).padStart(2, "0")}h`
+      : "—",
+    location: o.address || undefined,
+    items: o.items.map((i: BackendOrderItem) => ({
+      name: i.product?.name || `Produto #${i.product?.id}`,
+      quantity: i.quantity,
+      price: i.unitPrice,
+      observation: i.observation || undefined,
+    })),
+    generalObservations: o.observation || undefined,
+    total: o.items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0),
+  };
+}
 
 const COLUMNS = [
-  { key: "fila" as const, title: "Fila", subtitle: "Aguardando Aprovação", icon: <User className="h-4 w-4" /> },
-  { key: "aprovados" as const, title: "Aprovados", subtitle: "Aguardando para iniciar preparo", icon: <Check className="h-4 w-4" /> },
-  { key: "fazendo" as const, title: "Fazendo", subtitle: "Em preparo", icon: <ChefHat className="h-4 w-4" /> },
-  { key: "prontos" as const, title: "Prontos", subtitle: "Aguardando entrega/retirada", icon: <Package className="h-4 w-4" /> },
+  { key: "FILA", variant: "fila" as const, title: "Fila", subtitle: "Aguardando Aprovação", icon: <User className="h-4 w-4" /> },
+  { key: "APROVADO", variant: "aprovados" as const, title: "Aprovados", subtitle: "Aguardando para iniciar preparo", icon: <Check className="h-4 w-4" /> },
+  { key: "FAZENDO", variant: "fazendo" as const, title: "Fazendo", subtitle: "Em preparo", icon: <ChefHat className="h-4 w-4" /> },
+  { key: "PRONTO", variant: "prontos" as const, title: "Prontos", subtitle: "Aguardando entrega/retirada", icon: <Package className="h-4 w-4" /> },
 ];
 
 export default function AdminPedidosPage() {
-  const [orders, setOrders] = React.useState(MOCK_ORDERS);
+  const [ordersByStatus, setOrdersByStatus] = React.useState<Record<string, Order[]>>({
+    FILA: [],
+    APROVADO: [],
+    FAZENDO: [],
+    PRONTO: [],
+  });
+  const [loading, setLoading] = React.useState(true);
+
+  const loadOrders = React.useCallback(async () => {
+    try {
+      const all = await api.getOrders();
+      const grouped: Record<string, Order[]> = {
+        FILA: [],
+        APROVADO: [],
+        FAZENDO: [],
+        PRONTO: [],
+      };
+      all.forEach((o) => {
+        const status = o.status || "FILA";
+        if (grouped[status]) {
+          grouped[status].push(mapOrder(o));
+        } else {
+          grouped["FILA"].push(mapOrder(o));
+        }
+      });
+      setOrdersByStatus(grouped);
+    } catch (err) {
+      console.error("Failed to load orders", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
+
+  const moveOrder = async (order: Order, fromStatus: string, toStatus: string) => {
+    setOrdersByStatus((prev) => ({
+      ...prev,
+      [fromStatus]: prev[fromStatus]?.filter((o) => o.id !== order.id) || [],
+      [toStatus]: [...(prev[toStatus] || []), { ...order }],
+    }));
+    try {
+      await api.updateOrderStatus(Number(order.id), toStatus);
+    } catch (err) {
+      console.error("Failed to update order status", err);
+      loadOrders();
+    }
+  };
 
   const handleRecusar = (order: Order) => {
-    setOrders((prev) => ({
+    setOrdersByStatus((prev) => ({
       ...prev,
-      fila: prev.fila.filter((o) => o.id !== order.id),
+      FILA: prev.FILA?.filter((o) => o.id !== order.id) || [],
     }));
   };
 
-  const handleAceitar = (order: Order) => {
-    setOrders((prev) => ({
-      ...prev,
-      fila: prev.fila.filter((o) => o.id !== order.id),
-      aprovados: [...prev.aprovados, order],
-    }));
-  };
-
-  const handleIniciarPreparo = (order: Order) => {
-    setOrders((prev) => ({
-      ...prev,
-      aprovados: prev.aprovados.filter((o) => o.id !== order.id),
-      fazendo: [...prev.fazendo, order],
-    }));
-  };
-
-  const handleMarcarPronto = (order: Order) => {
-    setOrders((prev) => ({
-      ...prev,
-      fazendo: prev.fazendo.filter((o) => o.id !== order.id),
-      prontos: [...prev.prontos, order],
-    }));
-  };
+  const handleAceitar = (order: Order) => moveOrder(order, "FILA", "APROVADO");
+  const handleIniciarPreparo = (order: Order) => moveOrder(order, "APROVADO", "FAZENDO");
+  const handleMarcarPronto = (order: Order) => moveOrder(order, "FAZENDO", "PRONTO");
 
   const handleMarcarEntregue = (order: Order) => {
-    setOrders((prev) => ({
+    setOrdersByStatus((prev) => ({
       ...prev,
-      prontos: prev.prontos.filter((o) => o.id !== order.id),
+      PRONTO: prev.PRONTO?.filter((o) => o.id !== order.id) || [],
     }));
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--brand-700)]" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-full">
@@ -200,14 +139,14 @@ export default function AdminPedidosPage() {
             title={col.title}
             subtitle={col.subtitle}
             icon={col.icon}
-            count={orders[col.key].length}
-            orders={orders[col.key]}
-            variant={col.key}
-            onRecusar={handleRecusar}
-            onAceitar={handleAceitar}
-            onIniciarPreparo={handleIniciarPreparo}
-            onMarcarPronto={handleMarcarPronto}
-            onMarcarEntregue={handleMarcarEntregue}
+            count={ordersByStatus[col.key]?.length || 0}
+            orders={ordersByStatus[col.key] || []}
+            variant={col.variant}
+            onRecusar={col.key === "FILA" ? handleRecusar : undefined}
+            onAceitar={col.key === "FILA" ? handleAceitar : undefined}
+            onIniciarPreparo={col.key === "APROVADO" ? handleIniciarPreparo : undefined}
+            onMarcarPronto={col.key === "FAZENDO" ? handleMarcarPronto : undefined}
+            onMarcarEntregue={col.key === "PRONTO" ? handleMarcarEntregue : undefined}
           />
         ))}
       </div>

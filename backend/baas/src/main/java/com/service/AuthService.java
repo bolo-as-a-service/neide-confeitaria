@@ -3,6 +3,7 @@ package com.service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.dto.LoginDTO;
+import com.dto.RegisterDTO;
 import com.model.User;
 import com.repository.UserRepository;
 
@@ -24,6 +25,19 @@ public class AuthService {
             throw new RuntimeException("Email ou senha inválidos");
         }
         return user;
+    }
+
+    public User register(RegisterDTO dto) {
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new RuntimeException("Email já cadastrado");
+        }
+        User user = new User();
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPhone(dto.getPhone());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setRole("USER");
+        return userRepository.save(user);
     }
 
     public User createAdmin(String name, String email, String rawPassword) {

@@ -13,6 +13,8 @@ export interface AdminProduct {
   image: string;
   category: string;
   categoryColor: "rose" | "red" | "green" | "amber";
+  available?: boolean;
+  ingredients?: string[];
 }
 
 interface AdminProductTableProps {

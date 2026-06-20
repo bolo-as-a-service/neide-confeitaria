@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/menu/Header";
-import { CategoryTabs, CATEGORIES } from "@/components/menu/CategoryTabs";
+import { CategoryTabs, Category } from "@/components/menu/CategoryTabs";
 import { SearchBar } from "@/components/menu/SearchBar";
 import { ProductCategorySection } from "@/components/menu/ProductCategorySection";
 import { ProductModal } from "@/components/menu/ProductModal";
@@ -12,53 +12,64 @@ import { Footer } from "@/components/menu/Footer";
 import { Product } from "@/components/menu/ProductCard";
 import { useCart, CartItem } from "@/lib/cart-context";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api";
+import type { BackendCategory, BackendProduct } from "@/lib/types";
 
-const MOCK_PRODUCTS: Product[] = [
-  { id: "1", name: "Bolo de chocolate", price: 70, image: "/bolo.webp", category: "bolos-cobertura", description: "Bolo de chocolate cremoso c/ cobertura de chocolate / 18cm x 6cm, com recheio", ingredients: ["Ovo", "Leite", "Chocolate", "Trigo"] },
-  { id: "2", name: "Bolo morango", price: 70, image: "/bolo.webp", category: "bolos-cobertura", description: "Bolo de morango fresquinho c/ cobertura de chocolate branco / 18cm x 6cm", ingredients: ["Ovo", "Leite", "Morango", "Trigo"] },
-  { id: "3", name: "Bolo coco", price: 70, image: "/bolo.webp", category: "bolos-cobertura", description: "Bolo de coco úmido c/ cobertura de leite condensado / 18cm x 6cm", ingredients: ["Ovo", "Leite", "Coco", "Trigo"] },
-  { id: "4", name: "Bolo de maracujá", price: 70, image: "/bolo.webp", category: "bolos-cobertura", description: "Bolo de maracujá azedinho c/ cobertura de chocolate / 18cm x 6cm", ingredients: ["Ovo", "Leite", "Maracujá", "Trigo"] },
-  { id: "5", name: "Bolo vulcão 1", price: 70, image: "/bolo.webp", category: "bolos-vulcao", description: "Bolo vulcão de chocolate c/ recheio cremoso / 20cm", ingredients: ["Ovo", "Leite", "Chocolate", "Trigo"] },
-  { id: "20", name: "Bolo de chocolate", price: 70, image: "/bolo.webp", category: "bolos-cobertura", description: "Bolo de chocolate cremoso c/ cobertura de chocolate / 18cm x 6cm, com recheio", ingredients: ["Ovo", "Leite", "Chocolate", "Trigo"] },
-  { id: "21", name: "Bolo morango", price: 70, image: "/bolo.webp", category: "bolos-cobertura", description: "Bolo de morango fresquinho c/ cobertura de chocolate branco / 18cm x 6cm", ingredients: ["Ovo", "Leite", "Morango", "Trigo"] },
-  { id: "22", name: "Bolo coco", price: 70, image: "/bolo.webp", category: "bolos-cobertura", description: "Bolo de coco úmido c/ cobertura de leite condensado / 18cm x 6cm", ingredients: ["Ovo", "Leite", "Coco", "Trigo"] },
-  { id: "23", name: "Bolo de maracujá", price: 70, image: "/bolo.webp", category: "bolos-cobertura", description: "Bolo de maracujá azedinho c/ cobertura de chocolate / 18cm x 6cm", ingredients: ["Ovo", "Leite", "Maracujá", "Trigo"] },
-  { id: "24", name: "Bolo vulcão 1", price: 70, image: "/bolo.webp", category: "bolos-vulcao", description: "Bolo vulcão de chocolate c/ recheio cremoso / 20cm", ingredients: ["Ovo", "Leite", "Chocolate", "Trigo"] },
-  { id: "25", name: "Bolo vulcão 2", price: 70, image: "/bolo.webp", category: "bolos-vulcao", description: "Bolo vulcão de doce de leite c/ recheio cremoso / 20cm", ingredients: ["Ovo", "Leite", "Doce de leite", "Trigo"] },
-  { id: "7", name: "Bolo vulcão 3", price: 70, image: "/bolo.webp", category: "bolos-vulcao", description: "Bolo vulcão de nutella c/ recheio cremoso / 20cm", ingredients: ["Ovo", "Leite", "Nutella", "Trigo"] },
-  { id: "8", name: "Bolo vulcão 4", price: 70, image: "/bolo.webp", category: "bolos-vulcao", description: "Bolo vulcão de brigadeiro c/ recheio cremoso / 20cm", ingredients: ["Ovo", "Leite", "Brigadeiro", "Trigo"] },
-  { id: "9", name: "Mini Esfihas", price: 70, image: "/bolo.webp", category: "salgados", description: "Kit com 20 mini esfihas de carne / frango / queijo", ingredients: ["Trigo", "Carne", "Frango", "Queijo"] },
-  { id: "10", name: "Mini Coxinhas", price: 70, image: "/bolo.webp", category: "salgados", description: "Kit com 20 mini coxinhas de frango c/ catupiry", ingredients: ["Trigo", "Frango", "Catupiry", "Batata"] },
-  { id: "11", name: "Sortidos", price: 70, image: "/bolo.webp", category: "salgados", description: "Kit sortido c/ 30 salgadinhos variados (coxinha, risole, bolinha de queijo, enfihas)", ingredients: ["Trigo", "Carne", "Frango", "Queijo", "Presunto"] },
-  { id: "12", name: "Bolo fit banana", price: 65, image: "/bolo.webp", category: "bolos-fit", description: "Bolo integral de banana sem açúcar / 18cm x 6cm", ingredients: ["Banana", "Aveia", "Ovo", "Canela"] },
-  { id: "13", name: "Bolo fit cenoura", price: 65, image: "/bolo.webp", category: "bolos-fit", description: "Bolo integral de cenoura c/ cobertura de cacau 70% / 18cm x 6cm", ingredients: ["Cenoura", "Aveia", "Ovo", "Cacau"] },
-  { id: "14", name: "Pudim de leite", price: 45, image: "/bolo.webp", category: "pudins", description: "Pudim de leite condensado tradicional / 500g", ingredients: ["Leite condensado", "Leite", "Ovo", "Açúcar"] },
-  { id: "15", name: "Pudim de chocolate", price: 50, image: "/bolo.webp", category: "pudins", description: "Pudim de chocolate meio amargo / 500g", ingredients: ["Leite condensado", "Leite", "Ovo", "Chocolate"] },
-  { id: "16", name: "Cesta café da manhã", price: 120, image: "/bolo.webp", category: "cestas", description: "Cesta c/ pães, bolos, frios, frutas, sucos e café / serve 4 pessoas", ingredients: ["Pães", "Bolos", "Frios", "Frutas", "Sucos"] },
-  { id: "17", name: "Cesta aniversario", price: 180, image: "/bolo.webp", category: "cestas", description: "Cesta decorada c/ bolo, doces, salgados e bebidas / serve 10 pessoas", ingredients: ["Bolo", "Doces", "Salgados", "Bebidas"] },
-  { id: "18", name: "Lasanha congelada", price: 55, image: "/bolo.webp", category: "congelados", description: "Lasanha de carne c/ molho bechamel / 800g", ingredients: ["Massa", "Carne", "Queijo", "Molho bechamel"] },
-  { id: "19", name: "Empadão congelado", price: 50, image: "/bolo.webp", category: "congelados", description: "Empadão de frango c/ catupiry / 700g", ingredients: ["Massa", "Frango", "Catupiry", "Milho"] },
-];
-
-const CATEGORY_TITLES: Record<string, string> = {
-  "bolos-cobertura": "Bolos c/ cobertura",
-  "bolos-vulcao": "Bolos vulcão",
-  "bolos-piscina": "Bolos piscina",
-  "bolos-fit": "Bolos fit",
-  "pudins": "Pudins",
-  "cestas": "Cestas",
-  "congelados": "Congelados",
-  "salgados": "Salgados",
+const CATEGORY_ICONS: Record<string, { label: string; icon: string }> = {
+  "caseiro": { label: "Caseiro", icon: "CakeSlice" },
+  "diet": { label: "Diet", icon: "Leaf" },
+  "vulc\u00e3o": { label: "Vulc\u00e3o", icon: "Flame" },
+  "bolo": { label: "Bolo", icon: "CakeSlice" },
+  "salgado": { label: "Salgado", icon: "ChefHat" },
+  "pudim": { label: "Pudim", icon: "CupSoda" },
+  "cesta": { label: "Cesta", icon: "ShoppingBasket" },
+  "congelado": { label: "Congelado", icon: "Snowflake" },
 };
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+function mapProduct(p: BackendProduct): Product {
+  const categoryName = p.category?.name?.toLowerCase().replace(/\s+/g, "-") || "outros";
+  return {
+    id: String(p.id),
+    name: p.name,
+    price: p.price,
+    image: p.imageUrl ? `${API_BASE}${p.imageUrl}` : "/bolo.webp",
+    category: categoryName,
+    description: p.description,
+    ingredients: p.ingredients,
+  };
+}
 
 export default function CardapioPage() {
   const router = useRouter();
-  const [activeCategory, setActiveCategory] = React.useState("bolos-cobertura");
+  const [activeCategory, setActiveCategory] = React.useState("todos");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [cartOpen, setCartOpen] = React.useState(false);
   const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
   const [isMobile, setIsMobile] = React.useState(false);
+  const [backendCategories, setBackendCategories] = React.useState<BackendCategory[]>([]);
+  const [backendProducts, setBackendProducts] = React.useState<BackendProduct[]>([]);
+  const [loading, setLoading] = React.useState(true);
   const { items, addItem, updateQuantity, removeItem } = useCart();
+
+  React.useEffect(() => {
+    async function load() {
+      try {
+        const [categories, products] = await Promise.all([
+          api.getCategories(),
+          api.getProducts(),
+        ]);
+        setBackendCategories(categories);
+        setBackendProducts(products);
+      } catch (err) {
+        console.error("Failed to load menu data", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
 
   React.useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
@@ -67,13 +78,40 @@ export default function CardapioPage() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  const frontendCategories = React.useMemo(() => {
+    if (backendCategories.length > 0) {
+      return backendCategories.map((cat) => {
+        const slug = cat.name.toLowerCase().replace(/\s+/g, "-");
+        const preset = CATEGORY_ICONS[slug];
+        return {
+          id: slug,
+          label: preset?.label || cat.name,
+        };
+      });
+    }
+    return Object.entries(CATEGORY_ICONS).map(([id, val]) => ({
+      id,
+      label: val.label,
+    }));
+  }, [backendCategories]);
+
   const productsByCategory = React.useMemo(() => {
     const grouped: Record<string, Product[]> = {};
-    CATEGORIES.forEach((cat) => {
-      grouped[cat.id] = MOCK_PRODUCTS.filter((p) => p.category === cat.id);
+    const categories = frontendCategories.length > 0 ? frontendCategories : Object.entries(CATEGORY_ICONS).map(([id, val]) => ({ id, label: val.label }));
+    categories.forEach((cat) => {
+      grouped[cat.id] = [];
+    });
+    backendProducts.forEach((p) => {
+      const categoryName = p.category?.name?.toLowerCase().replace(/\s+/g, "-") || "outros";
+      if (grouped[categoryName]) {
+        grouped[categoryName].push(mapProduct(p));
+      } else {
+        if (!grouped["outros"]) grouped["outros"] = [];
+        grouped["outros"].push(mapProduct(p));
+      }
     });
     return grouped;
-  }, []);
+  }, [backendProducts, frontendCategories]);
 
   const handleAddToCart = (product: Product) => {
     addItem(product);
@@ -90,6 +128,14 @@ export default function CardapioPage() {
 
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--page-bg)] font-body flex items-center justify-center">
+        <div className="text-[var(--brand-700)] text-lg font-display">Carregando cardápio...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[var(--page-bg)] font-body">
       <Header cartCount={cartCount} onCartClick={() => setCartOpen(true)} />
@@ -100,22 +146,23 @@ export default function CardapioPage() {
           cartOpen ? "lg:max-w-[calc(100%-380px)] lg:px-4" : "lg:pr-4"
         )}>
           <div className="max-w-[1020px] mx-auto px-4 sm:px-6 pb-12">
-            <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
+            <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} categories={frontendCategories as Category[]} />
             <SearchBar value={searchQuery} onChange={setSearchQuery} />
 
-            {CATEGORIES.map((category) => {
-              const products = productsByCategory[category.id] || [];
-              if (products.length === 0) return null;
-              return (
-                <ProductCategorySection
-                  key={category.id}
-                  title={CATEGORY_TITLES[category.id] || category.label}
-                  products={products}
-                  onAddClick={handleAddToCart}
-                  onDetailClick={setSelectedProduct}
-                />
-              );
-            })}
+            {(activeCategory === "todos" ? frontendCategories : frontendCategories.filter((cat) => cat.id === activeCategory))
+              .map((category) => {
+                const products = productsByCategory[category.id] || [];
+                if (products.length === 0) return null;
+                return (
+                  <ProductCategorySection
+                    key={category.id}
+                    title={category.label}
+                    products={products}
+                    onAddClick={handleAddToCart}
+                    onDetailClick={setSelectedProduct}
+                  />
+                );
+              })}
           </div>
         </div>
 

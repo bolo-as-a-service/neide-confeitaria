@@ -44,6 +44,7 @@ export function ProductCard({ product, onAddClick, onDetailClick }: ProductCardP
           src={product.image}
           alt={product.name}
           fill
+          unoptimized={product.image.startsWith("http")}
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="200px"
         />

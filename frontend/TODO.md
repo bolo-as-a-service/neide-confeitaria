@@ -1,1 +1,0 @@
-- [ ] Adicionar detalhe da cobertura nas páginas

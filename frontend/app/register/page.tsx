@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2, CakeSlice, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Loader2, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { api } from "@/lib/api";
 
 const registerSchema = z
   .object({
@@ -38,6 +39,7 @@ export default function RegisterPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState("");
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -50,11 +52,22 @@ export default function RegisterPage() {
     },
   });
 
-  const handleSubmit = form.handleSubmit(async () => {
+  const handleSubmit = form.handleSubmit(async (data) => {
     setIsPending(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setIsPending(false);
-    setIsSuccess(true);
+    setError("");
+    try {
+      await api.register({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+      });
+      setIsSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao criar conta");
+    } finally {
+      setIsPending(false);
+    }
   });
 
   if (isSuccess) {
@@ -133,6 +146,12 @@ export default function RegisterPage() {
               Preencha os dados para se cadastrar
             </p>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-600">
+              {error}
+            </div>
+          )}
 
           <Form {...form}>
             <form onSubmit={handleSubmit} className="space-y-4">
