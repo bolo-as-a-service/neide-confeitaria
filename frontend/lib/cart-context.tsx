@@ -2,13 +2,14 @@
 
 import * as React from "react";
 import { Product } from "@/components/menu/ProductCard";
+import {
+  CartItem,
+  loadStoredCart,
+  mergeAddItem,
+  saveStoredCart,
+} from "@/lib/cart-store";
 
-export interface CartItem {
-  id: string;
-  product: Product;
-  quantity: number;
-  observations: string;
-}
+export type { CartItem };
 
 interface CartContextType {
   items: CartItem[];
@@ -23,19 +24,29 @@ const CartContext = React.createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = React.useState<CartItem[]>([]);
+  const [hydrated, setHydrated] = React.useState(false);
+
+  // Hidrata do localStorage uma vez (fora do corpo síncrono do efeito).
+  React.useEffect(() => {
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setItems(loadStoredCart());
+      setHydrated(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Persiste a cada mudança após a hidratação.
+  React.useEffect(() => {
+    if (!hydrated) return;
+    saveStoredCart(items);
+  }, [items, hydrated]);
 
    const addItem = React.useCallback((product: Product, quantity: number = 1, observations: string = "") => {
-     setItems((prev) => {
-       const existing = prev.find((item) => item.product.id === product.id);
-       if (existing) {
-         return prev.map((item) =>
-           item.product.id === product.id
-             ? { ...item, quantity: item.quantity + quantity, observations }
-             : item
-         );
-       }
-       return [...prev, { id: `${product.id}-${Date.now()}`, product, quantity, observations }];
-     });
+     setItems((prev) => mergeAddItem(prev, product, quantity, observations));
    }, []);
 
    const updateQuantity = React.useCallback((itemId: string, quantity: number) => {
