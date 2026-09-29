@@ -94,22 +94,40 @@ export default function AdminPedidosPage() {
     }
   };
 
-  const handleRecusar = (order: Order) => {
+  const handleRecusar = async (order: Order) => {
+    // Otimista: remove da FILA e confirma CANCELADO no backend (issue #21).
+    // Rollback restaura o snapshot em caso de erro.
+    const snapshot = ordersByStatus;
     setOrdersByStatus((prev) => ({
       ...prev,
       FILA: prev.FILA?.filter((o) => o.id !== order.id) || [],
     }));
+    try {
+      await api.updateOrderStatus(Number(order.id), "CANCELADO");
+    } catch (err) {
+      console.error("Failed to cancel order", err);
+      setOrdersByStatus(snapshot);
+    }
   };
 
   const handleAceitar = (order: Order) => moveOrder(order, "FILA", "APROVADO");
   const handleIniciarPreparo = (order: Order) => moveOrder(order, "APROVADO", "FAZENDO");
   const handleMarcarPronto = (order: Order) => moveOrder(order, "FAZENDO", "PRONTO");
 
-  const handleMarcarEntregue = (order: Order) => {
+  const handleMarcarEntregue = async (order: Order) => {
+    // Otimista: remove de PRONTO e confirma ENTREGUE no backend (issue #21).
+    // Rollback restaura o snapshot em caso de erro.
+    const snapshot = ordersByStatus;
     setOrdersByStatus((prev) => ({
       ...prev,
       PRONTO: prev.PRONTO?.filter((o) => o.id !== order.id) || [],
     }));
+    try {
+      await api.updateOrderStatus(Number(order.id), "ENTREGUE");
+    } catch (err) {
+      console.error("Failed to mark order as delivered", err);
+      setOrdersByStatus(snapshot);
+    }
   };
 
   if (loading) {
