@@ -12,18 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { api } from "@/lib/api";
+import { categoryColorForCategory } from "@/lib/utils";
 import type { BackendCategory, BackendProduct } from "@/lib/types";
-
-const categoryColorMap: Record<string, string> = {
-  "bolos-cobertura": "rose",
-  "bolos-vulcao": "amber",
-  "bolos-piscina": "rose",
-  "bolos-fit": "green",
-  pudins: "rose",
-  cestas: "rose",
-  congelados: "rose",
-  salgados: "amber",
-};
 
 function toAdminProduct(p: BackendProduct): AdminProduct {
   const catName = p.category?.name || "Sem categoria";
@@ -34,7 +24,7 @@ function toAdminProduct(p: BackendProduct): AdminProduct {
     price: p.price,
     image: p.imageUrl || "/bolo.webp",
     category: catName,
-    categoryColor: (categoryColorMap[catName.toLowerCase()] as AdminProduct["categoryColor"]) || "rose",
+    categoryColor: categoryColorForCategory(catName),
     available: p.available,
     ingredients: p.ingredients,
   };

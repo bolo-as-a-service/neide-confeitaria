@@ -25,12 +25,14 @@ const DEFAULT_ICON = <Utensils className="h-5 w-5" />;
 const ICON_MAP: Record<string, React.ReactNode> = {
   "caseiro": <CakeSlice className="h-5 w-5" />,
   "diet": <Leaf className="h-5 w-5" />,
-  "vulc\u00e3o": <Flame className="h-5 w-5" />,
+  "vulcao": <Flame className="h-5 w-5" />,
   "bolo": <CakeSlice className="h-5 w-5" />,
   "salgado": <ChefHat className="h-5 w-5" />,
   "pudim": <CupSoda className="h-5 w-5" />,
   "cesta": <ShoppingBasket className="h-5 w-5" />,
   "congelado": <Snowflake className="h-5 w-5" />,
+  "outros": <Utensils className="h-5 w-5" />,
+  "sem-categoria": <Utensils className="h-5 w-5" />,
 };
 
 function getIcon(id: string): React.ReactNode {

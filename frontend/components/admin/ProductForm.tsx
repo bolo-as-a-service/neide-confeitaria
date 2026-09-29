@@ -41,9 +41,11 @@ export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
   React.useEffect(() => {
     api.getCategories().then((cats) => {
       setCategories(cats);
-      if (editProduct?.category) {
+      if (editProduct?.category && editProduct.category !== "Sem categoria") {
         const match = cats.find((c) => c.name === editProduct.category);
         if (match) setSelectedCategory(match);
+      } else {
+        setSelectedCategory(null);
       }
       setCategoriesLoaded(true);
     }).catch(() => setCategoriesLoaded(true));
@@ -224,20 +226,25 @@ export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
           <div className="space-y-4">
             <div>
               <Label htmlFor="category" className="mb-1.5 block">
-                Categoria <span className="text-red-500">*</span>
+                Categoria
               </Label>
               <div className="relative">
                 <select
                   id="category"
-                  value={selectedCategory?.id ?? ""}
+                  value={selectedCategory?.id ?? "__none__"}
                   onChange={(e) => {
-                    const id = Number(e.target.value);
+                    const raw = e.target.value;
+                    if (raw === "__none__" || raw === "") {
+                      setSelectedCategory(null);
+                      return;
+                    }
+                    const id = Number(raw);
                     const cat = categories.find((c) => c.id === id);
                     setSelectedCategory(cat ?? null);
                   }}
                   className="flex h-11 w-full rounded-lg border border-[var(--rose-200)] bg-white/90 px-4 py-2 text-sm text-[var(--ink)] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] appearance-none"
                 >
-                  <option value="">{categoriesLoaded ? "Selecione a categoria" : "Carregando..."}</option>
+                  <option value="__none__">{categoriesLoaded ? "Sem categoria (aparece em Outros)" : "Carregando..."}</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
