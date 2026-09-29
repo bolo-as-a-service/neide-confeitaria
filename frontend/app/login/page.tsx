@@ -1,11 +1,12 @@
 "use client";
 
+import * as React from "react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { api } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Insira seu email ou telefone"),
@@ -28,8 +29,10 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user, isLoading: authLoading, login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState("");
@@ -39,16 +42,35 @@ export default function LoginPage() {
     defaultValues: { email: "", password: "", remember: false },
   });
 
+  // Se já está autenticado, respeita ?next= (apenas ADMIN em /admin) ou papel.
+  React.useEffect(() => {
+    if (authLoading || !user) return;
+    const next = searchParams.get("next");
+    if (next && next.startsWith("/admin") && user.role === "ADMIN") {
+      router.replace(next);
+    } else if (user.role === "ADMIN") {
+      router.replace("/admin");
+    } else {
+      router.replace("/");
+    }
+  }, [user, authLoading, router, searchParams]);
+
   const handleSubmit = form.handleSubmit(async (data) => {
     setIsPending(true);
     setError("");
     try {
-      const user = await api.login({ email: data.email, password: data.password });
-      localStorage.setItem("user", JSON.stringify(user));
-      if (user.role === "ADMIN") {
+      const logged = await login(
+        { email: data.email, password: data.password },
+        data.remember ?? false
+      );
+      const next = searchParams.get("next");
+      if (next && next.startsWith("/admin") && logged.role === "ADMIN") {
+        router.push(next);
+      } else if (logged.role === "ADMIN") {
         router.push("/admin");
       } else {
-        router.push("/admin");
+        // USER (cliente) volta ao cardápio, não ao painel admin.
+        router.push("/");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao fazer login");
@@ -216,5 +238,13 @@ export default function LoginPage() {
       </div>
 
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <LoginForm />
+    </React.Suspense>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Allura, Cormorant_Garamond, Manrope } from "next/font/google";
 import { CartProvider } from "@/lib/cart-context";
+import { AuthProvider } from "@/lib/auth-context";
 import "./globals.css";
 
 const displayFont = Cormorant_Garamond({
@@ -36,7 +37,7 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${displayFont.variable} ${bodyFont.variable} ${scriptFont.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col"><CartProvider>{children}</CartProvider></body>
+      <body className="min-h-full flex flex-col"><AuthProvider><CartProvider>{children}</CartProvider></AuthProvider></body>
     </html>
   );
 }

@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Cake, ClipboardList, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { useAuth } from "@/lib/auth-context";
 
 const mobileNavItems = [
   { label: "Produtos", icon: <Cake className="h-4 w-4" />, href: "/admin/menu" },
@@ -19,6 +20,22 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, isLoading, isAdmin } = useAuth();
+
+  React.useEffect(() => {
+    if (!isLoading && (!user || !isAdmin)) {
+      router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+    }
+  }, [user, isAdmin, isLoading, router, pathname]);
+
+  if (isLoading || !user || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-[var(--page-bg)] flex items-center justify-center">
+        <p className="text-sm text-[var(--muted)]">Verificando acesso…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--page-bg)] flex flex-col">

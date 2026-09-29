@@ -11,25 +11,26 @@ import { ShoppingCartSidebar } from "@/components/menu/ShoppingCartSidebar";
 import { Footer } from "@/components/menu/Footer";
 import { Product } from "@/components/menu/ProductCard";
 import { useCart, CartItem } from "@/lib/cart-context";
-import { cn } from "@/lib/utils";
+import { cn, slugifyCategory } from "@/lib/utils";
 import { api } from "@/lib/api";
 import type { BackendCategory, BackendProduct } from "@/lib/types";
 
 const CATEGORY_ICONS: Record<string, { label: string; icon: string }> = {
   "caseiro": { label: "Caseiro", icon: "CakeSlice" },
   "diet": { label: "Diet", icon: "Leaf" },
-  "vulc\u00e3o": { label: "Vulc\u00e3o", icon: "Flame" },
+  "vulcao": { label: "Vulcão", icon: "Flame" },
   "bolo": { label: "Bolo", icon: "CakeSlice" },
   "salgado": { label: "Salgado", icon: "ChefHat" },
   "pudim": { label: "Pudim", icon: "CupSoda" },
   "cesta": { label: "Cesta", icon: "ShoppingBasket" },
   "congelado": { label: "Congelado", icon: "Snowflake" },
+  "outros": { label: "Outros", icon: "Utensils" },
 };
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 function mapProduct(p: BackendProduct): Product {
-  const categoryName = p.category?.name?.toLowerCase().replace(/\s+/g, "-") || "outros";
+  const categoryName = slugifyCategory(p.category?.name);
   return {
     id: String(p.id),
     name: p.name,
@@ -80,20 +81,29 @@ export default function CardapioPage() {
 
   const frontendCategories = React.useMemo(() => {
     if (backendCategories.length > 0) {
-      return backendCategories.map((cat) => {
-        const slug = cat.name.toLowerCase().replace(/\s+/g, "-");
+      const mapped = backendCategories.map((cat) => {
+        const slug = slugifyCategory(cat.name);
         const preset = CATEGORY_ICONS[slug];
         return {
           id: slug,
           label: preset?.label || cat.name,
         };
       });
+      // Garante a seção "Outros": produtos sem categoria (category null/id 0)
+      // são agrupados em "outros" e precisam de aba visível.
+      const hasUncategorized = backendProducts.some(
+        (p) => slugifyCategory(p.category?.name) === "outros"
+      );
+      if (hasUncategorized && !mapped.some((c) => c.id === "outros")) {
+        mapped.push({ id: "outros", label: CATEGORY_ICONS["outros"].label });
+      }
+      return mapped;
     }
     return Object.entries(CATEGORY_ICONS).map(([id, val]) => ({
       id,
       label: val.label,
     }));
-  }, [backendCategories]);
+  }, [backendCategories, backendProducts]);
 
   const productsByCategory = React.useMemo(() => {
     const grouped: Record<string, Product[]> = {};
@@ -102,7 +112,7 @@ export default function CardapioPage() {
       grouped[cat.id] = [];
     });
     backendProducts.forEach((p) => {
-      const categoryName = p.category?.name?.toLowerCase().replace(/\s+/g, "-") || "outros";
+      const categoryName = slugifyCategory(p.category?.name);
       if (grouped[categoryName]) {
         grouped[categoryName].push(mapProduct(p));
       } else {
