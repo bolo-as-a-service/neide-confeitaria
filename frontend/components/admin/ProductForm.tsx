@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
+import { isPersistableImageUrl, resolveBackendImage } from "@/lib/product-image";
 import type { BackendCategory } from "@/lib/types";
 
 import { AdminProduct } from "./AdminProductTable";
@@ -94,7 +95,15 @@ export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
 
   const handleSave = () => {
     if (onSave) {
-      onSave({ name, description, category: selectedCategory ?? undefined, price, ingredients, image: imageUrl || undefined });
+      onSave({
+        name,
+        description,
+        category: selectedCategory ?? undefined,
+        price,
+        ingredients,
+        // Só persiste URL de upload real; fallback local não é foto do produto.
+        image: isPersistableImageUrl(imageUrl) ? imageUrl : undefined,
+      });
     } else {
       console.log({ name, description, category: selectedCategory, price, ingredients, image: imageUrl });
       onBack();
@@ -186,7 +195,7 @@ export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
                 <div className="relative rounded-xl overflow-hidden border border-[var(--rose-200)]">
                   <div className="relative aspect-video w-full">
                     <Image
-                      src={imageUrl.startsWith("http") ? imageUrl : `${process.env.NEXT_PUBLIC_API_URL}${imageUrl}`}
+                      src={resolveBackendImage(imageUrl) ?? imageUrl}
                       alt="Preview"
                       fill
                       unoptimized

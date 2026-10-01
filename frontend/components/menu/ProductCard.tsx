@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { cn, productBlurPlaceholder } from "@/lib/utils";
+import { FALLBACK_IMAGE, categoryImageSrc } from "@/lib/product-image";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
@@ -48,7 +49,12 @@ export function ProductCard({ product, onAddClick, onDetailClick }: ProductCardP
           placeholder="blur"
           blurDataURL={productBlurPlaceholder}
           onError={() => {
-            if (imgSrc !== "/bolo.webp") setImgSrc("/bolo.webp");
+            const categoryFallback = categoryImageSrc(product.category);
+            if (imgSrc !== categoryFallback) {
+              setImgSrc(categoryFallback);
+            } else if (imgSrc !== FALLBACK_IMAGE) {
+              setImgSrc(FALLBACK_IMAGE);
+            }
           }}
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="200px"
