@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Product } from "./ProductCard";
 import { CartItem } from "@/lib/cart-context";
+import { productBlurPlaceholder } from "@/lib/utils";
 
 interface ProductModalProps {
   product: Product | null;
@@ -76,6 +77,8 @@ function ProductModalContent({
             src={product.image}
             alt={product.name}
             fill
+            placeholder="blur"
+            blurDataURL={productBlurPlaceholder}
             className="object-cover"
             priority
           />

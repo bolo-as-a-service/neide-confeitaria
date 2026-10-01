@@ -9,6 +9,8 @@ import { ProductCategorySection } from "@/components/menu/ProductCategorySection
 import { ProductModal } from "@/components/menu/ProductModal";
 import { ShoppingCartSidebar } from "@/components/menu/ShoppingCartSidebar";
 import { Footer } from "@/components/menu/Footer";
+import { Skeleton, ProductGridSkeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/ui/error-state";
 import { Product } from "@/components/menu/ProductCard";
 import { useCart, CartItem } from "@/lib/cart-context";
 import { cn, slugifyCategory } from "@/lib/utils";
@@ -27,7 +29,7 @@ const CATEGORY_ICONS: Record<string, { label: string; icon: string }> = {
   "outros": { label: "Outros", icon: "Utensils" },
 };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/+$/, "");
 
 function mapProduct(p: BackendProduct): Product {
   const categoryName = slugifyCategory(p.category?.name);
@@ -52,25 +54,35 @@ export default function CardapioPage() {
   const [backendCategories, setBackendCategories] = React.useState<BackendCategory[]>([]);
   const [backendProducts, setBackendProducts] = React.useState<BackendProduct[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [loadError, setLoadError] = React.useState("");
   const { items, addItem, updateQuantity, removeItem } = useCart();
 
-  React.useEffect(() => {
-    async function load() {
-      try {
-        const [categories, products] = await Promise.all([
-          api.getCategories(),
-          api.getProducts(),
-        ]);
-        setBackendCategories(categories);
-        setBackendProducts(products);
-      } catch (err) {
-        console.error("Failed to load menu data", err);
-      } finally {
-        setLoading(false);
-      }
+  const load = React.useCallback(async () => {
+    setLoading(true);
+    setLoadError("");
+    try {
+      const [categories, products] = await Promise.all([
+        api.getCategories(),
+        api.getProducts(),
+      ]);
+      setBackendCategories(categories);
+      setBackendProducts(products);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Erro ao carregar cardápio");
+    } finally {
+      setLoading(false);
     }
-    load();
   }, []);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) load();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [load]);
 
   React.useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
@@ -140,8 +152,39 @@ export default function CardapioPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--page-bg)] font-body flex items-center justify-center">
-        <div className="text-[var(--brand-700)] text-lg font-display">Carregando cardápio...</div>
+      <div className="min-h-screen bg-[var(--page-bg)] font-body">
+        <Header cartCount={cartCount} onCartClick={() => setCartOpen(true)} />
+        <main className="flex flex-1 w-full max-w-full lg:max-w-[85%] mx-auto">
+          <div className="flex-1 min-w-0">
+            <div className="max-w-[1020px] mx-auto px-4 sm:px-6 pb-12 pt-6 space-y-6">
+              <div className="flex gap-3 overflow-hidden px-4 pb-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-[104px] min-w-[90px] rounded-2xl" />
+                ))}
+              </div>
+              <Skeleton className="mx-4 h-12 rounded-full" />
+              <ProductGridSkeleton count={8} />
+              <ProductGridSkeleton count={8} />
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-[var(--page-bg)] font-body">
+        <Header cartCount={cartCount} onCartClick={() => setCartOpen(true)} />
+        <main className="max-w-[1020px] mx-auto px-4 sm:px-6 pb-12">
+          <ErrorState
+            title="Não foi possível carregar o cardápio"
+            message={loadError}
+            onRetry={load}
+          />
+        </main>
+        <Footer />
       </div>
     );
   }

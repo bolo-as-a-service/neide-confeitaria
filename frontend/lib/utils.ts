@@ -27,6 +27,24 @@ export function slugifyCategory(name?: string | null): string {
 
 export type CategoryColor = "rose" | "red" | "green" | "amber";
 
+/**
+ * Placeholder blur para next/image (issue #30).
+ * Shimmer SVG inline — evita layout shift enquanto a foto carrega,
+ * sem depender de thumbnail gerado no backend.
+ */
+function shimmerSvg(w: number, h: number): string {
+  return `<svg width="${w}" height="${h}" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#f6e8e4" offset="20%"/><stop stop-color="#efd9d3" offset="50%"/><stop stop-color="#f6e8e4" offset="70%"/></linearGradient></defs><rect width="${w}" height="${h}" fill="#f6e8e4"/><rect id="r" width="${w}" height="${h}" fill="url(#g)"/></svg>`;
+}
+
+function toBase64(str: string): string {
+  if (typeof window === "undefined") {
+    return Buffer.from(str).toString("base64");
+  }
+  return window.btoa(str);
+}
+
+export const productBlurPlaceholder = `data:image/svg+xml;base64,${toBase64(shimmerSvg(200, 200))}`;
+
 const KNOWN_CATEGORY_COLORS: Record<string, CategoryColor> = {
   "caseiro": "rose",
   "diet": "green",
