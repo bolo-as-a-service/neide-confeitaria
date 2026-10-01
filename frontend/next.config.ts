@@ -5,17 +5,17 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   images: {
-    unoptimized: true,
     remotePatterns: [
       {
         protocol: "http",
         hostname: "localhost",
         port: "8080",
       },
+      {
+        protocol: "https",
+        hostname: "apineide.gsrodriguesz.me",
+      },
     ],
-  },
-  env: {
-    NEXT_PUBLIC_API_URL: "http://localhost:8080",
   },
 };
 

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn, productBlurPlaceholder } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
@@ -23,6 +23,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onAddClick, onDetailClick }: ProductCardProps) {
+  const [imgSrc, setImgSrc] = React.useState(product.image);
   const formattedPrice = new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
@@ -41,10 +42,14 @@ export function ProductCard({ product, onAddClick, onDetailClick }: ProductCardP
     >
       <div className="relative aspect-square overflow-hidden bg-[var(--rose-50)]">
         <Image
-          src={product.image}
+          src={imgSrc}
           alt={product.name}
           fill
-          unoptimized={product.image.startsWith("http")}
+          placeholder="blur"
+          blurDataURL={productBlurPlaceholder}
+          onError={() => {
+            if (imgSrc !== "/bolo.webp") setImgSrc("/bolo.webp");
+          }}
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="200px"
         />
