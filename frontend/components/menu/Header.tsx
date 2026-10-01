@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { ShoppingBag, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
 
 interface HeaderProps {
   cartCount: number;
@@ -11,6 +12,7 @@ interface HeaderProps {
 }
 
 export function Header({ cartCount, onCartClick }: HeaderProps) {
+  const { user, isLoading } = useAuth();
   return (
     <header className="relative">
       <div className="relative bg-[var(--brand-900)] text-[var(--cream)]">
@@ -25,13 +27,23 @@ export function Header({ cartCount, onCartClick }: HeaderProps) {
             </a>
 
             <div className="flex items-center gap-2">
-              <Link
-                href="/login"
-                className="hidden md:flex items-center gap-2 text-sm underline hover:text-[var(--rose-100)] transition-colors"
-              >
-                <User className="h-4 w-4" />
-                Acessar Minha Conta
-              </Link>
+              {!isLoading && user ? (
+                <Link
+                  href={user.role === "ADMIN" ? "/admin" : "/meus-pedidos"}
+                  className="hidden md:flex items-center gap-2 text-sm underline hover:text-[var(--rose-100)] transition-colors"
+                >
+                  <User className="h-4 w-4" />
+                  {user.role === "ADMIN" ? "Painel Admin" : `Olá, ${user.name.split(" ")[0]}`}
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className="hidden md:flex items-center gap-2 text-sm underline hover:text-[var(--rose-100)] transition-colors"
+                >
+                  <User className="h-4 w-4" />
+                  Acessar Minha Conta
+                </Link>
+              )}
               <button
                 onClick={onCartClick}
                 className="relative flex items-center gap-2 bg-[var(--brand-700)] hover:bg-[var(--brand-800)] text-[var(--cream)] px-3 py-2 rounded-full text-sm font-medium transition-colors"
