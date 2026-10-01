@@ -5,17 +5,42 @@ import { Settings, MapPin, Phone, Clock, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { maskPhone } from "@/lib/checkout";
+import {
+  DEFAULT_STORE_SETTINGS,
+  loadStoreSettings,
+  saveStoreSettings,
+} from "@/lib/store-settings";
 
 export default function AdminExtraPage() {
-  const [storeName, setStoreName] = React.useState("Neide Confeitaria");
-  const [address, setAddress] = React.useState("Bragança Paulista Rua 7");
-  const [phone, setPhone] = React.useState("(11) 9 4022-8922");
-  const [openTime, setOpenTime] = React.useState("08:00");
-  const [closeTime, setCloseTime] = React.useState("20:00");
-  const [isOpen, setIsOpen] = React.useState(true);
+  const [storeName, setStoreName] = React.useState(DEFAULT_STORE_SETTINGS.storeName);
+  const [address, setAddress] = React.useState(DEFAULT_STORE_SETTINGS.address);
+  const [phone, setPhone] = React.useState(DEFAULT_STORE_SETTINGS.phone);
+  const [openTime, setOpenTime] = React.useState(DEFAULT_STORE_SETTINGS.openTime);
+  const [closeTime, setCloseTime] = React.useState(DEFAULT_STORE_SETTINGS.closeTime);
+  const [isOpen, setIsOpen] = React.useState(DEFAULT_STORE_SETTINGS.isOpen);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      const saved = loadStoreSettings();
+      setStoreName(saved.storeName);
+      setAddress(saved.address);
+      setPhone(saved.phone);
+      setOpenTime(saved.openTime);
+      setCloseTime(saved.closeTime);
+      setIsOpen(saved.isOpen);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleSave = () => {
-    console.log({ storeName, address, phone, openTime, closeTime, isOpen });
+    saveStoreSettings({ storeName, address, phone, openTime, closeTime, isOpen });
+    toast.success("Configurações salvas!");
   };
 
   return (
@@ -69,8 +94,10 @@ export default function AdminExtraPage() {
             </Label>
             <Input
               id="phone"
+              type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              maxLength={15}
+              onChange={(e) => setPhone(maskPhone(e.target.value))}
             />
           </div>
         </div>
