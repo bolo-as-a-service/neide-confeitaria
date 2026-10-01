@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { api } from "@/lib/api";
 import { categoryColorForCategory } from "@/lib/utils";
+import { productImageSrc } from "@/lib/product-image";
 import type { BackendCategory, BackendProduct } from "@/lib/types";
 
 function toAdminProduct(p: BackendProduct): AdminProduct {
@@ -22,7 +23,7 @@ function toAdminProduct(p: BackendProduct): AdminProduct {
     name: p.name,
     description: p.description || "",
     price: p.price,
-    image: p.imageUrl || "/bolo.webp",
+    image: productImageSrc(p),
     category: catName,
     categoryColor: categoryColorForCategory(catName),
     available: p.available,

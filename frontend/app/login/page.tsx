@@ -51,7 +51,7 @@ function LoginForm() {
     } else if (user.role === "ADMIN") {
       router.replace("/admin");
     } else {
-      router.replace("/");
+      router.replace("/cardapio");
     }
   }, [user, authLoading, router, searchParams]);
 
@@ -69,8 +69,8 @@ function LoginForm() {
       } else if (logged.role === "ADMIN") {
         router.push("/admin");
       } else {
-        // USER (cliente) volta ao cardápio, não ao painel admin.
-        router.push("/");
+        // USER (cliente) vai ao cardápio, não ao painel admin.
+        router.push("/cardapio");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao fazer login");

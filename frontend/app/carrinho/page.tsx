@@ -9,6 +9,14 @@ import { Button } from "@/components/ui/button";
 import { useCart, CartItem } from "@/lib/cart-context";
 import { ProductModal } from "@/components/menu/ProductModal";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
+import {
+  DELIVERY_FEE,
+  firstCheckoutError,
+  maskPhone,
+  validateCheckout,
+} from "@/lib/checkout";
+import { productBlurPlaceholder } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +35,17 @@ export default function CarrinhoPage() {
   const [deliveryDate, setDeliveryDate] = React.useState("");
   const [observations, setObservations] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
+  const [triedSubmit, setTriedSubmit] = React.useState(false);
+
+  const formErrors = validateCheckout({
+    customerName,
+    customerPhone,
+    delivery: deliveryOption === "sim",
+    address,
+    deliveryDateTime: deliveryDate,
+  });
+  const isFormValid = Object.keys(formErrors).length === 0;
+  const deliveryFee = deliveryOption === "sim" ? DELIVERY_FEE : 0;
 
   const [editItem, setEditItem] = React.useState<CartItem | null>(null);
   const [deleteItem, setDeleteItem] = React.useState<CartItem | null>(null);
@@ -45,9 +64,25 @@ export default function CarrinhoPage() {
       currency: "BRL",
     }).format(price * quantity);
 
+  const grandTotal = total + deliveryFee;
+
   const handleFinalize = async () => {
-    if (!customerName.trim()) return;
-    if (!customerPhone.trim()) return;
+    setTriedSubmit(true);
+    const firstError = firstCheckoutError({
+      customerName,
+      customerPhone,
+      delivery: deliveryOption === "sim",
+      address,
+      deliveryDateTime: deliveryDate,
+    });
+    if (firstError) {
+      toast.error(firstError);
+      return;
+    }
+    if (items.length === 0) {
+      toast.error("Seu carrinho está vazio.");
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -65,10 +100,10 @@ export default function CarrinhoPage() {
         })),
       });
       clearCart();
+      toast.success("Pedido enviado com sucesso!");
       router.push("/pedido-confirmado");
     } catch (err) {
-      console.error("Failed to create order", err);
-      alert("Erro ao criar pedido. Tente novamente.");
+      toast.error(err instanceof Error ? err.message : "Erro ao criar pedido. Tente novamente.");
     } finally {
       setSubmitting(false);
     }
@@ -121,7 +156,8 @@ export default function CarrinhoPage() {
                             src={item.product.image}
                             alt={item.product.name}
                             fill
-                            unoptimized={item.product.image.startsWith("http")}
+                            placeholder="blur"
+                            blurDataURL={productBlurPlaceholder}
                             className="object-cover"
                             sizes="64px"
                           />
@@ -196,11 +232,31 @@ export default function CarrinhoPage() {
             </div>
 
             {items.length > 0 && (
-              <div className="bg-[var(--rose-50)] px-6 py-4 flex items-center justify-between">
-                <span className="font-display text-lg font-bold text-[var(--brand-800)]">TOTAL :</span>
-                <span className="font-display text-xl font-extrabold text-[var(--brand-800)]">
-                  {formattedTotal}
-                </span>
+              <div className="bg-[var(--rose-50)] px-6 py-4 space-y-1">
+                <div className="flex items-center justify-between text-sm text-[var(--muted)]">
+                  <span>Subtotal</span>
+                  <span>{formattedTotal}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm text-[var(--muted)]">
+                  <span>Entrega</span>
+                  <span>
+                    {deliveryFee === 0
+                      ? "Grátis (retirada)"
+                      : new Intl.NumberFormat("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        }).format(deliveryFee)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-display text-lg font-bold text-[var(--brand-800)]">TOTAL :</span>
+                  <span className="font-display text-xl font-extrabold text-[var(--brand-800)]">
+                    {new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(grandTotal)}
+                  </span>
+                </div>
               </div>
             )}
           </div>
@@ -224,6 +280,9 @@ export default function CarrinhoPage() {
                       className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
                       required
                     />
+                    {triedSubmit && formErrors.customerName && (
+                      <p className="mt-1 text-xs text-red-600">{formErrors.customerName}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
@@ -232,11 +291,17 @@ export default function CarrinhoPage() {
                     <input
                       type="tel"
                       value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      onChange={(e) => setCustomerPhone(maskPhone(e.target.value))}
                       placeholder="(11) 99999-9999"
+                      maxLength={15}
+                      inputMode="tel"
+                      autoComplete="tel"
                       className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
                       required
                     />
+                    {triedSubmit && formErrors.customerPhone && (
+                      <p className="mt-1 text-xs text-red-600">{formErrors.customerPhone}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -291,6 +356,9 @@ export default function CarrinhoPage() {
                           placeholder="Digite seu endereço"
                           className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
                         />
+                        {triedSubmit && formErrors.address && (
+                          <p className="mt-1 text-xs text-red-600">{formErrors.address}</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
@@ -302,6 +370,9 @@ export default function CarrinhoPage() {
                           onChange={(e) => setDeliveryDate(e.target.value)}
                           className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
                         />
+                        {triedSubmit && formErrors.deliveryDateTime && (
+                          <p className="mt-1 text-xs text-red-600">{formErrors.deliveryDateTime}</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
@@ -359,6 +430,9 @@ export default function CarrinhoPage() {
                           onChange={(e) => setDeliveryDate(e.target.value)}
                           className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
                         />
+                        {triedSubmit && formErrors.deliveryDateTime && (
+                          <p className="mt-1 text-xs text-red-600">{formErrors.deliveryDateTime}</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
@@ -394,8 +468,21 @@ export default function CarrinhoPage() {
                 <div className="mt-6 flex justify-center">
                   <Button
                     onClick={handleFinalize}
-                    disabled={submitting || !customerName.trim() || !customerPhone.trim()}
-                    className="w-full max-w-md h-14 text-lg font-bold rounded-xl uppercase tracking-wide"
+                    disabled={submitting || items.length === 0 || !isFormValid}
+                    title={
+                      items.length === 0
+                        ? "Adicione itens ao carrinho"
+                        : !isFormValid
+                          ? (firstCheckoutError({
+                              customerName,
+                              customerPhone,
+                              delivery: deliveryOption === "sim",
+                              address,
+                              deliveryDateTime: deliveryDate,
+                            }) ?? "Preencha os dados corretamente")
+                          : undefined
+                    }
+                    className="w-full max-w-md h-14 text-lg font-bold rounded-xl uppercase tracking-wide disabled:cursor-not-allowed"
                     size="lg"
                   >
                     {submitting ? (

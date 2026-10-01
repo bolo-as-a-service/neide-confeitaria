@@ -7,8 +7,42 @@ import type {
   BackendLoginDTO,
   BackendRegisterDTO,
 } from "./types";
+import { mockApi } from "./mock-data";
+
+/**
+ * MOCK TEMPORÁRIO (remover quando o backend estabilizar): com
+ * NEXT_PUBLIC_USE_MOCK=true, o `api` usa dados fixados em mock-data.ts.
+ * Para remover: delete mock-data.ts + .env.local e reverta este bloco.
+ */
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+/** Erro tipado da API (issue #26): carrega status HTTP e erros de campo. */
+export class ApiError extends Error {
+  readonly status: number;
+  readonly fieldErrors?: Record<string, string>;
+
+  constructor(status: number, message: string, fieldErrors?: Record<string, string>) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.fieldErrors = fieldErrors;
+  }
+}
+
+function parseFieldErrors(body: unknown): Record<string, string> | undefined {
+  if (typeof body !== "object" || body === null) return undefined;
+  const record = body as Record<string, unknown>;
+  const candidate = record.fieldErrors ?? record.errors;
+  if (typeof candidate === "object" && candidate !== null && !Array.isArray(candidate)) {
+    const entries = Object.entries(candidate as Record<string, unknown>).filter(
+      ([, v]) => typeof v === "string"
+    ) as [string, string][];
+    if (entries.length > 0) return Object.fromEntries(entries);
+  }
+  return undefined;
+}
 
 async function request<T>(
   path: string,
@@ -20,13 +54,17 @@ async function request<T>(
   });
   if (!res.ok) {
     const body = await res.json().catch(() => null);
-    throw new Error(body?.error || `HTTP ${res.status}`);
+    const message =
+      (typeof body === "object" && body !== null && typeof (body as Record<string, unknown>).error === "string"
+        ? (body as Record<string, unknown>).error as string
+        : undefined) ?? `HTTP ${res.status}`;
+    throw new ApiError(res.status, message, parseFieldErrors(body));
   }
   if (res.status === 204) return undefined as T;
   return res.json();
 }
 
-export const api = {
+const realApi = {
   // Auth
   login: (dto: BackendLoginDTO) =>
     request<BackendUser>("/auth/login", {
@@ -121,3 +159,5 @@ export const api = {
     return res.json() as Promise<{ url: string }>;
   },
 };
+
+export const api = USE_MOCK ? mockApi : realApi;
