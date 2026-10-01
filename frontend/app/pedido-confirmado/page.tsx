@@ -50,7 +50,7 @@ export default function PedidoConfirmadoPage() {
             transition={{ delay: 0.4, duration: 0.4 }}
             className="text-base text-[var(--muted)] leading-relaxed mb-8"
           >
-            Seu pedido foi realizado com sucesso e já está sendo preparado com carinho.
+            Seu pedido foi recebido com sucesso e já entrou na nossa fila de produção.
           </motion.p>
 
           <motion.div

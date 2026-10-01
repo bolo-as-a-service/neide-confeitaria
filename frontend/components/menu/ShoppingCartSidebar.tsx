@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { X, Trash2, Edit, ShoppingBag, ChevronRight } from "lucide-react";
+import { X, Trash2, Edit, ShoppingBag, ChevronRight, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Product } from "./ProductCard";
@@ -134,7 +134,7 @@ export function ShoppingCartSidebar({
                             className="h-8 w-8 text-[var(--brand-700)] hover:bg-[var(--rose-100)] disabled:opacity-50"
                             aria-label="Diminuir quantidade"
                           >
-                            <X className="h-3.5 w-3.5" />
+                            <Minus className="h-3.5 w-3.5" />
                           </Button>
                           <span className="w-10 text-center font-display text-sm font-bold text-[var(--ink)]">
                             {item.quantity}
@@ -173,12 +173,15 @@ export function ShoppingCartSidebar({
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-[var(--muted)]">Entrega</span>
-                  <span className="font-medium text-[var(--ink)]">A calcular</span>
+                  <span className="font-medium text-[var(--ink)]">No checkout</span>
                 </div>
                 <div className="flex justify-between text-base font-bold text-[var(--brand-800)] border-t border-[var(--rose-200)] pt-3">
-                  <span>TOTAL</span>
+                  <span>SUBTOTAL</span>
                   <span>{formattedTotal}</span>
                 </div>
+                <p className="text-[11px] text-[var(--muted)]">
+                  Taxa de entrega calculada no checkout.
+                </p>
               </div>
             </>
           )}

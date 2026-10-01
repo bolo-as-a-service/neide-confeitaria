@@ -4,11 +4,23 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Clock, Phone, User, ChevronDown, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { DEFAULT_STORE_SETTINGS, loadStoreSettings } from "@/lib/store-settings";
 
 export function AdminHeader() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
+  const [settings, setSettings] = React.useState(DEFAULT_STORE_SETTINGS);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) setSettings(loadStoreSettings());
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const displayName = user?.name ? `Olá, ${user.name.split(" ")[0]}!` : "Olá, Neide!";
   const displayRole = user?.role === "ADMIN" ? "Administrador" : (user?.email ?? "Administrador");
@@ -27,21 +39,21 @@ export function AdminHeader() {
         <div className="hidden lg:flex items-center gap-3 text-sm text-[var(--muted)]">
           <div className="flex items-center gap-1.5">
             <MapPin className="h-4 w-4" />
-            <span>Bragança Paulista Rua 7</span>
+            <span>{settings.address}</span>
           </div>
           <span className="text-gray-300">|</span>
           <div className="flex items-center gap-1.5">
             <Clock className="h-4 w-4" />
-            <span>xx:xx - yy:yy</span>
+            <span>{settings.openTime} - {settings.closeTime}</span>
           </div>
           <span className="text-gray-300">|</span>
           <div className="flex items-center gap-1.5">
             <Phone className="h-4 w-4" />
-            <span>(11) 9 4022-8922</span>
+            <span>{settings.phone}</span>
           </div>
-          <span className="flex items-center gap-1.5 bg-green-50 text-green-700 rounded-full px-3 py-1 text-xs font-medium border border-green-200">
-            <span className="w-2 h-2 bg-green-500 rounded-full" />
-            ABERTO
+          <span className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border ${settings.isOpen ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-600 border-red-200"}`}>
+            <span className={`w-2 h-2 rounded-full ${settings.isOpen ? "bg-green-500" : "bg-red-500"}`} />
+            {settings.isOpen ? "ABERTO" : "FECHADO"}
           </span>
         </div>
 
