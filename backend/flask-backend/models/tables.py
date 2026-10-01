@@ -44,9 +44,7 @@ def Tables():
             db.session.add_all(
                  [
                       User(email="neide@gmail.com",name=("Neide"),phone_number=("11986803971"), password=("neide123"))
-
-                 ]
-            )
+                 ])
             db.session.commit()
 
     if Orders.query.count() == 0:
@@ -61,8 +59,7 @@ def Tables():
                     observation="Entregar na portaria",
                     status="PENDING",
                     items=[
-                        Items(id_product=1, quantity=2, unit_price=55.00, observation="Bem embalado")
-                    ]
-                )
+                    Items(id_product=1, quantity=2, unit_price=55.00, observation="Bem embalado")
+                    ])
             ])
             db.session.commit()
