@@ -3,7 +3,9 @@ from models.models_cardapio import *
 from models.models_users import *
 from models.models_orders import *
 
-if Category.query.count() == 0:
+
+def Tables():
+    if Category.query.count() == 0:
             
             db.session.add_all([
                 Category(id_category=1, name="Bolos"),
@@ -13,7 +15,7 @@ if Category.query.count() == 0:
             db.session.commit()
 
     
-if Product.query.count() == 0:
+    if Product.query.count() == 0:
     
             db.session.add_all([
                 Product(name="Bolo de Chocolate com Morango", price=55.00, id_category=1),
@@ -38,7 +40,7 @@ if Product.query.count() == 0:
             ])
             db.session.commit()
 
-if User.query.count() == 0:
+    if User.query.count() == 0:
             db.session.add_all(
                  [
                       User(email="neide@gmail.com",name=("Neide"),phone_number=("11986803971"), password=("neide123"))
@@ -47,7 +49,7 @@ if User.query.count() == 0:
             )
             db.session.commit()
 
-if Orders.query.count() == 0:
+    if Orders.query.count() == 0:
             db.session.add_all([
                 Orders(
                     customer_name="Carlos Silva",
