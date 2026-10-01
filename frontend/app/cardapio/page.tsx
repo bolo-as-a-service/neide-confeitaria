@@ -14,6 +14,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { Product } from "@/components/menu/ProductCard";
 import { useCart, CartItem } from "@/lib/cart-context";
 import { cn, slugifyCategory } from "@/lib/utils";
+import { productImageSrc } from "@/lib/product-image";
 import { api } from "@/lib/api";
 import type { BackendCategory, BackendProduct } from "@/lib/types";
 
@@ -29,15 +30,13 @@ const CATEGORY_ICONS: Record<string, { label: string; icon: string }> = {
   "outros": { label: "Outros", icon: "Utensils" },
 };
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/+$/, "");
-
 function mapProduct(p: BackendProduct): Product {
   const categoryName = slugifyCategory(p.category?.name);
   return {
     id: String(p.id),
     name: p.name,
     price: p.price,
-    image: p.imageUrl ? `${API_BASE}${p.imageUrl}` : "/bolo.webp",
+    image: productImageSrc(p),
     category: categoryName,
     description: p.description,
     ingredients: p.ingredients,

@@ -7,6 +7,14 @@ import type {
   BackendLoginDTO,
   BackendRegisterDTO,
 } from "./types";
+import { mockApi } from "./mock-data";
+
+/**
+ * MOCK TEMPORÁRIO (remover quando o backend estabilizar): com
+ * NEXT_PUBLIC_USE_MOCK=true, o `api` usa dados fixados em mock-data.ts.
+ * Para remover: delete mock-data.ts + .env.local e reverta este bloco.
+ */
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -56,7 +64,7 @@ async function request<T>(
   return res.json();
 }
 
-export const api = {
+const realApi = {
   // Auth
   login: (dto: BackendLoginDTO) =>
     request<BackendUser>("/auth/login", {
@@ -151,3 +159,5 @@ export const api = {
     return res.json() as Promise<{ url: string }>;
   },
 };
+
+export const api = USE_MOCK ? mockApi : realApi;
