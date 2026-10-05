@@ -45,7 +45,7 @@ def Tables():
     if User.query.count() == 0:
             db.session.add_all(
                  [
-                      User(email="neide@gmail.com",name=("Neide"),phone_number=("11986803971"), password=("neide123"))
+                      User(email="neide@gmail.com",name=("Neide"),phone_number=("11986803971"), password=("neide123"), role=("ADMIN"))
                  ])
             db.session.commit()
 

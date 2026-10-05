@@ -24,3 +24,6 @@ class Product(db.Model):
                 "name": self.category.name if self.category else ""
                 }
         }   
+
+class Ingredients(db.Model):
+    id_ingredients = db.Column(db.Integer, )

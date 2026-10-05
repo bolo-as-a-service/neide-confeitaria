@@ -34,3 +34,19 @@ def get_products_by_id(id):
     return jsonify(product_by_id),200
 
 
+@app.route(("/products/<int:id>"), methods=['PUT'])
+def put_products_by_id(id):
+
+    product_put = service_put_products_by_id(id)
+
+    return(product_put),203
+
+
+@app.route("/products/<int:id>",methods=['DELETE'])
+def delete_product_by_id(id):
+
+    deleteConfirmation = service_delete_product_by_id(id)
+
+    if deleteConfirmation == None:
+        return {"Error" : "Produto não encontrado"}
+    return '',204

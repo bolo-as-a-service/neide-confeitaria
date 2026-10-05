@@ -35,3 +35,22 @@ def service_get_products_by_id(id) :
     if not product:
         return None
     return product.to_dict
+
+
+def service_put_products_by_id(id):
+
+    product = Product.query.get_or_404(id)
+
+    
+
+
+def service_delete_product_by_id(id):
+
+    product = Product.query.get(id)
+
+
+    if not product:
+        return None
+    db.session.delete(product)
+    db.session.commit()
+    return True
