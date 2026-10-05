@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
-from models.extensions import db
+from db import db
 
 
 app = Flask(__name__)
@@ -13,12 +13,16 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
-from models.models_cardapio import *
+
+from models.tables import *
+
 from routes.route_products import *
 from routes.route_category import *
 from routes.route_authentication import *
 from routes.route_orders import *
-from models.tables import *
+
+from services.service_products import *
+
 
 
 if __name__ == "__main__":

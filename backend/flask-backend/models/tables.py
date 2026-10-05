@@ -1,5 +1,6 @@
-from models.extensions import db
-from models.models_cardapio import *
+from db import db
+from models.models_product import *
+from models.models_category import *
 from models.models_users import *
 from models.models_orders import *
 
@@ -40,12 +41,14 @@ def Tables():
             ])
             db.session.commit()
 
+
     if User.query.count() == 0:
             db.session.add_all(
                  [
                       User(email="neide@gmail.com",name=("Neide"),phone_number=("11986803971"), password=("neide123"))
                  ])
             db.session.commit()
+
 
     if Orders.query.count() == 0:
             db.session.add_all([

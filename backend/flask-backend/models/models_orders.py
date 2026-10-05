@@ -1,5 +1,5 @@
-from models.extensions import db
-from models.models_cardapio import *
+from db import db
+from models.models_product import *
 
 class Orders(db.Model):
     id_orders = db.Column(db.Integer, primary_key=True)
