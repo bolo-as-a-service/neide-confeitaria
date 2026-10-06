@@ -15,6 +15,8 @@ def orders_post():
 def orders_get():
     order = service_orders_get(request.args.get("status"))
 
+    if not order:
+        return [],200
     return jsonify(order), 200
 
 

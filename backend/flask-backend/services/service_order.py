@@ -55,6 +55,8 @@ def service_orders_get(status_product):
     else:
         orders = Orders.query.all()
 
+    if not orders:
+        return None
     return [order.to_dict() for order in orders]
 
 
@@ -100,11 +102,13 @@ def service_orders_change_patch(status,id):
         return None
         
     table = Orders.query.get_or_404(id)
-        
+   
     table.status = status
     
     db.session.commit()
+    print(status)
     return table.to_dict()
+
 
 
 

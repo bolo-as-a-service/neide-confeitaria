@@ -8,38 +8,41 @@ from models.models_orders import *
 def Tables():
     if Category.query.count() == 0:
             
-            db.session.add_all([
+        db.session.add_all([
                 Category(id_category=1, name="Bolos"),
                 Category(id_category=2, name="Doces e Sobremesas"),
                 Category(id_category=3, name="Salgados")
             ])
-            db.session.commit()
+        db.session.commit()
 
     
     if Product.query.count() == 0:
-    
-            db.session.add_all([
-                Product(name="Bolo de Chocolate com Morango", price=55.00, id_category=1),
-                Product(name="Bolo de Cenoura com Calda de Chocolate", price=40.00, id_category=1),
-                Product(name="Bolo Red Velvet", price=67.00, id_category=1),
-                Product(name="Bolo de Ninho com Nutella", price=70.00, id_category=1),
-                Product(name="Bolo Formigueiro Caseiro", price=32.00, id_category=1),
-                Product(name="Bolo de Limão Siciliano", price=48.00, id_category=1),
+
+
+
+        db.session.add_all([
                 
-                Product(name="Brigadeiro Gourmet (Caixa com 6)", price=20.00, id_category=2),
-                Product(name="Beijinho Tradicional (Caixa com 6)", price=18.00, id_category=2),
-                Product(name="Fatia de Torta Holandesa", price=15.00, id_category=2),
-                Product(name="Pudim de Leite Condensado (Fatia)", price=12.00, id_category=2),
-                Product(name="Brownie de Chocolate com Nozes", price=14.00, id_category=2),
-                Product(name="Coxinha de Doce de Leite com Churros", price=10.00, id_category=2),
+                Product(name="Bolo de Chocolate com Morango", price=55.00, id_category=1, ingredients = ["banana","maça","Sem morango"], description = ""),
+                Product(name="Bolo de Cenoura com Calda de Chocolate", price=40.00, id_category=1, ingredients = [], description = ""),
+                Product(name="Bolo Red Velvet", price=67.00, id_category=1, ingredients = [], description = ""),
+                Product(name="Bolo de Ninho com Nutella", price=70.00, id_category=1, ingredients = [], description = ""),
+                Product(name="Bolo Formigueiro Caseiro", price=32.00, id_category=1,  ingredients = [], description = ""),
+                Product(name="Bolo de Limão Siciliano", price=48.00, id_category=1, ingredients = [], description = ""),
                 
-                Product(name="Coxinha de Frango com Catupiry", price=8.50, id_category=3),
-                Product(name="Empada de Palmito", price=9.00, id_category=3),
-                Product(name="Quiche de Alho-Poró", price=12.50, id_category=3),
-                Product(name="Esfiha de Carne", price=8.00, id_category=3),
-                Product(name="Pão de Queijo Recheado", price=10.00, id_category=3)
+                Product(name="Brigadeiro Gourmet (Caixa com 6)", price=20.00, id_category=2, ingredients = [], description = ""),
+                Product(name="Beijinho Tradicional (Caixa com 6)", price=18.00, id_category=2, ingredients = [], description = ""),
+                Product(name="Fatia de Torta Holandesa", price=15.00, id_category=2, ingredients = [], description = ""),
+                Product(name="Pudim de Leite Condensado (Fatia)", price=12.00, id_category=2, ingredients = [], description = ""),
+                Product(name="Brownie de Chocolate com Nozes", price=14.00, id_category=2, ingredients = [], description = ""),
+                Product(name="Coxinha de Doce de Leite com Churros", price=10.00, id_category=2, ingredients = [], description = ""),
+                
+                Product(name="Coxinha de Frango com Catupiry", price=8.50, id_category=3, ingredients = [], description = ""),
+                Product(name="Empada de Palmito", price=9.00, id_category=3, ingredients = [], description = ""),
+                Product(name="Quiche de Alho-Poró", price=12.50, id_category=3, ingredients = [], description = ""),
+                Product(name="Esfiha de Carne", price=8.00, id_category=3, ingredients = [], description = ""),
+                Product(name="Pão de Queijo Recheado", price=10.00, id_category=3, ingredients = [], description = "")
             ])
-            db.session.commit()
+        db.session.commit()
 
 
     if User.query.count() == 0:

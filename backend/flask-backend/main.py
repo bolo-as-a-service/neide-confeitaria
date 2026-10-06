@@ -4,7 +4,7 @@ from db import db
 
 
 app = Flask(__name__)
-CORS(app, resources={"/*" : {"origins": "http://localhost:3000"}})
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'

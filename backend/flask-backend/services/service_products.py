@@ -2,6 +2,7 @@ from models.models_product import *
 
 
 
+
 def service_products_get(id):
 
     if id:
@@ -15,10 +16,14 @@ def service_products_get(id):
 
 def service_products_post(data):
 
+    list_product = data.get('ingredients')
+    
     new_product = Product(
             name =data.get('name'),
             price =data.get('price'),
-            id_category=data.get('categoryId')
+            id_category=data.get('categoryId'),
+            description=data.get('description'),
+            ingredients= list_product
         )
     
     db.session.add(new_product)

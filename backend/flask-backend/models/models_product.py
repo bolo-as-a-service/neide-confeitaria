@@ -1,13 +1,14 @@
 from db import db
+from sqlalchemy.types import JSON
 
 class Product(db.Model):
     id_product = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
-    id_category = db.Column(db.Integer,db.ForeignKey('category.id_category'), nullable=False)
+    id_category = db.Column(db.Integer,db.ForeignKey('category.id_category'), nullable=True)
 
-    description = db.Column(db.String(255), nullable=True)
-    ingredients = db.Column(db.String(255), nullable=True)
+    description = db.Column(db.String(200), nullable=True)
+    ingredients = db.Column(db.JSON, nullable=True)
     image_url = db.Column(db.String(255), nullable=True)
 
     
@@ -24,6 +25,3 @@ class Product(db.Model):
                 "name": self.category.name if self.category else ""
                 }
         }   
-
-class Ingredients(db.Model):
-    id_ingredients = db.Column(db.Integer, )
