@@ -11,6 +11,8 @@ class Product(db.Model):
     ingredients = db.Column(db.JSON, nullable=True)
     image_url = db.Column(db.String(255), nullable=True)
 
+    available = db.Column(db.Boolean,default = True , nullable = False)
+
     
 
     def to_dict(self):
@@ -23,5 +25,6 @@ class Product(db.Model):
             "imageUrl": self.image_url,
             "category": {
                 "name": self.category.name if self.category else ""
-                }
+                },
+            "available": self.available
         }   

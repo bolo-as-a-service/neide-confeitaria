@@ -15,15 +15,13 @@ def service_products_get(id):
 
 
 def service_products_post(data):
-
-    list_product = data.get('ingredients')
     
     new_product = Product(
             name =data.get('name'),
             price =data.get('price'),
             id_category=data.get('categoryId'),
             description=data.get('description'),
-            ingredients= list_product
+            ingredients= data.get('ingredients')
         )
     
     db.session.add(new_product)
@@ -42,9 +40,21 @@ def service_get_products_by_id(id) :
     return product.to_dict
 
 
-def service_put_products_by_id(id):
+def service_put_products_by_id(id, data):
 
     product = Product.query.get_or_404(id)
+        
+    product.name =data.get('name')
+    product.price =data.get('price')
+    product.id_category=data.get('categoryId')
+    product.description=data.get('description')
+    product.ingredients= data.get('ingredients')
+            
+        
+    db.session.add(product)
+    db.session.commit()
+    
+    return product.to_dict()
 
     
 

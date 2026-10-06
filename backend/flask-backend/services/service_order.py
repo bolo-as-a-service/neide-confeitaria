@@ -1,4 +1,5 @@
 from models.models_orders import *
+from models.models_users import *
 from datetime import datetime
 from flask import request
 
@@ -70,7 +71,7 @@ def service_get_order_by_id(id):
 
 def service_get_orders_by_name(name) :
 
-    orders = Orders.query.filter(Orders.name.ilike(f"%{name}%")).all()
+    orders = Orders.query.filter(User.name.ilike(f"%{name}%")).all()
 
     if not orders:
         return []

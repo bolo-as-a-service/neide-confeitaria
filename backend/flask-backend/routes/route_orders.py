@@ -37,7 +37,7 @@ def get_orders_by_name(name):
 
     orders = service_get_orders_by_name(name)
 
-    return orders, 200
+    return jsonify(orders), 200
 
 
 

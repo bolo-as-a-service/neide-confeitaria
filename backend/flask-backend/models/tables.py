@@ -48,7 +48,8 @@ def Tables():
     if User.query.count() == 0:
             db.session.add_all(
                  [
-                      User(email="neide@gmail.com",name=("Neide"),phone_number=("11986803971"), password=("neide123"), role=("ADMIN"))
+                      User(email="neide@gmail.com",name=("Neide"),phone_number=("11986803971"), password=("neide123"), role=("ADMIN")),
+                      User(email="teste@gmail.com",name=("Teste"),phone_number=("11986803971"), password=("teste123"), role=("USER"))
                  ])
             db.session.commit()
 
@@ -56,7 +57,7 @@ def Tables():
     if Orders.query.count() == 0:
             db.session.add_all([
                 Orders(
-                    customer_name="Carlos Silva",
+                    customer_name="Teste",
                     customer_phone="11988887777",
                     delivery=True,
                     address="Rua das Flores, 100",

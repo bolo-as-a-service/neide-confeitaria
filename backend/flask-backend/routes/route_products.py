@@ -37,9 +37,9 @@ def get_products_by_id(id):
 @app.route(("/products/<int:id>"), methods=['PUT'])
 def put_products_by_id(id):
 
-    product_put = service_put_products_by_id(id)
+    product_put = service_put_products_by_id(id, request.get_json())
 
-    return(product_put),203
+    return jsonify(product_put),200
 
 
 @app.route("/products/<int:id>",methods=['DELETE'])
@@ -48,5 +48,5 @@ def delete_product_by_id(id):
     deleteConfirmation = service_delete_product_by_id(id)
 
     if deleteConfirmation == None:
-        return {"Error" : "Produto não encontrado"}
+        return {"Error" : "Produto não encontrado"},404
     return '',204
