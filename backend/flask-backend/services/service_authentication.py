@@ -6,16 +6,20 @@ def service_login_post(data):
     password = data.get("password")
         
     
-    user_email = User.query.filter_by(email=credencial).first()
-    user_phone = User.query.filter_by(phone_number=credencial).first()
+    user = User.query.filter_by(email=credencial).first()
     
-    if user_email and user_email.password == password:
-        return user_email.to_dict()
-    elif user_phone and user_phone.password == password:
-        return user_phone.to_dict()
-    else:
-        return None
 
+    if not user :
+        user = User.query.filter_by(phone_number=credencial).first()
+
+    if user and user.password == password:
+        return user.to_dict()
+    
+    else:
+        if "@" in credencial or ".com" in credencial:
+            return "email_password_wrong"
+        else:
+            return "phone_password_wrong"
 
 
 def service_register_post(data):
@@ -23,13 +27,30 @@ def service_register_post(data):
     password = data.get("password")
     phone = data.get("phone")
     name = data.get("name")
-        
+
+
+    phone_already_exists= User.query.filter_by(phone_number=phone).first()
+    if phone_already_exists:
+        return "phone_already_exists"
+
+    email_already_exists = User.query.filter_by(email=email).first()
+    if email_already_exists:
+        return "email_already_exists"
+
+    if len(password) >= 30:
+        return "password_so_long"
+
+    if len(password) < 6:
+        return "password_so_short"
+
+
     new_user = User(
         email=email,
         password=password,
         phone_number=phone,
         name=name)
-        
+
+
     db.session.add(new_user)
     db.session.commit()
 

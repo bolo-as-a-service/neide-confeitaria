@@ -49,7 +49,7 @@ def Tables():
             db.session.add_all(
                  [
                       User(email="neide@gmail.com",name=("Neide"),phone_number=("11986803971"), password=("neide123"), role=("ADMIN")),
-                      User(email="teste@gmail.com",name=("Teste"),phone_number=("11986803971"), password=("teste123"), role=("USER"))
+                      User(email="teste@gmail.com",name=("Teste"),phone_number=("11986803972"), password=("teste123"), role=("USER"))
                  ])
             db.session.commit()
 
