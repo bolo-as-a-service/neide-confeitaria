@@ -1,6 +1,6 @@
 from main import app, db
 from flask import jsonify, request
-from services.service_order import *
+from services.service_orders import *
 
 @app.route("/orders", methods=["POST"])
 def orders_post():

@@ -35,4 +35,5 @@ def register_post():
 
     if new_user == "password_so_short":
         return jsonify({"error" : "A senha deve ter no minimo 6 caracteres"}), 409
+        
     return jsonify(new_user),201

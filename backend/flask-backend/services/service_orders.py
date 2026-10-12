@@ -52,9 +52,9 @@ def service_orders_post(data):
 def service_orders_get(status_product):
      
     if status_product:
-        orders = Orders.query.filter_by(status=status_product).all()
+        orders = Orders.query.filter(Orders.status==status_product).filter(Orders.status.not_in(["CANCELADO", "ENTREGUE"])).all()
     else:
-        orders = Orders.query.all()
+        orders = Orders.query.filter(Orders.status.not_in(["CANCELADO", "ENTREGUE"])).all()
 
     if not orders:
         return None
@@ -81,19 +81,22 @@ def service_get_orders_by_name(name) :
 
 def service_orders_advance_patch(id) :
 
-    table = Orders.query.get_or_404(id)
+    order = Orders.query.get_or_404(id)
 
-    if table.status == "PENDING":
-        table.status = "PREPARING"
+    if order.status == "PENDING":
+        order.status = "APROVADO"
     
-    elif table.status == "PREPARING":
-        table.status = "COMPLETED"
+    if order.status == "APROVADO":
+        order.status = "FAZENDO"
             
-    elif table.status == "COMPLETED":
-        table.status = "DELIVERING"
+    if order.status == "FAZENDO":
+        order.status = "PRONTO"
+
+    if order.status == "PRONTO":
+        order.status == "ENTREGUE"
 
     db.session.commit()
-    return table.to_dict()
+    return order.to_dict()
 
     
 
@@ -102,13 +105,13 @@ def service_orders_change_patch(status,id):
     if not status:
         return None
         
-    table = Orders.query.get_or_404(id)
+    order = Orders.query.get_or_404(id)
    
-    table.status = status
+    order.status = status
     
     db.session.commit()
     print(status)
-    return table.to_dict()
+    return order.to_dict()
 
 
 
