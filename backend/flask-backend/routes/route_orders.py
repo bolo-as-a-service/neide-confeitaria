@@ -25,6 +25,7 @@ def orders_get():
 def get_order_by_id(id):
     order = Service_get_order_by_id(id)
 
+
     if not order:
         return jsonify({"error" : "Pedido não encontrado"}), 404   
     
