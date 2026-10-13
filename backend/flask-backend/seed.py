@@ -1,8 +1,9 @@
 from db import db
-from models.models_product import *
-from models.models_category import *
-from models.models_users import *
-from models.models_orders import *
+
+from models.models_category import Category
+from models.models_product import Product
+from models.models_users import User
+from models.models_orders import Orders,Items
 
 
 def Tables():
@@ -17,9 +18,6 @@ def Tables():
 
     
     if Product.query.count() == 0:
-
-
-
         db.session.add_all([
                 
                 Product(name="Bolo de Chocolate com Morango", price=55.00, id_category=1, ingredients = ["banana","maça","Sem morango"], description = ""),
@@ -64,8 +62,7 @@ def Tables():
                     latitude=-22.9500,
                     longitude=-46.5400,
                     observation="Entregar na portaria",
-                    status="PENDING",
-                    items=[
+                    order_items=[
                     Items(id_product=1, quantity=2, unit_price=55.00, observation="Bem embalado")
                     ])
             ])

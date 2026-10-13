@@ -1,6 +1,7 @@
-from models.models_users import *
+from models.models_users import User
+from db import db
 
-def service_login_post(data):
+def Service_login_post(data):
 
     credencial = data.get("email")
     password = data.get("password")
@@ -22,7 +23,7 @@ def service_login_post(data):
             return "phone_password_wrong"
 
 
-def service_register_post(data):
+def Service_register_post(data):
     email = data.get("email")
     password = data.get("password")
     phone = data.get("phone")

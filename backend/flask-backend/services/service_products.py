@@ -1,20 +1,20 @@
-from models.models_product import *
+from db import db
+from models.models_product import Product
 
 
-
-
-def service_products_get(id):
+def Service_products_get(id):
 
     if id:
         products_db = Product.query.filter_by(id_category=id).all()
-    
     else:
         products_db = Product.query.all()
 
     return [product.to_dict() for product in products_db]
 
 
-def service_products_post(data):
+
+
+def Service_products_post(data):
     
     new_product = Product(
             name =data.get('name'),
@@ -31,7 +31,8 @@ def service_products_post(data):
 
 
 
-def service_get_products_by_id(id) :
+
+def Service_get_products_by_id(id) :
 
     product = Product.query.get(id)
 
@@ -40,7 +41,9 @@ def service_get_products_by_id(id) :
     return product.to_dict
 
 
-def service_put_products_by_id(id, data):
+
+
+def Service_put_products_by_id(id, data):
 
     product = Product.query.get_or_404(id)
         
@@ -59,7 +62,7 @@ def service_put_products_by_id(id, data):
     
 
 
-def service_delete_product_by_id(id):
+def Service_delete_product_by_id(id):
 
     product = Product.query.get(id)
 

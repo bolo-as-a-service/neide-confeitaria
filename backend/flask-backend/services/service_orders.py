@@ -1,9 +1,11 @@
-from models.models_orders import *
-from models.models_users import *
+from db import db
+from models.models_orders import Orders, Items
+from models.models_users import User
+from models.models_product import Product
 from datetime import datetime
-from flask import request
 
-def service_orders_post(data):
+
+def Service_orders_post(data):
 
     delivery_date = None
     if data.get("deliveryDateTime"):
@@ -49,7 +51,7 @@ def service_orders_post(data):
     return new_order.to_dict()
 
 
-def service_orders_get(status_product):
+def Service_orders_get(status_product):
      
     if status_product:
         orders = Orders.query.filter(Orders.status==status_product).filter(Orders.status.not_in(["CANCELADO", "ENTREGUE"])).all()
@@ -61,7 +63,7 @@ def service_orders_get(status_product):
     return [order.to_dict() for order in orders]
 
 
-def service_get_order_by_id(id):
+def Service_get_order_by_id(id):
     order = Orders.query.get(id)
 
     if not order:
@@ -69,7 +71,7 @@ def service_get_order_by_id(id):
     return order.to_dict()
 
 
-def service_get_orders_by_name(name) :
+def Service_get_orders_by_name(name) :
 
     orders = Orders.query.filter(User.name.ilike(f"%{name}%")).all()
 
@@ -79,7 +81,7 @@ def service_get_orders_by_name(name) :
         return [order.to_dict() for order in orders]
 
 
-def service_orders_advance_patch(id) :
+def Service_orders_advance_patch(id) :
 
     order = Orders.query.get_or_404(id)
 
@@ -100,7 +102,7 @@ def service_orders_advance_patch(id) :
 
     
 
-def service_orders_change_patch(status,id):
+def Service_orders_change_patch(status,id):
     
     if not status:
         return None

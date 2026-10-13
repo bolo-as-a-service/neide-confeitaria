@@ -1,13 +1,12 @@
-from main import app, db
-from models.models_users import *
+from main import app
 from flask import jsonify, request
-from services.service_authentication import *
+from services.service_authentication import Service_login_post, Service_register_post
 
 
 @app.route("/auth/login", methods=["POST"])
 def login_post():
 
-    login = service_login_post(request.get_json())
+    login = Service_login_post(request.get_json())
     
     if login == "email_password_wrong":
         return jsonify({"error": "Email ou senha invalidos"}), 401
@@ -22,7 +21,7 @@ def login_post():
 @app.route("/auth/register", methods=["POST"])
 def register_post():
 
-    new_user = service_register_post(request.get_json())
+    new_user = Service_register_post(request.get_json())
 
     if new_user == "email_already_exists":
         return jsonify({"error" : "Já existe uma conta registrada com este e-mail. "}), 409

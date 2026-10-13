@@ -1,6 +1,6 @@
-from models.models_category import *
+from models.models_category import Category
 
-def service_categorie_get():
+def Service_categorie_get():
 
     categories = Category.query.all()
 

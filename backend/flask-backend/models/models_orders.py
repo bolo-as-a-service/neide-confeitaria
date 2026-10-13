@@ -34,7 +34,7 @@ class Orders(db.Model):
             'deliveryDateTime': self.deliveryDateTime.isoformat() if self.deliveryDateTime else None,
             'createdAt': self.createdAt.isoformat() if self.createdAt else None,
 
-            'items': [item.to_dict() for item in self.items]
+            'order_items': [item.to_dict() for item in self.items]
             }       
 
 
