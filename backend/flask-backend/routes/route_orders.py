@@ -59,5 +59,5 @@ def orders_change_patch(id):
     status = Service_orders_change_patch(request.args.get("status"),id)
 
     if not status:
-        return jsonify({"error" : "status não fornecido ou status não encontrado"})
+        return jsonify({"error" : "status não fornecido ou status não encontrado"}),400
     return jsonify(status),200

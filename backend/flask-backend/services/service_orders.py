@@ -31,14 +31,14 @@ def Service_orders_post(data):
     items_list = data.get("items", [])
         
         
-    for i in items_list:
-        product_id = i.get("productId")
+    for item in items_list:
+        product_id = item.get("productId")
         product = Product.query.get(product_id)
     
     
         new_itens = Items(
-            quantity = i.get("quantity"),
-            observation = i.get("observation"),
+            quantity = item.get("quantity"),
+            observation = item.get("observation"),
             id_product = product.id_product,
             unit_price = product.price
            )
@@ -88,14 +88,14 @@ def Service_orders_advance_patch(id) :
     if order.status == "PENDING":
         order.status = "APROVADO"
     
-    if order.status == "APROVADO":
+    elif order.status == "APROVADO":
         order.status = "FAZENDO"
             
-    if order.status == "FAZENDO":
+    elif order.status == "FAZENDO":
         order.status = "PRONTO"
 
-    if order.status == "PRONTO":
-        order.status == "ENTREGUE"
+    elif order.status == "PRONTO":
+        order.status = "ENTREGUE"
 
     db.session.commit()
     return order.to_dict()
