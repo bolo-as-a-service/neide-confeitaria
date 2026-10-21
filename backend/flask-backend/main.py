@@ -3,6 +3,10 @@ from flask_cors import CORS
 from db import db
 
 
+from extensions.extensions import flask_bcrypt , flask_jwt , limiter
+
+
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
@@ -30,5 +34,9 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
         Tables()   
+                
+        limiter.init_app(app)
+        flask_bcrypt.init_app(app)
+        flask_jwt.init_app(app)
             
     app.run(debug=True)
