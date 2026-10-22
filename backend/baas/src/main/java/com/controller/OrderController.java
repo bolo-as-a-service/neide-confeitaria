@@ -2,6 +2,7 @@ package com.controller;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import com.dto.OrderDTO;
 import com.model.Order;
@@ -18,13 +19,31 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody OrderDTO dto) {
-        return ResponseEntity.ok(orderService.createOrder(dto));
+    public ResponseEntity<Order> createOrder(@RequestBody OrderDTO dto, Authentication authentication) {
+        return ResponseEntity.ok(orderService.createOrder(dto, extractUserId(authentication)));
+    }
+
+    /**
+     * Pedidos do usuário logado (vinculados pelo userId no checkout).
+     * Não expõe pedidos de outros usuários.
+     */
+    @GetMapping("/mine")
+    public ResponseEntity<List<Order>> getMine(Authentication authentication) {
+        return ResponseEntity.ok(orderService.getOrdersByUserId(Long.valueOf(authentication.getName())));
     }
 
     @GetMapping("/customer/{name}")
     public ResponseEntity<List<Order>> getByCustomer(@PathVariable String name) {
         return ResponseEntity.ok(orderService.getOrdersByCustomerName(name));
+    }
+
+    private static Long extractUserId(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) return null;
+        try {
+            return Long.valueOf(authentication.getName());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     @GetMapping

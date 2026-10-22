@@ -21,8 +21,9 @@ public class OrderService {
         this.productRepository = productRepository;
     }
 
-    public Order createOrder(OrderDTO dto) {
+    public Order createOrder(OrderDTO dto, Long userId) {
         Order order = new Order();
+        order.setUserId(userId);
         order.setCustomerName(dto.getCustomerName());
         order.setPhone(dto.getPhone());
         order.setDelivery(dto.getDelivery() != null ? dto.getDelivery() : false);
@@ -84,5 +85,9 @@ public class OrderService {
 
     public List<Order> getOrdersByCustomerName(String customerName) {
         return orderRepository.findByCustomerNameIgnoreCase(customerName);
+    }
+
+    public List<Order> getOrdersByUserId(Long userId) {
+        return orderRepository.findByUserId(userId);
     }
 }
