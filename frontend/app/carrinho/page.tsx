@@ -21,6 +21,7 @@ import { productBlurPlaceholder } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -296,14 +297,17 @@ export default function CarrinhoPage() {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                    <label htmlFor="checkout-name" className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
                       NOME <span className="text-red-500">*</span>
                     </label>
                     <input
+                      id="checkout-name"
                       type="text"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                       placeholder="Seu nome"
+                      autoComplete="name"
+                      maxLength={120}
                       className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
                       required
                     />
@@ -312,10 +316,11 @@ export default function CarrinhoPage() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                    <label htmlFor="checkout-phone" className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
                       TELEFONE <span className="text-red-500">*</span>
                     </label>
                     <input
+                      id="checkout-phone"
                       type="tel"
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(maskPhone(e.target.value))}
@@ -338,33 +343,27 @@ export default function CarrinhoPage() {
                   DESEJA RECEBER O PEDIDO EM CASA?
                 </h2>
 
-                <div className="flex items-center gap-8 mb-6">
-                  <label className="flex items-center gap-2.5 cursor-pointer group">
-                    <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${deliveryOption === "nao"
-                          ? "border-[var(--brand-700)]"
-                          : "border-gray-300 group-hover:border-gray-400"
-                        }`}
-                      onClick={() => setDeliveryOption("nao")}
-                    >
-                      {deliveryOption === "nao" && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-[var(--brand-700)]" />
-                      )}
-                    </div>
+                <div className="flex items-center gap-8 mb-6" role="radiogroup" aria-label="Deseja receber o pedido em casa?">
+                  <label className="flex items-center gap-2.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="delivery-option"
+                      value="nao"
+                      checked={deliveryOption === "nao"}
+                      onChange={() => setDeliveryOption("nao")}
+                      className="h-5 w-5 accent-[var(--brand-700)]"
+                    />
                     <span className="text-sm text-[var(--ink)]">NÃO</span>
                   </label>
-                  <label className="flex items-center gap-2.5 cursor-pointer group">
-                    <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${deliveryOption === "sim"
-                          ? "border-[var(--brand-700)]"
-                          : "border-gray-300 group-hover:border-gray-400"
-                        }`}
-                      onClick={() => setDeliveryOption("sim")}
-                    >
-                      {deliveryOption === "sim" && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-[var(--brand-700)]" />
-                      )}
-                    </div>
+                  <label className="flex items-center gap-2.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="delivery-option"
+                      value="sim"
+                      checked={deliveryOption === "sim"}
+                      onChange={() => setDeliveryOption("sim")}
+                      className="h-5 w-5 accent-[var(--brand-700)]"
+                    />
                     <span className="text-sm text-[var(--ink)]">SIM</span>
                   </label>
                 </div>
@@ -372,26 +371,30 @@ export default function CarrinhoPage() {
                 {deliveryOption === "sim" ? (
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="space-y-5">
-                      <div>
-                        <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
-                          ENDEREÇO :
-                        </label>
-                        <input
-                          type="text"
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
-                          placeholder="Digite seu endereço"
-                          className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
-                        />
+                    <div>
+                      <label htmlFor="checkout-address" className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                        ENDEREÇO :
+                      </label>
+                      <input
+                        id="checkout-address"
+                        type="text"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        placeholder="Digite seu endereço"
+                        autoComplete="street-address"
+                        maxLength={200}
+                        className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm transition-colors"
+                      />
                         {triedSubmit && formErrors.address && (
                           <p className="mt-1 text-xs text-red-600">{formErrors.address}</p>
                         )}
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                        <label htmlFor="checkout-datetime" className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
                           DATA e HORA :
                         </label>
                         <input
+                          id="checkout-datetime"
                           type="datetime-local"
                           value={deliveryDate}
                           onChange={(e) => setDeliveryDate(e.target.value)}
@@ -402,14 +405,16 @@ export default function CarrinhoPage() {
                         )}
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                        <label htmlFor="checkout-notes" className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
                           OBSERVAÇÕES GERAIS :
                         </label>
                         <textarea
+                          id="checkout-notes"
                           value={observations}
                           onChange={(e) => setObservations(e.target.value)}
                           placeholder="Ex: Deixar na portaria"
                           rows={3}
+                          maxLength={500}
                           className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm resize-none transition-colors"
                         />
                       </div>
@@ -448,10 +453,11 @@ export default function CarrinhoPage() {
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                        <label htmlFor="checkout-datetime-pickup" className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
                           DATA e HORA :
                         </label>
                         <input
+                          id="checkout-datetime-pickup"
                           type="datetime-local"
                           value={deliveryDate}
                           onChange={(e) => setDeliveryDate(e.target.value)}
@@ -462,14 +468,16 @@ export default function CarrinhoPage() {
                         )}
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
+                        <label htmlFor="checkout-notes-pickup" className="block text-sm font-semibold text-[var(--brand-800)] uppercase tracking-wide mb-1.5">
                           OBSERVAÇÕES GERAIS :
                         </label>
                         <textarea
+                          id="checkout-notes-pickup"
                           value={observations}
                           onChange={(e) => setObservations(e.target.value)}
                           placeholder="Ex: Quanto antes, melhor"
                           rows={3}
+                          maxLength={500}
                           className="w-full px-4 py-2.5 rounded-xl border border-[var(--rose-200)] bg-white text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--brand-600)] focus:ring-1 focus:ring-[var(--brand-600)] text-sm resize-none transition-colors"
                         />
                       </div>
@@ -547,6 +555,9 @@ export default function CarrinhoPage() {
             <DialogTitle className="text-lg font-bold text-[var(--ink)]">
               Remover item
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              Confirme se deseja remover este item do carrinho.
+            </DialogDescription>
           </DialogHeader>
           <p className="text-sm text-[var(--muted)] mb-6">
             Tem certeza que deseja remover <strong>{deleteItem?.product.name}</strong> do carrinho?

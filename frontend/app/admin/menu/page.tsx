@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -221,6 +222,9 @@ export default function AdminMenuPage() {
             <DialogTitle className="text-lg font-bold text-[var(--ink)]">
               Excluir produto
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              Confirme se deseja excluir este produto do cardápio.
+            </DialogDescription>
           </DialogHeader>
           <p className="text-sm text-[var(--muted)] mb-6">
             Tem certeza que deseja remover <strong>{deleteProduct?.name}</strong> do cardápio?
