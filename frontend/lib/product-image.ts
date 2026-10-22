@@ -35,17 +35,39 @@ export function categoryImageSrc(categoryName?: string | null): string {
   return CATEGORY_IMAGES[slug] ?? CATEGORY_IMAGES["outros"];
 }
 
+/** Hosts cujas imagens o next/image pode otimizar (mesmos do next.config). */
+function allowedImageHosts(): Set<string> {
+  const hosts = new Set<string>();
+  try {
+    hosts.add(new URL(getApiBase()).host);
+  } catch {
+    // base inválida: nenhum host absoluto permitido
+  }
+  return hosts;
+}
+
 /**
  * Resolve o imageUrl do backend para src final:
- * - http(s) → usa como está;
  * - /images/* → prefixa com a base da API;
- * - demais paths locais (/bolo.webp, /categories/*) → usa como está;
+ * - paths locais (/bolo.webp, /categories/*) → usa como está;
+ * - http(s) do host da API → usa como está;
+ * - http(s) de outro host, protocolo estranho ou inválido → undefined,
+ *   para o chamador aplicar categoria/fallback (next/image rejeita host
+ *   não listado no next.config e quebraria o card).
  * - vazio → undefined (chamador aplica categoria/fallback).
  */
 export function resolveBackendImage(imageUrl?: string | null): string | undefined {
   if (!imageUrl) return undefined;
-  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) return imageUrl;
   if (imageUrl.startsWith("/images/")) return `${getApiBase()}${imageUrl}`;
+  if (imageUrl.startsWith("/") && !imageUrl.startsWith("//")) return imageUrl;
+  let url: URL;
+  try {
+    url = new URL(imageUrl);
+  } catch {
+    return undefined;
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return undefined;
+  if (!allowedImageHosts().has(url.host)) return undefined;
   return imageUrl;
 }
 
