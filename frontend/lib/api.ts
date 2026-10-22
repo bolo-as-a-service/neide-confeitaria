@@ -18,7 +18,7 @@ const USE_MOCK =
   process.env.NEXT_PUBLIC_USE_MOCK === "true" &&
   process.env.NODE_ENV !== "production";
 
-const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/+$/, "");
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
 /** Timeout padrão das requisições (evita loading infinito em rede lenta). */
 export const REQUEST_TIMEOUT_MS = 15_000;
