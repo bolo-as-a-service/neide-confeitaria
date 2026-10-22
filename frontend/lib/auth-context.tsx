@@ -9,6 +9,40 @@ export type AuthUser = BackendUser;
 
 const ROLE_COOKIE = "neide_auth_role";
 const FLAG_COOKIE = "neide_auth";
+/** Cache do usuário para backends legados sem token (sem ele, o login
+ *  legado não sobreviveria ao F5). Com JWT, a fonte de verdade é o /me. */
+const LEGACY_USER_KEY = "neide_user";
+
+function readCachedUser(): AuthUser | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw =
+      window.localStorage.getItem(LEGACY_USER_KEY) ??
+      window.sessionStorage.getItem(LEGACY_USER_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as AuthUser;
+    if (!parsed || typeof parsed.email !== "string") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedUser(user: AuthUser | null, remember: boolean) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(LEGACY_USER_KEY);
+    window.sessionStorage.removeItem(LEGACY_USER_KEY);
+    if (user) {
+      (remember ? window.localStorage : window.sessionStorage).setItem(
+        LEGACY_USER_KEY,
+        JSON.stringify(user)
+      );
+    }
+  } catch {
+    // Storage indisponível: segue só em memória.
+  }
+}
 
 /**
  * Espelho legível do papel para o proxy (`proxy.ts`) dar UX de redirect.
@@ -47,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = React.useCallback(() => {
     setAuthToken(null, false);
     setUser(null);
+    writeCachedUser(null, false);
     writeAuthCookie(null, false);
   }, []);
 
@@ -56,13 +91,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => setOnUnauthorized(null);
   }, [logout]);
 
-  // Valida a sessão com o servidor: papel vem do banco, não do navegador.
+  // Valida a sessão: com JWT, o papel vem do /me (banco); sem token
+  // (backend legado), restaura o usuário do último login.
   React.useEffect(() => {
     let cancelled = false;
     queueMicrotask(async () => {
       try {
         if (!getAuthToken()) {
-          if (!cancelled) setUser(null);
+          const cached = readCachedUser();
+          if (!cancelled) {
+            setUser(cached);
+            if (cached) writeAuthCookie(cached, true);
+          }
           return;
         }
         const { user: me } = await api.getMe();
@@ -90,6 +130,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { token, user: logged } = await api.login(dto);
       setAuthToken(token, remember);
       setUser(logged);
+      // Cache local só no modo legado (sem token); com JWT a fonte é o /me.
+      writeCachedUser(token ? null : logged, remember);
       writeAuthCookie(logged, remember);
       return logged;
     },

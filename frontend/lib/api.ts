@@ -84,6 +84,31 @@ export function setAuthToken(token: string | null, remember: boolean) {
   }
 }
 
+/** Normaliza as duas formas de resposta de auth para um contrato único. */
+function normalizeAuthResponse(body: BackendAuthResponse | BackendUser): BackendAuthResponse {
+  if (
+    body !== null &&
+    typeof body === "object" &&
+    "user" in body &&
+    (body as BackendAuthResponse).user !== null &&
+    typeof (body as BackendAuthResponse).user === "object"
+  ) {
+    const wrapped = body as BackendAuthResponse;
+    return { token: wrapped.token ?? null, user: wrapped.user };
+  }
+  return { token: null, user: body as BackendUser };
+}
+
+/** Mensagem de erro do backend (`error` no baas, `message` no Flask). */
+function parseErrorMessage(body: unknown, fallback: string): string {
+  if (typeof body === "object" && body !== null) {
+    const record = body as Record<string, unknown>;
+    if (typeof record.error === "string") return record.error;
+    if (typeof record.message === "string") return record.message;
+  }
+  return fallback;
+}
+
 function parseFieldErrors(body: unknown): Record<string, string> | undefined {
   if (typeof body !== "object" || body === null) return undefined;
   const record = body as Record<string, unknown>;
@@ -120,11 +145,7 @@ async function request<T>(
     }
     if (!res.ok) {
       const body = await res.json().catch(() => null);
-      const message =
-        (typeof body === "object" && body !== null && typeof (body as Record<string, unknown>).error === "string"
-          ? (body as Record<string, unknown>).error as string
-          : undefined) ?? `HTTP ${res.status}`;
-      throw new ApiError(res.status, message, parseFieldErrors(body));
+      throw new ApiError(res.status, parseErrorMessage(body, `HTTP ${res.status}`), parseFieldErrors(body));
     }
     if (res.status === 204) return undefined as T;
     return res.json();
@@ -139,18 +160,19 @@ async function request<T>(
 }
 
 const realApi = {
-  // Auth (backend emite JWT; papel real vem de getMe, lido do banco)
+  // Auth: aceita `{token, user}` (backend com JWT) ou o usuário puro
+  // (backend legado sem token — ex.: Flask). Papel real vem de getMe.
   login: (dto: BackendLoginDTO) =>
-    request<BackendAuthResponse>("/auth/login", {
+    request<BackendAuthResponse | BackendUser>("/auth/login", {
       method: "POST",
       body: JSON.stringify(dto),
-    }),
+    }).then(normalizeAuthResponse),
 
   register: (dto: BackendRegisterDTO) =>
-    request<BackendAuthResponse>("/auth/register", {
+    request<BackendAuthResponse | BackendUser>("/auth/register", {
       method: "POST",
       body: JSON.stringify(dto),
-    }),
+    }).then(normalizeAuthResponse),
 
   getMe: () => request<{ user: BackendUser }>("/auth/me"),
 
@@ -255,11 +277,7 @@ const realApi = {
       }
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        const message =
-          (typeof body === "object" && body !== null && typeof (body as Record<string, unknown>).error === "string"
-            ? (body as Record<string, unknown>).error as string
-            : undefined) ?? "Erro ao fazer upload da imagem.";
-        throw new ApiError(res.status, message);
+        throw new ApiError(res.status, parseErrorMessage(body, "Erro ao fazer upload da imagem."));
       }
       return res.json() as Promise<{ url: string }>;
     } catch (err) {

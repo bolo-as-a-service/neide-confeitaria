@@ -23,7 +23,8 @@ export interface BackendUser {
 }
 
 export interface BackendAuthResponse {
-  token: string;
+  /** JWT (backends com autenticação). Nulo em backends legados sem token. */
+  token: string | null;
   user: BackendUser;
 }
 
