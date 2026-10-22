@@ -1,13 +1,16 @@
 /**
- * MOCK TEMPORÁRIO — dados reais do banco, fixados em 01/10/2026 (80 produtos,
- * 8 categorias, 3 pedidos) porque o backend está em alteração por outra pessoa.
+ * MOCK SOMENTE PARA DESENVOLVIMENTO — dados 100% fictícios (catálogo de
+ * exemplo + pedidos de demonstração). Nunca contém dados reais de clientes.
  *
- * COMO USAR: rode o frontend com NEXT_PUBLIC_USE_MOCK=true (já vem em
- * frontend/.env.local). O lib/api.ts troca o `api` real por este mock e simula
- * delay de rede (MOCK_DELAY_MS) para testar skeletons/loadings.
+ * COMO USAR: rode o frontend com NEXT_PUBLIC_USE_MOCK=true (ver
+ * frontend/.env.example). O lib/api.ts troca o `api` real por este mock e
+ * simula delay de rede (MOCK_DELAY_MS) para testar skeletons/loadings.
  *
- * COMO REMOVER: delete este arquivo + frontend/.env.local e reverta o bloco
- * USE_MOCK no topo de frontend/lib/api.ts. Nenhum outro arquivo foi alterado.
+ * O mock é desativado automaticamente em produção
+ * (USE_MOCK exige NODE_ENV !== "production"), mesmo com a env ligada.
+ *
+ * COMO REMOVER: delete este arquivo + a env e reverta o bloco USE_MOCK no
+ * topo de frontend/lib/api.ts. Nenhum outro arquivo depende dele.
  */
 
 import type {
@@ -115,15 +118,22 @@ const initialProducts: BackendProduct[] = [
   {"id": 80, "name": "Kit Festa Congelado", "description": "Kit com 50 salgadinhos variados congelados", "price": 70.0, "imageUrl": undefined, "available": true, "category": {"id": 8, "name": "Congelado"}, "ingredients": ["Coxinha", "Empada", "Kibe", "Risole"]},
 ];
 
-// ---- Usuários mock (login demo) ----
-const mockAdminUser: BackendUser = {"id": 900, "name": "Neide", "email": "admin@neide.com", "phone": "11999999999", "role": "ADMIN"};
-const mockCustomerUser: BackendUser = {"id": 1, "name": "Everton", "email": "everton@gmail.com", "phone": "11933548635", "role": "USER"};
+// ---- Usuários mock (login demo, dados fictícios) ----
+const mockAdminUser: BackendUser = {"id": 900, "name": "Demo Admin", "email": "admin@exemplo.com", "phone": "11900000000", "role": "ADMIN"};
+const mockCustomerUser: BackendUser = {"id": 1, "name": "Cliente Demo", "email": "cliente@exemplo.com", "phone": "11900001111", "role": "USER"};
 
-// ---- Pedidos (snapshot real do banco; cópia mutável em memória) ----
+/** Sessão mock atual (definida no login/registro). */
+let currentMockUser: BackendUser | null = null;
+
+function mockToken(user: BackendUser): string {
+  return `mock-token-${user.id}-${user.role}`;
+}
+
+// ---- Pedidos fictícios de demonstração (cópia mutável em memória) ----
 const initialOrders: BackendOrder[] = [
-  {"id": 1, "customerName": "Teste", "phone": "00000000000", "delivery": false, "address": undefined, "latitude": undefined, "longitude": undefined, "observation": undefined, "status": "FILA", "deliveryDateTime": undefined, "createdAt": "2026-06-17T16:55:45.787000+00:00", "items": [{"id": 1, "product": {"id": 2, "name": "Bolo de Fubá", "description": "Bolo de fubá cremoso tradicional", "price": 55.0, "imageUrl": undefined, "available": true, "category": {"id": 1, "name": "Caseiro"}, "ingredients": ["Fubá", "Leite", "Ovos", "Açúcar", "Queijo"]}, "quantity": 1, "observation": undefined, "unitPrice": 55.0}]},
-  {"id": 2, "customerName": "Gustavo", "phone": "11995095240", "delivery": true, "address": "Rua Joaquim Cirino da Silva, 52", "latitude": undefined, "longitude": undefined, "observation": "Colocar uma embalagem discreta", "status": "FILA", "deliveryDateTime": "2026-06-20T23:00:00+00:00", "createdAt": "2026-06-17T18:42:18.620000+00:00", "items": [{"id": 2, "product": {"id": 1, "name": "Bolo de Cenoura", "description": "Bolo de cenoura 45x45 com cobertura de chocolate", "price": 65.0, "imageUrl": undefined, "available": true, "category": {"id": 1, "name": "Caseiro"}, "ingredients": ["Cenoura", "Chocolate", "Farinha de trigo", "Açúcar", "Ovos"]}, "quantity": 2, "observation": "Quero o sem cobertura", "unitPrice": 65.0}]},
-  {"id": 3, "customerName": "Gustavo Rodrigues", "phone": "5181084848", "delivery": true, "address": "Gsgsgw", "latitude": undefined, "longitude": undefined, "observation": undefined, "status": "FILA", "deliveryDateTime": "2026-09-02T02:04:00+00:00", "createdAt": "2026-09-01T23:04:38.210000+00:00", "items": [{"id": 3, "product": {"id": 44, "name": "Risole de Carne", "description": "Risole de carne moída (unidade)", "price": 7.0, "imageUrl": undefined, "available": true, "category": {"id": 5, "name": "Salgado"}, "ingredients": ["Carne moída", "Farinha", "Temperos"]}, "quantity": 1, "observation": undefined, "unitPrice": 7.0}]},
+  {"id": 1, "customerName": "Cliente Demo", "phone": "11900001111", "delivery": false, "address": undefined, "latitude": undefined, "longitude": undefined, "observation": undefined, "status": "FILA", "deliveryDateTime": undefined, "createdAt": "2026-06-17T16:55:45.787000+00:00", "items": [{"id": 1, "product": {"id": 2, "name": "Bolo de Fubá", "description": "Bolo de fubá cremoso tradicional", "price": 55.0, "imageUrl": undefined, "available": true, "category": {"id": 1, "name": "Caseiro"}, "ingredients": ["Fubá", "Leite", "Ovos", "Açúcar", "Queijo"]}, "quantity": 1, "observation": undefined, "unitPrice": 55.0}]},
+  {"id": 2, "customerName": "Maria Exemplo", "phone": "11900002222", "delivery": true, "address": "Rua das Flores, 123 — Cidade Exemplo", "latitude": undefined, "longitude": undefined, "observation": "Deixar na portaria", "status": "FAZENDO", "deliveryDateTime": "2026-06-20T23:00:00+00:00", "createdAt": "2026-06-17T18:42:18.620000+00:00", "items": [{"id": 2, "product": {"id": 1, "name": "Bolo de Cenoura", "description": "Bolo de cenoura 45x45 com cobertura de chocolate", "price": 65.0, "imageUrl": undefined, "available": true, "category": {"id": 1, "name": "Caseiro"}, "ingredients": ["Cenoura", "Chocolate", "Farinha de trigo", "Açúcar", "Ovos"]}, "quantity": 2, "observation": "Sem cobertura", "unitPrice": 65.0}]},
+  {"id": 3, "customerName": "João Exemplo", "phone": "11900003333", "delivery": true, "address": "Av. Central, 456 — Cidade Exemplo", "latitude": undefined, "longitude": undefined, "observation": undefined, "status": "PRONTO", "deliveryDateTime": "2026-09-02T02:04:00+00:00", "createdAt": "2026-09-01T23:04:38.210000+00:00", "items": [{"id": 3, "product": {"id": 44, "name": "Risole de Carne", "description": "Risole de carne moída (unidade)", "price": 7.0, "imageUrl": undefined, "available": true, "category": {"id": 5, "name": "Salgado"}, "ingredients": ["Carne moída", "Farinha", "Temperos"]}, "quantity": 1, "observation": undefined, "unitPrice": 7.0}]},
 ];
 // ---- Estado mutável em memória (CRUD do admin e checkout funcionam no mock) ----
 let products = initialProducts.map((p) => ({ ...p }));
@@ -139,7 +149,8 @@ export const mockApi = {
   login: async (dto: BackendLoginDTO) => {
     await mockDelay();
     if (!dto.email || !dto.password) throw new Error("Credenciais inválidas");
-    return clone(dto.email.toLowerCase().includes("admin") ? mockAdminUser : mockCustomerUser);
+    currentMockUser = clone(dto.email.toLowerCase().includes("admin") ? mockAdminUser : mockCustomerUser);
+    return { token: mockToken(currentMockUser), user: clone(currentMockUser) };
   },
 
   register: async (dto: BackendRegisterDTO) => {
@@ -151,7 +162,14 @@ export const mockApi = {
       phone: dto.phone,
       role: "USER",
     };
-    return created;
+    currentMockUser = clone(created);
+    return { token: mockToken(created), user: created };
+  },
+
+  getMe: async () => {
+    await mockDelay();
+    if (!currentMockUser) throw new Error("Sessão expirada. Faça login novamente.");
+    return { user: clone(currentMockUser) };
   },
 
   // Categories
@@ -250,6 +268,18 @@ export const mockApi = {
     const found = orders.find((o) => o.id === id);
     if (!found) throw new Error("HTTP 404");
     return clone(found);
+  },
+
+  getMyOrders: async () => {
+    await mockDelay();
+    if (!currentMockUser) throw new Error("Sessão expirada. Faça login novamente.");
+    return clone(
+      orders.filter(
+        (o) =>
+          o.userId === currentMockUser!.id ||
+          o.customerName.toLowerCase() === currentMockUser!.name.toLowerCase()
+      )
+    );
   },
 
   getOrdersByCustomer: async (name: string) => {

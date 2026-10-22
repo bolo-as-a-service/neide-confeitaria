@@ -7,7 +7,7 @@ import { Header } from "@/components/menu/Header";
 import { Footer } from "@/components/menu/Footer";
 import { ErrorState } from "@/components/ui/error-state";
 import { useAuth } from "@/lib/auth-context";
-import { api } from "@/lib/api";
+import { ApiError, api } from "@/lib/api";
 import type { BackendOrder } from "@/lib/types";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -42,7 +42,18 @@ export default function MeusPedidosPage() {
     setLoading(true);
     setError("");
     try {
-      const data = await api.getOrdersByCustomer(user.name);
+      // Pedidos vinculados à conta (privado por usuário no servidor).
+      // Fallback para busca por nome se o backend ainda não tem /mine.
+      let data: BackendOrder[];
+      try {
+        data = await api.getMyOrders();
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404 && user.name) {
+          data = await api.getOrdersByCustomer(user.name);
+        } else {
+          throw err;
+        }
+      }
       setOrders(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao carregar pedidos");

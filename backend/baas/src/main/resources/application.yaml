@@ -21,3 +21,12 @@ server:
 
 upload:
   dir: uploads
+
+app:
+  jwt:
+    # Segredo HS256 (>= 32 bytes). Produção: export JWT_SECRET=<aleatório>.
+    secret: "${JWT_SECRET:}"
+    expiration-hours: 12
+  cors:
+    # Origens do frontend separadas por vírgula (sem "*" quando há credencial).
+    allowed-origins: "${APP_CORS_ORIGINS:http://localhost:3000}"

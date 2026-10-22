@@ -16,6 +16,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     price: 39.9,
     image: "/bolo.webp",
     category: "caseiro",
+    available: true,
     ...overrides,
   };
 }
@@ -93,7 +94,7 @@ describe("persistência localStorage (issue #19)", () => {
     globalThis.localStorage.setItem(
       CART_STORAGE_KEY,
       JSON.stringify([
-        { id: "x", product: { id: "1", name: "Bolo", price: 10 }, quantity: 2.7, observations: "  ok " },
+        { id: "x", product: { id: "1", name: "Bolo", price: 10, image: "/bolo.webp", category: "caseiro", available: true }, quantity: 2.7, observations: "  ok " },
         { id: "bad", quantity: -1 },
         null,
       ])

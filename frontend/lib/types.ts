@@ -22,6 +22,12 @@ export interface BackendUser {
   role: string;
 }
 
+export interface BackendAuthResponse {
+  /** JWT (backends com autenticação). Nulo em backends legados sem token. */
+  token: string | null;
+  user: BackendUser;
+}
+
 export interface BackendOrderItem {
   id: number;
   product: BackendProduct;
@@ -32,6 +38,8 @@ export interface BackendOrderItem {
 
 export interface BackendOrder {
   id: number;
+  /** Dono do pedido quando feito por usuário logado (nulo = convidado). */
+  userId?: number;
   customerName: string;
   phone: string;
   delivery: boolean;

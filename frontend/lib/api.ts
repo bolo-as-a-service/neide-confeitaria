@@ -6,17 +6,22 @@ import type {
   BackendOrderDTO,
   BackendLoginDTO,
   BackendRegisterDTO,
+  BackendAuthResponse,
 } from "./types";
 import { mockApi } from "./mock-data";
 
 /**
- * MOCK TEMPORÁRIO (remover quando o backend estabilizar): com
- * NEXT_PUBLIC_USE_MOCK=true, o `api` usa dados fixados em mock-data.ts.
- * Para remover: delete mock-data.ts + .env.local e reverta este bloco.
+ * MOCK SOMENTE EM DESENVOLVIMENTO: com NEXT_PUBLIC_USE_MOCK=true (e nunca em
+ * produção — ver lib/mock-data.ts), o `api` usa dados fictícios locais.
  */
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
+const USE_MOCK =
+  process.env.NEXT_PUBLIC_USE_MOCK === "true" &&
+  process.env.NODE_ENV !== "production";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/+$/, "");
+
+/** Timeout padrão das requisições (evita loading infinito em rede lenta). */
+export const REQUEST_TIMEOUT_MS = 15_000;
 
 /** Erro tipado da API (issue #26): carrega status HTTP e erros de campo. */
 export class ApiError extends Error {
@@ -29,6 +34,79 @@ export class ApiError extends Error {
     this.status = status;
     this.fieldErrors = fieldErrors;
   }
+}
+
+/**
+ * Token JWT da sessão (memória + storage conforme "lembrar de mim").
+ * O papel do usuário NUNCA é lido daqui: a fonte de verdade é o
+ * GET /auth/me (AuthContext), cujo papel vem do banco no servidor.
+ */
+const TOKEN_KEY = "neide_auth_token";
+
+let memoryToken: string | null = null;
+let onUnauthorized: (() => void) | null = null;
+
+/** Chamado pelo AuthContext para deslogar em 401. */
+export function setOnUnauthorized(handler: (() => void) | null) {
+  onUnauthorized = handler;
+}
+
+function readStoredToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return (
+      window.localStorage.getItem(TOKEN_KEY) ??
+      window.sessionStorage.getItem(TOKEN_KEY)
+    );
+  } catch {
+    return null;
+  }
+}
+
+export function getAuthToken(): string | null {
+  if (memoryToken) return memoryToken;
+  memoryToken = readStoredToken();
+  return memoryToken;
+}
+
+export function setAuthToken(token: string | null, remember: boolean) {
+  memoryToken = token;
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(TOKEN_KEY);
+    window.sessionStorage.removeItem(TOKEN_KEY);
+    if (token) {
+      const storage = remember ? window.localStorage : window.sessionStorage;
+      storage.setItem(TOKEN_KEY, token);
+    }
+  } catch {
+    // Storage indisponível: segue só em memória.
+  }
+}
+
+/** Normaliza as duas formas de resposta de auth para um contrato único. */
+function normalizeAuthResponse(body: BackendAuthResponse | BackendUser): BackendAuthResponse {
+  if (
+    body !== null &&
+    typeof body === "object" &&
+    "user" in body &&
+    (body as BackendAuthResponse).user !== null &&
+    typeof (body as BackendAuthResponse).user === "object"
+  ) {
+    const wrapped = body as BackendAuthResponse;
+    return { token: wrapped.token ?? null, user: wrapped.user };
+  }
+  return { token: null, user: body as BackendUser };
+}
+
+/** Mensagem de erro do backend (`error` no baas, `message` no Flask). */
+function parseErrorMessage(body: unknown, fallback: string): string {
+  if (typeof body === "object" && body !== null) {
+    const record = body as Record<string, unknown>;
+    if (typeof record.error === "string") return record.error;
+    if (typeof record.message === "string") return record.message;
+  }
+  return fallback;
 }
 
 function parseFieldErrors(body: unknown): Record<string, string> | undefined {
@@ -46,37 +124,57 @@ function parseFieldErrors(body: unknown): Record<string, string> | undefined {
 
 async function request<T>(
   path: string,
-  options?: RequestInit
+  options?: RequestInit,
+  timeoutMs: number = REQUEST_TIMEOUT_MS,
 ): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    const message =
-      (typeof body === "object" && body !== null && typeof (body as Record<string, unknown>).error === "string"
-        ? (body as Record<string, unknown>).error as string
-        : undefined) ?? `HTTP ${res.status}`;
-    throw new ApiError(res.status, message, parseFieldErrors(body));
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const token = getAuthToken();
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const res = await fetch(`${BASE_URL}${path}`, {
+      headers,
+      ...options,
+      // Authorization acima é substituído se options trouxer headers próprios.
+      signal: controller.signal,
+    });
+    if (res.status === 401) {
+      onUnauthorized?.();
+      throw new ApiError(401, "Sessão expirada. Faça login novamente.");
+    }
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      throw new ApiError(res.status, parseErrorMessage(body, `HTTP ${res.status}`), parseFieldErrors(body));
+    }
+    if (res.status === 204) return undefined as T;
+    return res.json();
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new ApiError(0, "Tempo de resposta esgotado. Tente novamente.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
   }
-  if (res.status === 204) return undefined as T;
-  return res.json();
 }
 
 const realApi = {
-  // Auth
+  // Auth: aceita `{token, user}` (backend com JWT) ou o usuário puro
+  // (backend legado sem token — ex.: Flask). Papel real vem de getMe.
   login: (dto: BackendLoginDTO) =>
-    request<BackendUser>("/auth/login", {
+    request<BackendAuthResponse | BackendUser>("/auth/login", {
       method: "POST",
       body: JSON.stringify(dto),
-    }),
+    }).then(normalizeAuthResponse),
 
   register: (dto: BackendRegisterDTO) =>
-    request<BackendUser>("/auth/register", {
+    request<BackendAuthResponse | BackendUser>("/auth/register", {
       method: "POST",
       body: JSON.stringify(dto),
-    }),
+    }).then(normalizeAuthResponse),
+
+  getMe: () => request<{ user: BackendUser }>("/auth/me"),
 
   // Categories
   getCategories: () => request<BackendCategory[]>("/categories"),
@@ -130,6 +228,9 @@ const realApi = {
 
   getOrder: (id: number) => request<BackendOrder>(`/orders/${id}`),
 
+  /** Pedidos do usuário logado (vinculados pelo userId no servidor). */
+  getMyOrders: () => request<BackendOrder[]>("/orders/mine"),
+
   getOrdersByCustomer: (name: string) =>
     request<BackendOrder[]>(`/orders/customer/${encodeURIComponent(name)}`),
 
@@ -149,14 +250,44 @@ const realApi = {
 
   // Images
   uploadImage: async (file: File) => {
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      throw new ApiError(415, "Formato inválido. Envie JPG, PNG ou WebP.");
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      throw new ApiError(413, "Imagem muito grande. Máximo 5MB.");
+    }
     const formData = new FormData();
     formData.append("file", file);
-    const res = await fetch(`${BASE_URL}/images/upload`, {
-      method: "POST",
-      body: formData,
-    });
-    if (!res.ok) throw new Error("Upload failed");
-    return res.json() as Promise<{ url: string }>;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    try {
+      const headers: Record<string, string> = {};
+      const token = getAuthToken();
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      const res = await fetch(`${BASE_URL}/images/upload`, {
+        method: "POST",
+        body: formData,
+        headers,
+        signal: controller.signal,
+      });
+      if (res.status === 401) {
+        onUnauthorized?.();
+        throw new ApiError(401, "Sessão expirada. Faça login novamente.");
+      }
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new ApiError(res.status, parseErrorMessage(body, "Erro ao fazer upload da imagem."));
+      }
+      return res.json() as Promise<{ url: string }>;
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        throw new ApiError(0, "Tempo de resposta esgotado. Tente novamente.");
+      }
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
   },
 };
 

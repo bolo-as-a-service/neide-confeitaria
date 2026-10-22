@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { X, Minus, Plus, ShoppingCart, ChefHat, CirclePlus } from "lucide-react";
+import { Minus, Plus, ShoppingCart, ChefHat, CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Product } from "./ProductCard";
 import { CartItem } from "@/lib/cart-context";
 import { productBlurPlaceholder } from "@/lib/utils";
@@ -64,6 +64,9 @@ function ProductModalContent({
         <DialogTitle className="font-display text-xl font-bold text-[var(--ink)]">
           {product.name}
         </DialogTitle>
+        <DialogDescription className="sr-only">
+          Detalhes de {product.name}: escolha a quantidade e observações.
+        </DialogDescription>
         <div className="mt-2 flex items-baseline justify-between gap-4">
           <p className="text-sm text-[var(--muted)] line-clamp-2">{product.description}</p>
           <span className="font-display text-xl font-extrabold text-[var(--brand-800)] whitespace-nowrap">

@@ -15,6 +15,7 @@ export interface Product {
   category: string;
   description?: string;
   ingredients?: string[];
+  available: boolean;
 }
 
 interface ProductCardProps {
@@ -36,9 +37,19 @@ export function ProductCard({ product, onAddClick, onDetailClick }: ProductCardP
         "group relative flex-shrink-0 w-[200px] sm:w-[220px]",
         "bg-white rounded-2xl border border-[var(--rose-200)] shadow-sm",
         "overflow-hidden transition-all duration-300",
-        "hover:shadow-lg hover:-translate-y-1"
+        "hover:shadow-lg hover:-translate-y-1",
+        onDetailClick && "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
       )}
       onClick={() => onDetailClick?.(product)}
+      onKeyDown={(e) => {
+        if (onDetailClick && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          onDetailClick(product);
+        }
+      }}
+      role={onDetailClick ? "button" : undefined}
+      tabIndex={onDetailClick ? 0 : undefined}
+      aria-label={onDetailClick ? `Ver detalhes de ${product.name}` : undefined}
       style={{ cursor: onDetailClick ? "pointer" : "default" }}
     >
       <div className="relative aspect-square overflow-hidden bg-[var(--rose-50)]">

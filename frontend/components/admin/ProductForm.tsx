@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { parsePriceInput } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { isPersistableImageUrl, resolveBackendImage } from "@/lib/product-image";
 import type { BackendCategory } from "@/lib/types";
@@ -16,6 +18,7 @@ import { AdminProduct } from "./AdminProductTable";
 interface ProductFormProps {
   onBack: () => void;
   editProduct?: AdminProduct | null;
+  saving?: boolean;
   onSave?: (data: {
     name: string;
     description: string;
@@ -26,7 +29,7 @@ interface ProductFormProps {
   }) => void;
 }
 
-export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
+export function ProductForm({ onBack, editProduct, saving = false, onSave }: ProductFormProps) {
   const [name, setName] = React.useState(editProduct?.name ?? "");
   const [description, setDescription] = React.useState(editProduct?.description ?? "");
   const [categories, setCategories] = React.useState<BackendCategory[]>([]);
@@ -36,7 +39,9 @@ export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
   const [newIngredient, setNewIngredient] = React.useState("");
   const [imageUrl, setImageUrl] = React.useState(editProduct?.image ?? "");
   const [uploading, setUploading] = React.useState(false);
+  const [uploadError, setUploadError] = React.useState("");
   const [categoriesLoaded, setCategoriesLoaded] = React.useState(false);
+  const [formErrors, setFormErrors] = React.useState<{ name?: string; price?: string }>({});
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
@@ -53,16 +58,15 @@ export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
   }, [editProduct]);
 
   const handleImageUpload = async (file: File) => {
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Imagem muito grande. Máximo 5MB.");
-      return;
-    }
+    setUploadError("");
     setUploading(true);
     try {
       const result = await api.uploadImage(file);
       setImageUrl(result.url);
-    } catch {
-      alert("Erro ao fazer upload da imagem.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erro ao fazer upload da imagem.";
+      setUploadError(message);
+      toast.error(message);
     } finally {
       setUploading(false);
     }
@@ -83,8 +87,9 @@ export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
   const maxDescriptionLength = 200;
 
   const handleAddIngredient = () => {
-    if (newIngredient.trim()) {
-      setIngredients([...ingredients, newIngredient.trim()]);
+    const value = newIngredient.trim().slice(0, 60);
+    if (value && !ingredients.includes(value)) {
+      setIngredients([...ingredients, value]);
       setNewIngredient("");
     }
   };
@@ -93,10 +98,28 @@ export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
     setIngredients(ingredients.filter((_, i) => i !== index));
   };
 
+  const validate = (): boolean => {
+    const errors: { name?: string; price?: string } = {};
+    if (name.trim().length < 2) {
+      errors.name = "Informe o nome do produto (mín. 2 caracteres).";
+    }
+    const value = parsePriceInput(price);
+    if (!Number.isFinite(value) || value <= 0) {
+      errors.price = "Informe um preço válido maior que zero (ex.: 65,90).";
+    }
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = () => {
+    if (uploading) {
+      toast.error("Aguarde o envio da imagem terminar.");
+      return;
+    }
+    if (!validate()) return;
     if (onSave) {
       onSave({
-        name,
+        name: name.trim(),
         description,
         category: selectedCategory ?? undefined,
         price,
@@ -105,7 +128,6 @@ export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
         image: isPersistableImageUrl(imageUrl) ? imageUrl : undefined,
       });
     } else {
-      console.log({ name, description, category: selectedCategory, price, ingredients, image: imageUrl });
       onBack();
     }
   };
@@ -131,14 +153,23 @@ export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
               variant="outline"
               className="border-[var(--brand-700)] text-[var(--brand-800)] text-xs sm:text-sm px-3 sm:px-4"
               onClick={onBack}
+              disabled={saving}
             >
               Cancelar
             </Button>
             <Button
               className="bg-[var(--brand-700)] hover:bg-[var(--brand-800)] text-white text-xs sm:text-sm px-3 sm:px-4"
               onClick={handleSave}
+              disabled={saving}
             >
-              Salvar Produto
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                "Salvar Produto"
+              )}
             </Button>
           </div>
         </div>
@@ -160,8 +191,15 @@ export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
                 id="name"
                 placeholder="Ex.: Bolo de Cenoura"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                maxLength={120}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (formErrors.name) setFormErrors((prev) => ({ ...prev, name: undefined }));
+                }}
               />
+              {formErrors.name && (
+                <p className="mt-1 text-xs text-red-600">{formErrors.name}</p>
+              )}
             </div>
 
             <div>
@@ -226,8 +264,11 @@ export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
                     {uploading ? "Enviando..." : "Clique para enviar uma imagem"}
                   </p>
                   <p className="text-xs text-[var(--muted)] mt-1">ou arraste e solte aqui</p>
-                  <p className="text-xs text-[var(--muted)] mt-4">Formatos: JPG, PNG • Tamanho máx: 5MB</p>
+                  <p className="text-xs text-[var(--muted)] mt-4">Formatos: JPG, PNG, WebP • Tamanho máx: 5MB</p>
                 </div>
+              )}
+              {uploadError && (
+                <p className="mt-2 text-xs text-red-600">{uploadError}</p>
               )}
             </div>
           </div>
@@ -275,11 +316,19 @@ export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
                 <Input
                   id="price"
                   type="text"
+                  inputMode="decimal"
                   placeholder="0,00"
                   value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                  maxLength={12}
+                  onChange={(e) => {
+                    setPrice(e.target.value);
+                    if (formErrors.price) setFormErrors((prev) => ({ ...prev, price: undefined }));
+                  }}
                   className="pl-10"
                 />
+                {formErrors.price && (
+                  <p className="mt-1 text-xs text-red-600">{formErrors.price}</p>
+                )}
               </div>
             </div>
 

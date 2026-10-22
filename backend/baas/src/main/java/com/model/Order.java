@@ -15,6 +15,8 @@ public class Order {
 
     private String customerName;
     private String phone;
+    /** Dono do pedido quando feito por usuário logado (nulo = convidado). */
+    private Long userId;
     private Boolean delivery = false;
     private String address;
     private Double latitude;
@@ -35,6 +37,7 @@ public class Order {
     }
 
     public Long getId() { return id; }
+    public Long getUserId() { return userId; }
     public String getCustomerName() { return customerName; }
     public String getPhone() { return phone; }
     public Boolean getDelivery() { return delivery; }
@@ -48,6 +51,7 @@ public class Order {
     public List<OrderItem> getItems() { return items; }
 
     public void setId(Long id) { this.id = id; }
+    public void setUserId(Long userId) { this.userId = userId; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
     public void setPhone(String phone) { this.phone = phone; }
     public void setDelivery(Boolean delivery) { this.delivery = delivery; }

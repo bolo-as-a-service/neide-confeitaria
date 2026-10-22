@@ -21,8 +21,9 @@ public class OrderService {
         this.productRepository = productRepository;
     }
 
-    public Order createOrder(OrderDTO dto) {
+    public Order createOrder(OrderDTO dto, Long userId) {
         Order order = new Order();
+        order.setUserId(userId);
         order.setCustomerName(dto.getCustomerName());
         order.setPhone(dto.getPhone());
         order.setDelivery(dto.getDelivery() != null ? dto.getDelivery() : false);
@@ -76,7 +77,13 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+    private static final java.util.Set<String> VALID_STATUSES = java.util.Set.of(
+        "FILA", "APROVADO", "FAZENDO", "PRONTO", "ENTREGUE", "CANCELADO");
+
     public Order updateStatus(Long id, String status) {
+        if (status == null || !VALID_STATUSES.contains(status)) {
+            throw new RuntimeException("Status inválido: " + status);
+        }
         Order order = getOrderById(id);
         order.setStatus(status);
         return orderRepository.save(order);
@@ -84,5 +91,9 @@ public class OrderService {
 
     public List<Order> getOrdersByCustomerName(String customerName) {
         return orderRepository.findByCustomerNameIgnoreCase(customerName);
+    }
+
+    public List<Order> getOrdersByUserId(Long userId) {
+        return orderRepository.findByUserId(userId);
     }
 }

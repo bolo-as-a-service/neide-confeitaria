@@ -2,24 +2,23 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, getAuthToken, setAuthToken, setOnUnauthorized } from "@/lib/api";
 import type { BackendUser } from "@/lib/types";
 
 export type AuthUser = BackendUser;
 
-const STORAGE_KEY = "neide_user";
-const LEGACY_STORAGE_KEY = "user";
 const ROLE_COOKIE = "neide_auth_role";
 const FLAG_COOKIE = "neide_auth";
+/** Cache do usuário para backends legados sem token (sem ele, o login
+ *  legado não sobreviveria ao F5). Com JWT, a fonte de verdade é o /me. */
+const LEGACY_USER_KEY = "neide_user";
 
-function readStoredUser(): AuthUser | null {
+function readCachedUser(): AuthUser | null {
   if (typeof window === "undefined") return null;
   try {
     const raw =
-      window.localStorage.getItem(STORAGE_KEY) ??
-      window.sessionStorage.getItem(STORAGE_KEY) ??
-      // Compatibilidade com versão anterior que salvava em "user" no localStorage
-      window.localStorage.getItem(LEGACY_STORAGE_KEY);
+      window.localStorage.getItem(LEGACY_USER_KEY) ??
+      window.sessionStorage.getItem(LEGACY_USER_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as AuthUser;
     if (!parsed || typeof parsed.email !== "string") return null;
@@ -29,11 +28,30 @@ function readStoredUser(): AuthUser | null {
   }
 }
 
+function writeCachedUser(user: AuthUser | null, remember: boolean) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(LEGACY_USER_KEY);
+    window.sessionStorage.removeItem(LEGACY_USER_KEY);
+    if (user) {
+      (remember ? window.localStorage : window.sessionStorage).setItem(
+        LEGACY_USER_KEY,
+        JSON.stringify(user)
+      );
+    }
+  } catch {
+    // Storage indisponível: segue só em memória.
+  }
+}
+
+/**
+ * Espelho legível do papel para o proxy (`proxy.ts`) dar UX de redirect.
+ * NÃO é barreira de segurança: a autorização real acontece no backend
+ * (endpoints exigem JWT; o papel exibido aqui vem do GET /auth/me,
+ * lido do banco a cada carregamento).
+ */
 function writeAuthCookie(user: AuthUser | null, remember: boolean) {
   if (typeof document === "undefined") return;
-  // Cookie legível pelo middleware (Next) para guarda de /admin.
-  // INTERIM: o backend ainda não emite JWT (#16). Quando o JWT existir,
-  // o backend deve setar cookie httpOnly seguro e este mecanismo será removido.
   const maxAge = remember ? 60 * 60 * 24 * 30 : undefined; // 30 dias se "lembrar"
   const attrs = `path=/; SameSite=Lax${maxAge ? `; Max-Age=${maxAge}` : ""}`;
   if (user) {
@@ -43,22 +61,6 @@ function writeAuthCookie(user: AuthUser | null, remember: boolean) {
     document.cookie = `${FLAG_COOKIE}=; path=/; Max-Age=0; SameSite=Lax`;
     document.cookie = `${ROLE_COOKIE}=; path=/; Max-Age=0; SameSite=Lax`;
   }
-}
-
-function persistUser(user: AuthUser | null, remember: boolean) {
-  if (typeof window === "undefined") return;
-  window.localStorage.removeItem(STORAGE_KEY);
-  window.sessionStorage.removeItem(STORAGE_KEY);
-  window.localStorage.removeItem(LEGACY_STORAGE_KEY);
-  if (user) {
-    const raw = JSON.stringify(user);
-    if (remember) {
-      window.localStorage.setItem(STORAGE_KEY, raw);
-    } else {
-      window.sessionStorage.setItem(STORAGE_KEY, raw);
-    }
-  }
-  writeAuthCookie(user, remember);
 }
 
 interface AuthContextValue {
@@ -76,13 +78,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
+  const logout = React.useCallback(() => {
+    setAuthToken(null, false);
+    setUser(null);
+    writeCachedUser(null, false);
+    writeAuthCookie(null, false);
+  }, []);
+
+  // Desloga globalmente em 401 (token expirado/inválido).
+  React.useEffect(() => {
+    setOnUnauthorized(() => logout());
+    return () => setOnUnauthorized(null);
+  }, [logout]);
+
+  // Valida a sessão: com JWT, o papel vem do /me (banco); sem token
+  // (backend legado), restaura o usuário do último login.
   React.useEffect(() => {
     let cancelled = false;
-    // Hidrata fora do corpo síncrono do efeito (evita set-state-in-effect).
-    queueMicrotask(() => {
-      if (cancelled) return;
-      setUser(readStoredUser());
-      setIsLoading(false);
+    queueMicrotask(async () => {
+      try {
+        if (!getAuthToken()) {
+          const cached = readCachedUser();
+          if (!cancelled) {
+            setUser(cached);
+            if (cached) writeAuthCookie(cached, true);
+          }
+          return;
+        }
+        const { user: me } = await api.getMe();
+        if (!cancelled) {
+          setUser(me);
+          writeAuthCookie(me, true);
+        }
+      } catch {
+        setAuthToken(null, false);
+        if (!cancelled) {
+          setUser(null);
+          writeAuthCookie(null, false);
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
     });
     return () => {
       cancelled = true;
@@ -91,18 +127,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = React.useCallback(
     async (dto: { email: string; password: string }, remember = false) => {
-      const logged = await api.login(dto);
-      persistUser(logged, remember);
+      const { token, user: logged } = await api.login(dto);
+      setAuthToken(token, remember);
       setUser(logged);
+      // Cache local só no modo legado (sem token); com JWT a fonte é o /me.
+      writeCachedUser(token ? null : logged, remember);
+      writeAuthCookie(logged, remember);
       return logged;
     },
     []
   );
-
-  const logout = React.useCallback(() => {
-    persistUser(null, false);
-    setUser(null);
-  }, []);
 
   const value = React.useMemo<AuthContextValue>(
     () => ({
@@ -131,7 +165,7 @@ export function useRequireAdmin() {
 
   React.useEffect(() => {
     if (!isLoading && (!user || !isAdmin)) {
-      router.replace("/login?next=/admin");
+      router.replace(`/login?next=${encodeURIComponent(window.location.pathname)}`);
     }
   }, [user, isAdmin, isLoading, router]);
 

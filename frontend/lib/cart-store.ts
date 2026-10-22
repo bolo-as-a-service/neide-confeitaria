@@ -9,9 +9,9 @@ export interface CartItem {
 
 export const CART_STORAGE_KEY = "neide_cart_v1";
 
-/** Normaliza observação para comparação (trim; vazio vira ""). */
-export function normalizeObservations(observations?: string | null): string {
-  return (observations ?? "").trim();
+/** Normaliza observação para comparação (trim; vazio ou não-texto vira ""). */
+export function normalizeObservations(observations?: unknown): string {
+  return typeof observations === "string" ? observations.trim() : "";
 }
 
 function newCartItem(product: Product, quantity: number, observations: string): CartItem {
@@ -61,6 +61,7 @@ function isValidStoredItem(value: unknown): value is CartItem {
   if (typeof product !== "object" || product === null) return false;
   if (typeof product.id !== "string" && typeof product.id !== "number") return false;
   if (typeof product.name !== "string" || typeof product.price !== "number") return false;
+  if (typeof product.image !== "string" || typeof product.category !== "string") return false;
   return true;
 }
 

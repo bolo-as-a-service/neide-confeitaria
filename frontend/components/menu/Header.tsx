@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ShoppingBag, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { LogOut, ShoppingBag, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 
@@ -12,7 +13,15 @@ interface HeaderProps {
 }
 
 export function Header({ cartCount, onCartClick }: HeaderProps) {
-  const { user, isLoading } = useAuth();
+  const router = useRouter();
+  const { user, isLoading, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = React.useState(false);
+
+  const handleLogout = () => {
+    logout();
+    setMenuOpen(false);
+    router.push("/cardapio");
+  };
   return (
     <header className="relative">
       <div className="relative bg-[var(--brand-900)] text-[var(--cream)]">
@@ -28,13 +37,52 @@ export function Header({ cartCount, onCartClick }: HeaderProps) {
 
             <div className="flex items-center gap-2">
               {!isLoading && user ? (
-                <Link
-                  href={user.role === "ADMIN" ? "/admin" : "/meus-pedidos"}
-                  className="hidden md:flex items-center gap-2 text-sm underline hover:text-[var(--rose-100)] transition-colors"
-                >
-                  <User className="h-4 w-4" />
-                  {user.role === "ADMIN" ? "Painel Admin" : `Olá, ${user.name.split(" ")[0]}`}
-                </Link>
+                <div className="relative hidden md:block">
+                  <button
+                    type="button"
+                    onClick={() => setMenuOpen((v) => !v)}
+                    className="flex items-center gap-2 text-sm underline hover:text-[var(--rose-100)] transition-colors"
+                    aria-haspopup="menu"
+                    aria-expanded={menuOpen}
+                  >
+                    <User className="h-4 w-4" />
+                    {user.role === "ADMIN" ? "Painel Admin" : `Olá, ${user.name.split(" ")[0]}`}
+                  </button>
+                  {menuOpen && (
+                    <>
+                      <button
+                        type="button"
+                        aria-hidden
+                        tabIndex={-1}
+                        onClick={() => setMenuOpen(false)}
+                        className="fixed inset-0 z-10 cursor-default"
+                      />
+                      <div
+                        role="menu"
+                        className="absolute right-0 z-20 mt-2 w-48 rounded-xl border border-[var(--rose-200)] bg-white p-1.5 text-[var(--ink)] shadow-lg"
+                      >
+                        <Link
+                          role="menuitem"
+                          href={user.role === "ADMIN" ? "/admin" : "/meus-pedidos"}
+                          onClick={() => setMenuOpen(false)}
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-[var(--rose-100)] transition-colors"
+                        >
+                          <User className="h-4 w-4" />
+                          {user.role === "ADMIN" ? "Painel Admin" : "Meus pedidos"}
+                        </Link>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={handleLogout}
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Sair
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               ) : (
                 <Link
                   href="/login"

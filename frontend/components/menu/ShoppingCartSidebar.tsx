@@ -5,7 +5,6 @@ import Image from "next/image";
 import { X, Trash2, Edit, ShoppingBag, ChevronRight, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Product } from "./ProductCard";
 import { CartItem } from "@/lib/cart-context";
 
 export type { CartItem };

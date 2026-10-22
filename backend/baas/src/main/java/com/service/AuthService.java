@@ -27,6 +27,15 @@ public class AuthService {
         return user;
     }
 
+    public User findById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+    }
+
+    public boolean adminExists() {
+        return userRepository.existsByRole("ADMIN");
+    }
+
     public User register(RegisterDTO dto) {
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new RuntimeException("Email já cadastrado");
