@@ -21,7 +21,7 @@ def Service_login_post(data):
         user = User.query.filter_by(phone_number=credencial).first()
 
     if user and flask_bcrypt.check_password_hash(user.password, password):
-        return user.to_dict(), 201
+        return user.to_dict(), None
 
     elif "@" in credencial or ".com" in credencial:
         return "Email ou senha invalidos", 400 #TEMPORARIO, O CORRETO SERIA RETORNAR 401
