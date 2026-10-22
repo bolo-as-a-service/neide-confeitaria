@@ -6,11 +6,11 @@ from db import db
 def Service_login_post(data):
 
     if not data:
-        return "empty_label"
+        return "Preencha todos os campos", 400
 
     for campo in ['email', 'password']:
         if not data.get(campo):
-            return "empty_label"
+            return "Preencha todos os campos", 400
 
     credencial = data.get("email")
     password = data.get("password")
@@ -21,7 +21,7 @@ def Service_login_post(data):
         user = User.query.filter_by(phone_number=credencial).first()
 
     if user and flask_bcrypt.check_password_hash(user.password, password):
-        return user.to_dict(), None
+        return user.to_dict(), 201
 
     if "@" in credencial or ".com" in credencial:
         return "Email ou senha invalidos", 401
@@ -66,7 +66,7 @@ def Service_register_post(data):
         phone_number=phone,
         name=name
     )
-    print("1")
+   
 
     db.session.add(new_user)
     db.session.commit()

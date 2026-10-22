@@ -8,12 +8,12 @@ from extensions.extensions import limiter
 @limiter.limit("30 per minute")
 def login_post():
 
-    login,erro = Service_login_post(request.get_json())
+    message_login,status_error = Service_login_post(request.get_json())
     
-    if erro:
-        return jsonify({"message" : login}), erro 
+    if status_error:
+        return jsonify({"error" : message_login}), status_error
     
-    return jsonify(login), 200
+    return jsonify(message_login), 200
     
 
 
@@ -21,9 +21,9 @@ def login_post():
 @limiter.limit("30 per minute")
 def register_post():
 
-    new_user, erro = Service_register_post(request.get_json())
+    message_new_user, status_error = Service_register_post(request.get_json())
     
-    if erro:
-        return jsonify({"message" : new_user}), erro 
+    if status_error:
+        return jsonify({"error" : message_new_user}), status_error
     
-    return jsonify(new_user), 201
+    return jsonify(message_new_user), 201
