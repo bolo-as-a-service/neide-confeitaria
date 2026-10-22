@@ -14,6 +14,7 @@ import {
   DELIVERY_FEE,
   firstCheckoutError,
   maskPhone,
+  stripPhoneDigits,
   validateCheckout,
 } from "@/lib/checkout";
 import { productBlurPlaceholder } from "@/lib/utils";
@@ -88,7 +89,8 @@ export default function CarrinhoPage() {
     try {
       await api.createOrder({
         customerName: customerName.trim(),
-        phone: customerPhone.trim(),
+        // Backend espera só dígitos; a máscara é só apresentação.
+        phone: stripPhoneDigits(customerPhone),
         delivery: deliveryOption === "sim",
         address: deliveryOption === "sim" ? address : undefined,
         deliveryDateTime: deliveryDate ? new Date(deliveryDate).toISOString() : undefined,
