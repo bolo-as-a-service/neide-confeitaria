@@ -80,7 +80,13 @@ export default function AdminPedidosPage() {
   }, []);
 
   React.useEffect(() => {
-    loadOrders();
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) loadOrders();
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [loadOrders]);
 
   const moveOrder = async (order: Order, fromStatus: string, toStatus: string) => {

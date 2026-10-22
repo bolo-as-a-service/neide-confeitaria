@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { X, Minus, Plus, ShoppingCart, ChefHat, CirclePlus } from "lucide-react";
+import { Minus, Plus, ShoppingCart, ChefHat, CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";

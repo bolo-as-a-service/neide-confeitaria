@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Neide Confeitaria — Frontend
 
-## Getting Started
+Cardápio digital, checkout de convidado e painel administrativo (Next.js 16, React 19, Tailwind 4).
 
-First, run the development server:
+## Desenvolvimento
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+npm run build    # build de produção
+npm run lint     # eslint (deve passar sem erros)
+npm test         # vitest
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Pré-requisito: backend Spring (`backend/baas`, porta 8080) ou modo mock (abaixo).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variáveis de ambiente
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copie `.env.example` para `.env.local` (ignorado pelo git):
 
-## Learn More
+| Variável              | Dev                  | Produção                          |
+| --------------------- | -------------------- | --------------------------------- |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8080` | `https://apineide.gsrodriguesz.me` |
+| `NEXT_PUBLIC_USE_MOCK`| `true` (dados fictícios) | `false` (mock desativado no build) |
 
-To learn more about Next.js, take a look at the following resources:
+`NEXT_PUBLIC_USE_MOCK=true` usa `lib/mock-data.ts` (100% fictício) e só vale
+em desenvolvimento — o build de produção nunca usa o mock.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Autenticação
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Login/registro retornam JWT; o token vai no header `Authorization: Bearer`
+de todas as chamadas e o papel exibido vem do `GET /auth/me` (lido do banco
+no servidor). O proxy de `/admin` é só UX — a autorização real é o backend
+(401/403). Nunca confie em papel guardado no navegador.
 
-## Deploy on Vercel
+## Estrutura
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `app/` — rotas: `cardapio`, `carrinho`, `login`, `register`,
+  `meus-pedidos`, `pedido-confirmado`, `admin/{menu,pedidos,extra}`.
+- `components/menu|admin|ui` — UI do cardápio, do painel e primitivos.
+- `lib/` — `api.ts` (cliente HTTP + token + timeout), `auth-context.tsx`,
+  `cart-*` (carrinho + localStorage), `checkout.ts` (validação),
+  `product-image.ts` (resolução de imagens), `store-settings.ts`.

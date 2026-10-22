@@ -150,7 +150,7 @@ export default function CardapioPage() {
       id,
       label: val.label,
     }));
-  }, [backendCategories, backendProducts]);
+  }, [backendCategories, productsByCategory]);
 
   const visibleCategoryIds = React.useMemo(
     () =>
