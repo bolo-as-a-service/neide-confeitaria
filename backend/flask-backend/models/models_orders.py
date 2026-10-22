@@ -8,8 +8,8 @@ class Orders(db.Model):
     delivery = db.Column(db.Boolean, nullable=False)
 
     address = db.Column(db.String(100), nullable=True)
-    latitude= db.Column(db.Float, nullable=True)
-    longitude= db.Column(db.Float, nullable=True)
+    latitude= db.Column(db.String(200), nullable=True)
+    longitude= db.Column(db.String(200), nullable=True)
 
     observation= db.Column(db.String(150), nullable=True)
     status= db.Column(db.String(20), nullable = False, default="PENDING")
