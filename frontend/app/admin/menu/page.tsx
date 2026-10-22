@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ErrorState } from "@/components/ui/error-state";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { categoryColorForCategory } from "@/lib/utils";
@@ -40,20 +41,31 @@ export default function AdminMenuPage() {
   const [deleteProduct, setDeleteProduct] = React.useState<AdminProduct | null>(null);
   const [products, setProducts] = React.useState<AdminProduct[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [loadError, setLoadError] = React.useState("");
+  const [saving, setSaving] = React.useState(false);
+  const [deleting, setDeleting] = React.useState(false);
 
   const loadProducts = React.useCallback(async () => {
+    setLoading(true);
+    setLoadError("");
     try {
       const data = await api.getProducts();
       setProducts(data.map(toAdminProduct));
     } catch (err) {
-      console.error("Failed to load products", err);
+      setLoadError(err instanceof Error ? err.message : "Erro ao carregar produtos");
     } finally {
       setLoading(false);
     }
   }, []);
 
   React.useEffect(() => {
-    loadProducts();
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) loadProducts();
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [loadProducts]);
 
   const handleEdit = (product: AdminProduct) => {
@@ -85,14 +97,17 @@ export default function AdminMenuPage() {
   };
 
   const confirmDelete = async () => {
-    if (deleteProduct) {
-      try {
-        await api.deleteProduct(Number(deleteProduct.id));
-        setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id));
-      } catch (err) {
-        console.error("Failed to delete product", err);
-      }
+    if (!deleteProduct || deleting) return;
+    setDeleting(true);
+    try {
+      await api.deleteProduct(Number(deleteProduct.id));
+      setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id));
+      toast.success(`"${deleteProduct.name}" excluído do cardápio.`);
       setDeleteProduct(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao excluir produto");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -104,6 +119,7 @@ export default function AdminMenuPage() {
     ingredients: string[];
     image?: string;
   }) => {
+    if (saving) return;
     const payload: Partial<BackendProduct> = {
       name: data.name,
       description: data.description,
@@ -114,20 +130,25 @@ export default function AdminMenuPage() {
     if (data.category) {
       payload.category = data.category;
     }
+    setSaving(true);
     try {
       if (editProduct) {
         const updated = await api.updateProduct(Number(editProduct.id), payload);
         setProducts((prev) =>
           prev.map((p) => (p.id === editProduct.id ? toAdminProduct(updated) : p))
         );
+        toast.success(`"${updated.name}" atualizado.`);
       } else {
         const created = await api.createProduct(payload);
         setProducts((prev) => [...prev, toAdminProduct(created)]);
+        toast.success(`"${created.name}" criado no cardápio.`);
       }
       setShowForm(false);
       setEditProduct(null);
     } catch (err) {
-      console.error("Failed to save product", err);
+      toast.error(err instanceof Error ? err.message : "Erro ao salvar produto");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -139,8 +160,22 @@ export default function AdminMenuPage() {
     );
   }
 
+  if (loadError) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-8">
+          <div className="flex items-center gap-3">
+            <Cake className="h-5 w-5 lg:h-6 lg:w-6 text-[var(--brand-700)]" />
+            <h1 className="text-xl lg:text-2xl font-bold text-[var(--ink)]">Menu de Produtos</h1>
+          </div>
+        </div>
+        <ErrorState message={loadError} onRetry={loadProducts} />
+      </div>
+    );
+  }
+
   if (showForm) {
-    return <ProductForm onBack={() => { setShowForm(false); setEditProduct(null); }} editProduct={editProduct} onSave={handleSave} />;
+    return <ProductForm onBack={() => { setShowForm(false); setEditProduct(null); }} editProduct={editProduct} onSave={handleSave} saving={saving} />;
   }
 
   return (
@@ -191,11 +226,11 @@ export default function AdminMenuPage() {
             Tem certeza que deseja remover <strong>{deleteProduct?.name}</strong> do cardápio?
           </p>
           <div className="flex gap-3 justify-center">
-            <Button variant="outline" onClick={() => setDeleteProduct(null)}>
+            <Button variant="outline" onClick={() => setDeleteProduct(null)} disabled={deleting}>
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              Sim, excluir
+            <Button variant="destructive" onClick={confirmDelete} disabled={deleting}>
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sim, excluir"}
             </Button>
           </div>
         </DialogContent>

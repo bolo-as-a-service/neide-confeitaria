@@ -16,6 +16,7 @@ import { AdminProduct } from "./AdminProductTable";
 interface ProductFormProps {
   onBack: () => void;
   editProduct?: AdminProduct | null;
+  saving?: boolean;
   onSave?: (data: {
     name: string;
     description: string;
@@ -26,7 +27,7 @@ interface ProductFormProps {
   }) => void;
 }
 
-export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
+export function ProductForm({ onBack, editProduct, saving = false, onSave }: ProductFormProps) {
   const [name, setName] = React.useState(editProduct?.name ?? "");
   const [description, setDescription] = React.useState(editProduct?.description ?? "");
   const [categories, setCategories] = React.useState<BackendCategory[]>([]);
@@ -131,14 +132,23 @@ export function ProductForm({ onBack, editProduct, onSave }: ProductFormProps) {
               variant="outline"
               className="border-[var(--brand-700)] text-[var(--brand-800)] text-xs sm:text-sm px-3 sm:px-4"
               onClick={onBack}
+              disabled={saving}
             >
               Cancelar
             </Button>
             <Button
               className="bg-[var(--brand-700)] hover:bg-[var(--brand-800)] text-white text-xs sm:text-sm px-3 sm:px-4"
               onClick={handleSave}
+              disabled={saving}
             >
-              Salvar Produto
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                "Salvar Produto"
+              )}
             </Button>
           </div>
         </div>
