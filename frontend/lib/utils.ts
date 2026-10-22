@@ -6,6 +6,16 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Normaliza texto para busca/comparação: minúsculas sem acentos.
+ */
+export function normalizeSearchText(value?: string | null): string {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+/**
  * Slug canônico de categoria (issue #14).
  * Unifica a lógica antes duplicada em `app/cardapio/page.tsx`
  * (mapProduct, frontendCategories, productsByCategory).

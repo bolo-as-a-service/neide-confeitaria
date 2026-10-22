@@ -13,7 +13,7 @@ import { Skeleton, ProductGridSkeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { Product } from "@/components/menu/ProductCard";
 import { useCart, CartItem } from "@/lib/cart-context";
-import { cn, slugifyCategory } from "@/lib/utils";
+import { cn, normalizeSearchText, slugifyCategory } from "@/lib/utils";
 import { productImageSrc } from "@/lib/product-image";
 import { api } from "@/lib/api";
 import type { BackendCategory, BackendProduct } from "@/lib/types";
@@ -90,6 +90,40 @@ export default function CardapioPage() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // Produtos visíveis: aplica a busca (insensível a acentos e caixa) sobre
+  // nome, descrição e ingredientes antes de agrupar por categoria.
+  const visibleProducts = React.useMemo(() => {
+    const q = normalizeSearchText(searchQuery.trim());
+    if (!q) return backendProducts;
+    const tokens = q.split(/\s+/).filter(Boolean);
+    return backendProducts.filter((p) => {
+      const haystack = normalizeSearchText(
+        `${p.name} ${p.description ?? ""} ${(p.ingredients ?? []).join(" ")}`
+      );
+      return tokens.every((token) => haystack.includes(token));
+    });
+  }, [backendProducts, searchQuery]);
+
+  const searching = searchQuery.trim().length > 0;
+
+  // Agrupa os produtos visíveis: slugs conhecidos (backend + presets) vão
+  // para a própria seção; qualquer categoria nova/não listada cai no
+  // bucket "outros" — nenhum produto some do cardápio.
+  const productsByCategory = React.useMemo(() => {
+    const grouped: Record<string, Product[]> = {};
+    const knownSlugs = new Set<string>([
+      ...backendCategories.map((cat) => slugifyCategory(cat.name)),
+      ...Object.keys(CATEGORY_ICONS),
+    ]);
+    visibleProducts.forEach((p) => {
+      const slug = slugifyCategory(p.category?.name);
+      const bucket = knownSlugs.has(slug) ? slug : "outros";
+      if (!grouped[bucket]) grouped[bucket] = [];
+      grouped[bucket].push(mapProduct(p));
+    });
+    return grouped;
+  }, [visibleProducts, backendCategories]);
+
   const frontendCategories = React.useMemo(() => {
     if (backendCategories.length > 0) {
       const mapped = backendCategories.map((cat) => {
@@ -100,12 +134,11 @@ export default function CardapioPage() {
           label: preset?.label || cat.name,
         };
       });
-      // Garante a seção "Outros": produtos sem categoria (category null/id 0)
-      // são agrupados em "outros" e precisam de aba visível.
-      const hasUncategorized = backendProducts.some(
-        (p) => slugifyCategory(p.category?.name) === "outros"
-      );
-      if (hasUncategorized && !mapped.some((c) => c.id === "outros")) {
+      // Garante a seção "Outros" sempre que o bucket de fallback tem itens
+      // (sem categoria, categoria nova ou não listada pelo backend).
+      const hasFallback =
+        (productsByCategory["outros"]?.length ?? 0) > 0;
+      if (hasFallback && !mapped.some((c) => c.id === "outros")) {
         mapped.push({ id: "outros", label: CATEGORY_ICONS["outros"].label });
       }
       return mapped;
@@ -116,23 +149,14 @@ export default function CardapioPage() {
     }));
   }, [backendCategories, backendProducts]);
 
-  const productsByCategory = React.useMemo(() => {
-    const grouped: Record<string, Product[]> = {};
-    const categories = frontendCategories.length > 0 ? frontendCategories : Object.entries(CATEGORY_ICONS).map(([id, val]) => ({ id, label: val.label }));
-    categories.forEach((cat) => {
-      grouped[cat.id] = [];
-    });
-    backendProducts.forEach((p) => {
-      const categoryName = slugifyCategory(p.category?.name);
-      if (grouped[categoryName]) {
-        grouped[categoryName].push(mapProduct(p));
-      } else {
-        if (!grouped["outros"]) grouped["outros"] = [];
-        grouped["outros"].push(mapProduct(p));
-      }
-    });
-    return grouped;
-  }, [backendProducts, frontendCategories]);
+  const visibleCategoryIds = React.useMemo(
+    () =>
+      (activeCategory === "todos"
+        ? frontendCategories
+        : frontendCategories.filter((cat) => cat.id === activeCategory)
+      ).filter((category) => (productsByCategory[category.id]?.length ?? 0) > 0),
+    [frontendCategories, activeCategory, productsByCategory]
+  );
 
   const handleAddToCart = (product: Product) => {
     addItem(product);
@@ -201,20 +225,41 @@ export default function CardapioPage() {
             <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} categories={frontendCategories as Category[]} />
             <SearchBar value={searchQuery} onChange={setSearchQuery} />
 
-            {(activeCategory === "todos" ? frontendCategories : frontendCategories.filter((cat) => cat.id === activeCategory))
-              .map((category) => {
-                const products = productsByCategory[category.id] || [];
-                if (products.length === 0) return null;
-                return (
-                  <ProductCategorySection
-                    key={category.id}
-                    title={category.label}
-                    products={products}
-                    onAddClick={handleAddToCart}
-                    onDetailClick={setSelectedProduct}
-                  />
-                );
-              })}
+            {visibleCategoryIds.map((category) => {
+              const products = productsByCategory[category.id] || [];
+              return (
+                <ProductCategorySection
+                  key={category.id}
+                  title={category.label}
+                  products={products}
+                  onAddClick={handleAddToCart}
+                  onDetailClick={setSelectedProduct}
+                />
+              );
+            })}
+            {visibleCategoryIds.length === 0 && (
+              <div className="px-4 py-16 text-center">
+                <p className="font-display text-lg font-bold text-[var(--brand-800)]">
+                  Nenhum produto encontrado
+                </p>
+                <p className="mt-1 text-sm text-[var(--muted)]">
+                  {searching
+                    ? `Sem resultados para "${searchQuery.trim()}". Tente outro termo ou categoria.`
+                    : "Ainda não há produtos nesta categoria."}
+                </p>
+                {searching && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setActiveCategory("todos");
+                    }}
+                    className="mt-4 text-sm font-semibold text-[var(--brand-700)] underline underline-offset-2 hover:text-[var(--brand-800)]"
+                  >
+                    Limpar busca
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
