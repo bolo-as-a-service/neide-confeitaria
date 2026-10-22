@@ -28,7 +28,7 @@ export interface Order {
 
 interface OrderCardProps {
   order: Order;
-  variant: "fila" | "aprovados" | "fazendo" | "prontos";
+  variant: "fila" | "aprovados" | "fazendo" | "prontos" | "entregues" | "cancelados";
   onRecusar?: (order: Order) => void;
   onAceitar?: (order: Order) => void;
   onIniciarPreparo?: (order: Order) => void;

@@ -77,7 +77,13 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+    private static final java.util.Set<String> VALID_STATUSES = java.util.Set.of(
+        "FILA", "APROVADO", "FAZENDO", "PRONTO", "ENTREGUE", "CANCELADO");
+
     public Order updateStatus(Long id, String status) {
+        if (status == null || !VALID_STATUSES.contains(status)) {
+            throw new RuntimeException("Status inválido: " + status);
+        }
         Order order = getOrderById(id);
         order.setStatus(status);
         return orderRepository.save(order);

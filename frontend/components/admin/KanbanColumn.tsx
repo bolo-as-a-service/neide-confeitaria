@@ -10,7 +10,7 @@ interface KanbanColumnProps {
   icon: React.ReactNode;
   count: number;
   orders: Order[];
-  variant: "fila" | "aprovados" | "fazendo" | "prontos";
+  variant: "fila" | "aprovados" | "fazendo" | "prontos" | "entregues" | "cancelados";
   onRecusar?: (order: Order) => void;
   onAceitar?: (order: Order) => void;
   onIniciarPreparo?: (order: Order) => void;
@@ -23,6 +23,8 @@ const headerStyles: Record<string, string> = {
   aprovados: "bg-yellow-50 text-yellow-800",
   fazendo: "bg-blue-50 text-blue-800",
   prontos: "bg-green-50 text-green-800",
+  entregues: "bg-teal-50 text-teal-800",
+  cancelados: "bg-gray-100 text-gray-600",
 };
 
 const countStyles: Record<string, string> = {
@@ -30,6 +32,8 @@ const countStyles: Record<string, string> = {
   aprovados: "bg-yellow-500 text-white",
   fazendo: "bg-blue-500 text-white",
   prontos: "bg-green-500 text-white",
+  entregues: "bg-teal-600 text-white",
+  cancelados: "bg-gray-400 text-white",
 };
 
 const bodyStyles: Record<string, string> = {
@@ -37,6 +41,8 @@ const bodyStyles: Record<string, string> = {
   aprovados: "bg-yellow-50/50",
   fazendo: "bg-blue-50/50",
   prontos: "bg-green-50/50",
+  entregues: "bg-teal-50/50",
+  cancelados: "bg-gray-50",
 };
 
 export function KanbanColumn({
