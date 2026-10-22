@@ -158,12 +158,6 @@ function LoginForm() {
                   <FormItem>
                     <div className="flex items-center justify-between">
                       <FormLabel>Senha</FormLabel>
-                      <Link
-                        href="/recuperar-senha"
-                        className="text-xs font-semibold text-[var(--brand-600)] underline-offset-2 hover:underline"
-                      >
-                        Esqueceu?
-                      </Link>
                     </div>
                     <FormControl>
                       <div className="relative">
