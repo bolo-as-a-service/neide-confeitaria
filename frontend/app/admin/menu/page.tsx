@@ -14,7 +14,7 @@ import {
 import { ErrorState } from "@/components/ui/error-state";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { categoryColorForCategory } from "@/lib/utils";
+import { categoryColorForCategory, parsePriceInput } from "@/lib/utils";
 import { productImageSrc } from "@/lib/product-image";
 import type { BackendCategory, BackendProduct } from "@/lib/types";
 
@@ -123,7 +123,7 @@ export default function AdminMenuPage() {
     const payload: Partial<BackendProduct> = {
       name: data.name,
       description: data.description,
-      price: parseFloat(data.price.replace(",", ".")),
+      price: parsePriceInput(data.price),
       ingredients: data.ingredients,
       imageUrl: data.image,
     };

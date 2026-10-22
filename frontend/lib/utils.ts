@@ -6,6 +6,16 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Converte entrada de preço pt-BR ("1.234,56" ou "1234,56") em número.
+ * Retorna NaN se inválido.
+ */
+export function parsePriceInput(raw: string): number {
+  const normalized = raw.trim().replace(/\s/g, "").replace(/\./g, "").replace(",", ".");
+  if (!/^\d+(\.\d{1,2})?$/.test(normalized)) return NaN;
+  return Number(normalized);
+}
+
+/**
  * Normaliza texto para busca/comparação: minúsculas sem acentos.
  */
 export function normalizeSearchText(value?: string | null): string {
