@@ -51,6 +51,14 @@ export default function CarrinhoPage() {
   const [editItem, setEditItem] = React.useState<CartItem | null>(null);
   const [deleteItem, setDeleteItem] = React.useState<CartItem | null>(null);
 
+  // O iframe do mapa só recarrega após 600ms sem digitar: evita um embed
+  // (e um envio do endereço ao Google) a cada tecla.
+  const [debouncedAddress, setDebouncedAddress] = React.useState(address);
+  React.useEffect(() => {
+    const timer = setTimeout(() => setDebouncedAddress(address), 600);
+    return () => clearTimeout(timer);
+  }, [address]);
+
   const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
   // Itens pausados no admin depois de adicionados não podem ser comprados.
@@ -412,9 +420,9 @@ export default function CarrinhoPage() {
                         MARQUE O ENDEREÇO DE ENTREGA
                       </h3>
                       <div className="relative w-full h-[260px] rounded-xl overflow-hidden border border-gray-300">
-                        {address.trim() ? (
+                        {debouncedAddress.trim() ? (
                           <iframe
-                            src={`https://maps.google.com/maps?q=${encodeURIComponent(address)}&output=embed`}
+                            src={`https://maps.google.com/maps?q=${encodeURIComponent(debouncedAddress)}&output=embed`}
                             className="w-full h-full"
                             allowFullScreen
                             loading="lazy"
