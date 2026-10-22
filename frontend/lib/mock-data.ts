@@ -119,6 +119,13 @@ const initialProducts: BackendProduct[] = [
 const mockAdminUser: BackendUser = {"id": 900, "name": "Neide", "email": "admin@neide.com", "phone": "11999999999", "role": "ADMIN"};
 const mockCustomerUser: BackendUser = {"id": 1, "name": "Everton", "email": "everton@gmail.com", "phone": "11933548635", "role": "USER"};
 
+/** Sessão mock atual (definida no login/registro). */
+let currentMockUser: BackendUser | null = null;
+
+function mockToken(user: BackendUser): string {
+  return `mock-token-${user.id}-${user.role}`;
+}
+
 // ---- Pedidos (snapshot real do banco; cópia mutável em memória) ----
 const initialOrders: BackendOrder[] = [
   {"id": 1, "customerName": "Teste", "phone": "00000000000", "delivery": false, "address": undefined, "latitude": undefined, "longitude": undefined, "observation": undefined, "status": "FILA", "deliveryDateTime": undefined, "createdAt": "2026-06-17T16:55:45.787000+00:00", "items": [{"id": 1, "product": {"id": 2, "name": "Bolo de Fubá", "description": "Bolo de fubá cremoso tradicional", "price": 55.0, "imageUrl": undefined, "available": true, "category": {"id": 1, "name": "Caseiro"}, "ingredients": ["Fubá", "Leite", "Ovos", "Açúcar", "Queijo"]}, "quantity": 1, "observation": undefined, "unitPrice": 55.0}]},
@@ -139,7 +146,8 @@ export const mockApi = {
   login: async (dto: BackendLoginDTO) => {
     await mockDelay();
     if (!dto.email || !dto.password) throw new Error("Credenciais inválidas");
-    return clone(dto.email.toLowerCase().includes("admin") ? mockAdminUser : mockCustomerUser);
+    currentMockUser = clone(dto.email.toLowerCase().includes("admin") ? mockAdminUser : mockCustomerUser);
+    return { token: mockToken(currentMockUser), user: clone(currentMockUser) };
   },
 
   register: async (dto: BackendRegisterDTO) => {
@@ -151,7 +159,14 @@ export const mockApi = {
       phone: dto.phone,
       role: "USER",
     };
-    return created;
+    currentMockUser = clone(created);
+    return { token: mockToken(created), user: created };
+  },
+
+  getMe: async () => {
+    await mockDelay();
+    if (!currentMockUser) throw new Error("Sessão expirada. Faça login novamente.");
+    return { user: clone(currentMockUser) };
   },
 
   // Categories
@@ -250,6 +265,18 @@ export const mockApi = {
     const found = orders.find((o) => o.id === id);
     if (!found) throw new Error("HTTP 404");
     return clone(found);
+  },
+
+  getMyOrders: async () => {
+    await mockDelay();
+    if (!currentMockUser) throw new Error("Sessão expirada. Faça login novamente.");
+    return clone(
+      orders.filter(
+        (o) =>
+          o.userId === currentMockUser!.id ||
+          o.customerName.toLowerCase() === currentMockUser!.name.toLowerCase()
+      )
+    );
   },
 
   getOrdersByCustomer: async (name: string) => {
