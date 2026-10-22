@@ -53,6 +53,8 @@ export default function CarrinhoPage() {
 
   const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  // Itens pausados no admin depois de adicionados não podem ser comprados.
+  const unavailableItems = items.filter((item) => item.product.available === false);
 
   const formattedTotal = new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -82,6 +84,10 @@ export default function CarrinhoPage() {
     }
     if (items.length === 0) {
       toast.error("Seu carrinho está vazio.");
+      return;
+    }
+    if (unavailableItems.length > 0) {
+      toast.error("Remova os itens pausados do carrinho para continuar.");
       return;
     }
 
@@ -129,6 +135,12 @@ export default function CarrinhoPage() {
         </button>
 
         <div className="space-y-6">
+          {unavailableItems.length > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 text-sm text-amber-800">
+              <strong>Atenção:</strong> {unavailableItems.length === 1 ? "um item do seu carrinho foi pausado" : "alguns itens do seu carrinho foram pausados"} e {unavailableItems.length === 1 ? "precisa ser removido" : "precisam ser removidos"} antes de finalizar:{" "}
+              {unavailableItems.map((i) => i.product.name).join(", ")}.
+            </div>
+          )}
           <div className="bg-white rounded-2xl border border-[var(--rose-200)] shadow-sm overflow-hidden">
             <div className="p-6 pb-4">
               <h2 className="font-display text-lg font-bold text-[var(--brand-800)] uppercase tracking-wide mb-5">
@@ -170,6 +182,11 @@ export default function CarrinhoPage() {
                             <div>
                               <h3 className="font-display text-base font-semibold text-[var(--ink)]">
                                 {item.product.name}
+                                {item.product.available === false && (
+                                  <span className="ml-2 align-middle inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-200 text-gray-600 uppercase">
+                                    Pausado
+                                  </span>
+                                )}
                               </h3>
                               <p className="text-sm text-[var(--muted)] mt-0.5">
                                 {item.quantity}x • {formattedItemTotal(item.product.price, 1)}
@@ -470,19 +487,21 @@ export default function CarrinhoPage() {
                 <div className="mt-6 flex justify-center">
                   <Button
                     onClick={handleFinalize}
-                    disabled={submitting || items.length === 0 || !isFormValid}
+                    disabled={submitting || items.length === 0 || !isFormValid || unavailableItems.length > 0}
                     title={
                       items.length === 0
                         ? "Adicione itens ao carrinho"
-                        : !isFormValid
-                          ? (firstCheckoutError({
-                              customerName,
-                              customerPhone,
-                              delivery: deliveryOption === "sim",
-                              address,
-                              deliveryDateTime: deliveryDate,
-                            }) ?? "Preencha os dados corretamente")
-                          : undefined
+                        : unavailableItems.length > 0
+                          ? "Remova os itens pausados para continuar"
+                          : !isFormValid
+                            ? (firstCheckoutError({
+                                customerName,
+                                customerPhone,
+                                delivery: deliveryOption === "sim",
+                                address,
+                                deliveryDateTime: deliveryDate,
+                              }) ?? "Preencha os dados corretamente")
+                            : undefined
                     }
                     className="w-full max-w-md h-14 text-lg font-bold rounded-xl uppercase tracking-wide disabled:cursor-not-allowed"
                     size="lg"

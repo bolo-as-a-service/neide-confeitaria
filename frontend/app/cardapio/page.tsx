@@ -40,6 +40,7 @@ function mapProduct(p: BackendProduct): Product {
     category: categoryName,
     description: p.description,
     ingredients: p.ingredients,
+    available: p.available,
   };
 }
 
@@ -91,13 +92,14 @@ export default function CardapioPage() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Produtos visíveis: aplica a busca (insensível a acentos e caixa) sobre
-  // nome, descrição e ingredientes antes de agrupar por categoria.
+  // Produtos visíveis: esconde indisponíveis e aplica a busca (insensível
+  // a acentos e caixa) sobre nome, descrição e ingredientes.
   const visibleProducts = React.useMemo(() => {
+    const sellable = backendProducts.filter((p) => p.available);
     const q = normalizeSearchText(searchQuery.trim());
-    if (!q) return backendProducts;
+    if (!q) return sellable;
     const tokens = q.split(/\s+/).filter(Boolean);
-    return backendProducts.filter((p) => {
+    return sellable.filter((p) => {
       const haystack = normalizeSearchText(
         `${p.name} ${p.description ?? ""} ${(p.ingredients ?? []).join(" ")}`
       );

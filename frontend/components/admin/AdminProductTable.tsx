@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Pencil, Trash2, Search } from "lucide-react";
+import { Pencil, Power, Trash2, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface AdminProduct {
@@ -25,6 +25,7 @@ interface AdminProductTableProps {
   onCategoryFilterChange: (value: string) => void;
   onEdit?: (product: AdminProduct) => void;
   onDelete?: (product: AdminProduct) => void;
+  onToggle?: (product: AdminProduct) => void;
 }
 
 const categoryTagStyles: Record<string, string> = {
@@ -42,6 +43,7 @@ export function AdminProductTable({
   onCategoryFilterChange,
   onEdit,
   onDelete,
+  onToggle,
 }: AdminProductTableProps) {
   const formattedPrice = (price: number) =>
     new Intl.NumberFormat("pt-BR", {
@@ -127,38 +129,7 @@ export function AdminProductTable({
               </div>
 
               <div className="flex lg:hidden items-center justify-between mt-2 pt-2 border-t border-gray-100">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={cn(
-                      "inline-block px-3 py-1 rounded-full text-xs font-semibold",
-                      categoryTagStyles[product.categoryColor]
-                    )}
-                  >
-                    {product.category}
-                  </span>
-                  <span className="text-sm font-bold text-[var(--brand-800)]">
-                    {formattedPrice(product.price)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => onEdit?.(product)}
-                    className="w-8 h-8 rounded-full bg-green-50 text-green-600 hover:bg-green-100 flex items-center justify-center transition-colors"
-                    aria-label={`Editar ${product.name}`}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => onDelete?.(product)}
-                    className="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors"
-                    aria-label={`Excluir ${product.name}`}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="hidden lg:block">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span
                   className={cn(
                     "inline-block px-3 py-1 rounded-full text-xs font-semibold",
@@ -167,15 +138,29 @@ export function AdminProductTable({
                 >
                   {product.category}
                 </span>
-              </div>
-
-              <div className="hidden lg:block">
+                {product.available === false && (
+                  <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-600">
+                    Pausado
+                  </span>
+                )}
                 <span className="text-sm font-bold text-[var(--brand-800)]">
                   {formattedPrice(product.price)}
                 </span>
               </div>
-
-              <div className="hidden lg:flex items-center justify-center gap-2">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onToggle?.(product)}
+                  className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+                    product.available === false
+                      ? "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                      : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                  )}
+                  aria-label={product.available === false ? `Ativar ${product.name}` : `Pausar ${product.name}`}
+                  title={product.available === false ? "Ativar no cardápio" : "Pausar no cardápio"}
+                >
+                  <Power className="h-4 w-4" />
+                </button>
                 <button
                   onClick={() => onEdit?.(product)}
                   className="w-8 h-8 rounded-full bg-green-50 text-green-600 hover:bg-green-100 flex items-center justify-center transition-colors"
@@ -183,6 +168,61 @@ export function AdminProductTable({
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
+                <button
+                  onClick={() => onDelete?.(product)}
+                  className="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors"
+                  aria-label={`Excluir ${product.name}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+              </div>
+
+            <div className="hidden lg:block">
+              <span className="flex items-center gap-1.5 flex-wrap">
+                <span
+                  className={cn(
+                    "inline-block px-3 py-1 rounded-full text-xs font-semibold",
+                    categoryTagStyles[product.categoryColor]
+                  )}
+                >
+                  {product.category}
+                </span>
+                {product.available === false && (
+                  <span className="inline-block px-2 py-1 rounded-full text-[10px] font-semibold bg-gray-200 text-gray-600">
+                    Pausado
+                  </span>
+                )}
+              </span>
+            </div>
+
+              <div className="hidden lg:block">
+                <span className="text-sm font-bold text-[var(--brand-800)]">
+                  {formattedPrice(product.price)}
+                </span>
+              </div>
+
+            <div className="hidden lg:flex items-center justify-center gap-2">
+              <button
+                onClick={() => onToggle?.(product)}
+                className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+                  product.available === false
+                    ? "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                    : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                )}
+                aria-label={product.available === false ? `Ativar ${product.name}` : `Pausar ${product.name}`}
+                title={product.available === false ? "Ativar no cardápio" : "Pausar no cardápio"}
+              >
+                <Power className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => onEdit?.(product)}
+                className="w-8 h-8 rounded-full bg-green-50 text-green-600 hover:bg-green-100 flex items-center justify-center transition-colors"
+                aria-label={`Editar ${product.name}`}
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
                 <button
                   onClick={() => onDelete?.(product)}
                   className="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors"

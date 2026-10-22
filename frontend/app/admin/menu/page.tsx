@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 import { categoryColorForCategory } from "@/lib/utils";
 import { productImageSrc } from "@/lib/product-image";
 import type { BackendCategory, BackendProduct } from "@/lib/types";
@@ -62,6 +63,25 @@ export default function AdminMenuPage() {
 
   const handleDelete = (product: AdminProduct) => {
     setDeleteProduct(product);
+  };
+
+  const handleToggle = async (product: AdminProduct) => {
+    const next = !(product.available ?? true);
+    setProducts((prev) =>
+      prev.map((p) => (p.id === product.id ? { ...p, available: next } : p))
+    );
+    try {
+      const updated = await api.toggleProduct(Number(product.id));
+      setProducts((prev) =>
+        prev.map((p) => (p.id === product.id ? toAdminProduct(updated) : p))
+      );
+      toast.success(next ? `"${product.name}" ativado no cardápio.` : `"${product.name}" pausado no cardápio.`);
+    } catch (err) {
+      setProducts((prev) =>
+        prev.map((p) => (p.id === product.id ? { ...p, available: product.available } : p))
+      );
+      toast.error(err instanceof Error ? err.message : "Erro ao alterar disponibilidade");
+    }
   };
 
   const confirmDelete = async () => {
@@ -152,6 +172,7 @@ export default function AdminMenuPage() {
         onCategoryFilterChange={setCategoryFilter}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onToggle={handleToggle}
       />
 
       <Dialog open={!!deleteProduct} onOpenChange={() => setDeleteProduct(null)}>

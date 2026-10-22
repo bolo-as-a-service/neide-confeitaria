@@ -16,6 +16,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     price: 39.9,
     image: "/bolo.webp",
     category: "caseiro",
+    available: true,
     ...overrides,
   };
 }

@@ -15,6 +15,7 @@ export interface Product {
   category: string;
   description?: string;
   ingredients?: string[];
+  available: boolean;
 }
 
 interface ProductCardProps {
