@@ -54,7 +54,8 @@ export default function CardapioPage() {
   const [backendProducts, setBackendProducts] = React.useState<BackendProduct[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [loadError, setLoadError] = React.useState("");
-  const { items, addItem, updateQuantity, removeItem } = useCart();
+  const { items, addItem, updateItem, updateQuantity, removeItem } = useCart();
+  const [editItem, setEditItem] = React.useState<CartItem | null>(null);
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -269,7 +270,7 @@ export default function CardapioPage() {
           onClose={() => setCartOpen(false)}
           onUpdateQuantity={updateQuantity}
           onRemoveItem={removeItem}
-          onEditItem={(item: CartItem) => setSelectedProduct(item.product)}
+            onEditItem={(item: CartItem) => setEditItem(item)}
           onCheckout={handleCheckout}
         />
       </main>
@@ -277,10 +278,18 @@ export default function CardapioPage() {
       <Footer />
 
       <ProductModal
-        product={selectedProduct}
-        isOpen={!!selectedProduct}
-        onClose={() => setSelectedProduct(null)}
+        product={editItem?.product ?? selectedProduct}
+        isOpen={!!selectedProduct || !!editItem}
+        onClose={() => {
+          setSelectedProduct(null);
+          setEditItem(null);
+        }}
         onAddToCart={handleAddToCartFromModal}
+        editItem={editItem}
+        onSaveEdit={(itemId, quantity, observations) => {
+          updateItem(itemId, quantity, observations);
+          setEditItem(null);
+        }}
       />
     </div>
   );
