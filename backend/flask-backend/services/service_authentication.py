@@ -26,9 +26,6 @@ def Service_login_post(data):
     elif "@" in credencial or ".com" in credencial:
         return "Email ou senha invalidos", 400 #TEMPORARIO, O CORRETO SERIA RETORNAR 401
 
-    elif "9" in credencial and ("1" or "2" or "3" or "4" or "5" or "6" or "7" or "8" or "0") in credencial:
-        return "Telefone ou senha invalidos", 400 #TEMPORARIO, O CORRETO SERIA RETORNAR 401
-
     else:
         return "Credencial ou senha invalidos", 400 #TEMPORARIO, O CORRETO SERIA RETORNAR 401
 
