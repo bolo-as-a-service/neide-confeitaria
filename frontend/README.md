@@ -12,7 +12,7 @@ npm run lint     # eslint (deve passar sem erros)
 npm test         # vitest
 ```
 
-Pré-requisito: backend Spring (`backend/flask-backend`, porta 5000) ou modo mock (abaixo).
+Pré-requisito: backend Spring ( `backend/flask-backend`, porta 5000 ) ou modo mock (abaixo).
 
 ## Variáveis de ambiente
 
