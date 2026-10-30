@@ -4,7 +4,7 @@ from models.models_category import Category
 from models.models_product import Product
 from models.models_users import User
 from models.models_orders import Orders,Items
-
+from extensions.extensions import flask_bcrypt
 
 def Tables():
     if Category.query.count() == 0:
@@ -46,8 +46,8 @@ def Tables():
     if User.query.count() == 0:
             db.session.add_all(
                  [
-                      User(email="neide@gmail.com",name=("Neide"),phone_number=("11986803971"), password=("neide123"), role=("ADMIN")),
-                      User(email="teste@gmail.com",name=("Teste"),phone_number=("11986803972"), password=("teste123"), role=("USER"))
+                      User(email="neide@gmail.com",name=("Neide"),phone_number=("11986803971"), password=(flask_bcrypt.generate_password_hash("neide123").decode("utf-8")), role=("ADMIN")),
+                      User(email="teste@gmail.com",name=("Teste"),phone_number=("11986803972"), password=(flask_bcrypt.generate_password_hash("teste123").decode("utf-8")), role=("USER"))
                  ])
             db.session.commit()
 
@@ -62,7 +62,7 @@ def Tables():
                     latitude=-22.9500,
                     longitude=-46.5400,
                     observation="Entregar na portaria",
-                    order_items=[
+                    items=[
                     Items(id_product=1, quantity=2, unit_price=55.00, observation="Bem embalado")
                     ])
             ])

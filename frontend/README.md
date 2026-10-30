@@ -12,7 +12,7 @@ npm run lint     # eslint (deve passar sem erros)
 npm test         # vitest
 ```
 
-Pré-requisito: backend Spring (`backend/baas`, porta 8080) ou modo mock (abaixo).
+Pré-requisito: backend Spring (`backend/flask-backend`, porta 5000) ou modo mock (abaixo).
 
 ## Variáveis de ambiente
 
@@ -20,7 +20,7 @@ Copie `.env.example` para `.env.local` (ignorado pelo git):
 
 | Variável              | Dev                  | Produção                          |
 | --------------------- | -------------------- | --------------------------------- |
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8080` | `https://apineide.gsrodriguesz.me` |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:5000` | `https://apineide.gsrodriguesz.me` |
 | `NEXT_PUBLIC_USE_MOCK`| `true` (dados fictícios) | `false` (mock desativado no build) |
 
 `NEXT_PUBLIC_USE_MOCK=true` usa `lib/mock-data.ts` (100% fictício) e só vale
