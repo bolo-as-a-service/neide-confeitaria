@@ -1,7 +1,7 @@
 from models.models_users import User
 from extensions.extensions import flask_bcrypt
 from db import db
-
+import re
 
 def Service_login_post(data):
 
@@ -40,8 +40,19 @@ def Service_register_post(data):
 
     email = data.get('email')
     password = data.get('password')
-    phone = data.get('phone')
     name = data.get('name')
+
+    phone = data.get('phone')
+
+    phone_caracters = set("0123456789+()- ")
+    
+    if not all(char in phone_caracters for char in phone):
+        return "Numero de telefone invalido", 422
+        
+    standardised_phone = re.sub(r'[^0-9]','', phone)
+
+    if len(standardised_phone) < 10 or len(standardised_phone) > 11:
+        return "Numero de telefone invalido", 422
 
     if "@" not in email :
         return "Formato de email incorreto", 422
@@ -54,7 +65,7 @@ def Service_register_post(data):
     if len(password) < 6:
         return "A senha deve ter no minimo 6 caracteres", 422
 
-    if User.query.filter_by(phone_number=phone).first():
+    if User.query.filter_by(phone_number=standardised_phone).first():
         return "Já existe uma conta registrada com este telefone", 409
 
     if User.query.filter_by(email=email).first():
@@ -65,7 +76,7 @@ def Service_register_post(data):
     new_user = User(
         email=email,
         password=hashed_password,
-        phone_number=phone,
+        phone_number=standardised_phone ,
         name=name
     )
    
