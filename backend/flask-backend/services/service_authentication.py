@@ -18,7 +18,13 @@ def Service_login_post(data):
     user = User.query.filter_by(email=credencial).first()
 
     if not user:
-        user = User.query.filter_by(phone_number=credencial).first()
+        phone_caracters = set("0123456789+()- ")
+            
+        if not all(char in phone_caracters for char in credencial):
+            return "Numero de telefone invalido", 422
+                
+        standardised_phone = re.sub(r'[^0-9]','', credencial)
+        user = User.query.filter_by(phone_number=standardised_phone).first()
 
     if user and flask_bcrypt.check_password_hash(user.password, password):
         return user.to_dict(), None
