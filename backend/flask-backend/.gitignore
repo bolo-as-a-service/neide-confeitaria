@@ -1,0 +1,6 @@
+# database
+*.db
+
+#pycache
+__pycache__/
+*.pyc
