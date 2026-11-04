@@ -21,7 +21,7 @@ def Service_login_post(data):
         phone_caracters = set("0123456789+()- ")
             
         if not all(char in phone_caracters for char in credencial):
-            return "Numero de telefone invalido", 422
+            pass
                 
         standardised_phone = re.sub(r'[^0-9]','', credencial)
         user = User.query.filter_by(phone_number=standardised_phone).first()
