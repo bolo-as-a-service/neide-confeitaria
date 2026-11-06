@@ -1,9 +1,9 @@
-from main import app
-from flask import jsonify
+from flask import Blueprint, jsonify
 from services.service_category import Service_categorie_get
 
+category_blueprint = Blueprint("categories", __name__, url_prefix="/categories")
 
-@app.route("/categories", methods=["GET"])
+
+@category_blueprint.get("")
 def categories_get():
-    categories = Service_categorie_get()
-    return jsonify(categories),200
+    return jsonify(Service_categorie_get()), 200

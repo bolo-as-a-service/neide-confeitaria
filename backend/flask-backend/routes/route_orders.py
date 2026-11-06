@@ -1,63 +1,42 @@
-from main import app
-from flask import jsonify, request
-from services.service_orders import Service_orders_post,Service_orders_get,Service_get_order_by_id,Service_get_orders_by_name,Service_orders_advance_patch,Service_orders_change_patch
+# routes/route_orders.py
+from flask import Blueprint, jsonify, request
+from services.service_orders import (
+    Service_orders_post,
+    Service_orders_get,
+    Service_get_order_by_id,
+    Service_get_orders_by_name,
+    Service_orders_advance_patch,
+    Service_orders_change_patch,
+)
 
-@app.route("/orders", methods=["POST"])
+orders_blueprint = Blueprint("orders", __name__, url_prefix="/orders")
+
+
+@orders_blueprint.post("")
 def orders_post():
-
-    new_order = Service_orders_post(request.get_json())
-    
-    return jsonify(new_order),201
+    return jsonify(Service_orders_post(request.get_json())), 201
 
 
-       
-@app.route("/orders", methods=["GET"])
+@orders_blueprint.get("")
 def orders_get():
-    order = Service_orders_get(request.args.get("status"))
-
-    if not order:
-        return [],200
-    return jsonify(order), 200
+    return jsonify(Service_orders_get(request.args.get("status")) or []), 200
 
 
-
-@app.route("/orders/<int:id>", methods=["GET"])
+@orders_blueprint.get("/<int:id>")
 def get_order_by_id(id):
-    order = Service_get_order_by_id(id)
+    return jsonify(Service_get_order_by_id(id)), 200
 
 
-    if not order:
-        return jsonify({"error" : "Pedido não encontrado"}), 404   
-    
-    return jsonify(order), 200
-
-    
-
-@app.route("/orders/customer/<string:name>", methods=["GET"])
+@orders_blueprint.get("/customer/<string:name>")
 def get_orders_by_name(name):
-
-    orders = Service_get_orders_by_name(name)
-
-    return jsonify(orders), 200
+    return jsonify(Service_get_orders_by_name(name)), 200
 
 
-
-
-@app.route("/orders/<int:id>/advance", methods=["PATCH"])
+@orders_blueprint.patch("/<int:id>/advance")
 def orders_advance_patch(id):
-
-    table = Service_orders_advance_patch(id)
-    
-    return jsonify(table),200
+    return jsonify(Service_orders_advance_patch(id)), 200
 
 
-
-
-@app.route("/orders/<int:id>/status", methods=["PATCH"])
+@orders_blueprint.patch("/<int:id>/status")
 def orders_change_patch(id):
-
-    status = Service_orders_change_patch(request.args.get("status"),id)
-
-    if not status:
-        return jsonify({"error" : "status não fornecido ou status não encontrado"}),400
-    return jsonify(status),200
+    return jsonify(Service_orders_change_patch(request.args.get("status"), id)), 200

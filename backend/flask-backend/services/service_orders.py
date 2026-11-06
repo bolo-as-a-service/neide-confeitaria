@@ -3,48 +3,45 @@ from models.models_orders import Orders, Items
 from models.models_users import User
 from models.models_product import Product
 from datetime import datetime
-
+from utils.error_message import AppError
 
 def Service_orders_post(data):
 
     delivery_date = None
     if data.get("deliveryDateTime"):
         try:
-            delivery_date = datetime.fromisoformat(data.get("deliveryDateTime").replace("Z", "+00:00"))
+            delivery_date = datetime.fromisoformat(
+                data.get("deliveryDateTime").replace("Z", "+00:00")
+            )
         except ValueError:
             pass
-    
-    
+
     new_order = Orders(
-        customer_name = data.get("customerName"),
-        customer_phone = data.get("phone"),
-        delivery = data.get("delivery"),
-    
-        address = data.get("address"),
-        latitude = data.get("latitude"),
-        longitude = data.get("longitude"),
-    
-        observation = data.get("observation"),
-        deliveryDateTime = delivery_date
+        customer_name=data.get("customerName"),
+        customer_phone=data.get("phone"),
+        delivery=data.get("delivery"),
+        address=data.get("address"),
+        latitude=data.get("latitude"),
+        longitude=data.get("longitude"),
+        observation=data.get("observation"),
+        deliveryDateTime=delivery_date,
     )
-    
+
     items_list = data.get("items", [])
-        
-        
+
     for item in items_list:
         product_id = item.get("productId")
         product = Product.query.get(product_id)
-    
-    
+
         new_itens = Items(
-            quantity = item.get("quantity"),
-            observation = item.get("observation"),
-            id_product = product.id_product,
-            unit_price = product.price
-           )
-    
+            quantity=item.get("quantity"),
+            observation=item.get("observation"),
+            id_product=product.id_product,
+            unit_price=product.price,
+        )
+
         new_order.items.append(new_itens)
-    
+
     db.session.add(new_order)
     db.session.commit()
 
@@ -52,11 +49,17 @@ def Service_orders_post(data):
 
 
 def Service_orders_get(status_product):
-     
+
     if status_product:
-        orders = Orders.query.filter(Orders.status==status_product).filter(Orders.status.not_in(["CANCELADO", "ENTREGUE"])).all()
+        orders = (
+            Orders.query.filter(Orders.status == status_product)
+            .filter(Orders.status.not_in(["CANCELADO", "ENTREGUE"]))
+            .all()
+        )
     else:
-        orders = Orders.query.filter(Orders.status.not_in(["CANCELADO", "ENTREGUE"])).all()
+        orders = Orders.query.filter(
+            Orders.status.not_in(["CANCELADO", "ENTREGUE"])
+        ).all()
 
     if not orders:
         return None
@@ -67,30 +70,29 @@ def Service_get_order_by_id(id):
     order = Orders.query.get(id)
 
     if not order:
-        return None
+        raise AppError("ORDER_DONT_EXISTS")
     return order.to_dict()
 
 
-def Service_get_orders_by_name(name) :
+def Service_get_orders_by_name(name):
 
     orders = Orders.query.filter(User.name.ilike(f"%{name}%")).all()
-
     if not orders:
         return []
     else:
         return [order.to_dict() for order in orders]
 
 
-def Service_orders_advance_patch(id) :
-
+def Service_orders_advance_patch(id):
+    print(1)
     order = Orders.query.get_or_404(id)
 
     if order.status == "PENDING":
         order.status = "APROVADO"
-    
+
     elif order.status == "APROVADO":
         order.status = "FAZENDO"
-            
+
     elif order.status == "FAZENDO":
         order.status = "PRONTO"
 
@@ -100,21 +102,14 @@ def Service_orders_advance_patch(id) :
     db.session.commit()
     return order.to_dict()
 
-    
 
-def Service_orders_change_patch(status,id):
-    
+def Service_orders_change_patch(status, id):
     if not status:
-        return None
-        
+        raise AppError("STATUS_ORDER_NOT_FOUND")
+    #VERIFICAR SE O ID DO PEDIDO EXISTE ANTES DE TENTAR ALGO SE NAO DA 404.
     order = Orders.query.get_or_404(id)
-   
+
     order.status = status
-    
+
     db.session.commit()
-    print(status)
     return order.to_dict()
-
-
-
-

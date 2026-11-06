@@ -2,15 +2,17 @@ from models.models_users import User
 from extensions.extensions import flask_bcrypt
 from db import db
 import re
+from utils.error_message import AppError
+
 
 def Service_login_post(data):
 
     if not data:
-        return "Preencha todos os campos", 400 
+        raise AppError("EMPTY_FIELDS")
 
-    for campo in ['email', 'password']:
+    for campo in ["email", "password"]:
         if not data.get(campo):
-            return "Preencha todos os campos", 400 
+            raise AppError("EMPTY_FIELDS")
 
     credencial = data.get("email")
     password = data.get("password")
@@ -19,77 +21,75 @@ def Service_login_post(data):
 
     if not user:
         phone_caracters = set("0123456789+()- ")
-            
+
         if not all(char in phone_caracters for char in credencial):
             pass
-                
-        standardised_phone = re.sub(r'[^0-9]','', credencial)
+
+        standardised_phone = re.sub(r"[^0-9]", "", credencial)
         user = User.query.filter_by(phone_number=standardised_phone).first()
 
     if user and flask_bcrypt.check_password_hash(user.password, password):
-        return user.to_dict(), None
+        return user.to_dict()
 
     elif "@" in credencial or ".com" in credencial:
-        return "Email ou senha invalidos", 400 #TEMPORARIO, O CORRETO SERIA RETORNAR 401
+        raise AppError("WRONG_DATA_EMAIL_OR_PASSWORD")
 
     else:
-        return "Credencial ou senha invalidos", 400 #TEMPORARIO, O CORRETO SERIA RETORNAR 401
+        raise AppError("WRONG_DATA_EMAIL_OR_PHONE")
+
 
 def Service_register_post(data):
 
     if not data:
-        return "Não podem haver campos vazios", 400
+        raise AppError("EMPTY_FIELDS")
 
-    for campo in ['email', 'password', 'phone', 'name']:
+    for campo in ["email", "password", "phone", "name"]:
         if not data.get(campo):
-            return "Não podem haver campos vazios", 400
+            raise AppError("EMPTY_FIELDS")
 
-    email = data.get('email')
-    password = data.get('password')
-    name = data.get('name')
+    email = data.get("email")
+    password = data.get("password")
+    name = data.get("name")
 
-    phone = data.get('phone')
+    phone = data.get("phone")
 
     phone_caracters = set("0123456789+()- ")
-    
     if not all(char in phone_caracters for char in phone):
-        return "Numero de telefone invalido", 422
-        
-    standardised_phone = re.sub(r'[^0-9]','', phone)
+        raise AppError("WRONG_PHONE_NUMBER")
+
+    standardised_phone = re.sub(r"[^0-9]", "", phone)
 
     if len(standardised_phone) < 10 or len(standardised_phone) > 11:
-        return "Numero de telefone invalido", 422
+        raise AppError("WRONG_PHONE_NUMBER")
 
-    if "@" not in email :
-        return "Formato de email incorreto", 422
-    if ' ' in password:
-        return "A senha não pode conter espaços", 400
+    if "@" not in email:
+        raise AppError("WRONG_EMAIL_FORMAT")
+
+    if " " in password:
+        raise AppError("PASSWORD_HAS_SPACES")
 
     if len(password) >= 30:
-        return "A senha deve ter no maximo 30 caracteres", 422  
+        raise AppError("PASSWORD_TOO_LONG")
 
     if len(password) < 6:
-        return "A senha deve ter no minimo 6 caracteres", 422
+        raise AppError("PASSWORD_TOO_SHORT")
 
     if User.query.filter_by(phone_number=standardised_phone).first():
-        return "Já existe uma conta registrada com este telefone", 409
+        raise AppError("PHONE_ALREADY_EXISTS")
 
     if User.query.filter_by(email=email).first():
-        return "Já existe uma conta registrada com este e-mail", 409
+        raise AppError("EMAIL_ALREADY_EXISTS")
 
     hashed_password = flask_bcrypt.generate_password_hash(password).decode("utf-8")
 
     new_user = User(
         email=email,
         password=hashed_password,
-        phone_number=standardised_phone ,
-        name=name
+        phone_number=standardised_phone,
+        name=name,
     )
-   
 
     db.session.add(new_user)
     db.session.commit()
 
-    
-
-    return new_user.to_dict(), None
+    return new_user.to_dict()
