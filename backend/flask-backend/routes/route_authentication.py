@@ -1,29 +1,17 @@
-from main import app
-from flask import jsonify, request
+from flask import Blueprint, jsonify, request
 from services.service_authentication import Service_login_post, Service_register_post
 from extensions.extensions import limiter
 
+auth_blueprint = Blueprint("auth", __name__, url_prefix="/auth")
 
-@app.route("/auth/login", methods=["POST"])
+
+@auth_blueprint.post("/login")
 @limiter.limit("30 per minute")
 def login_post():
-
-    message_login,status_error = Service_login_post(request.get_json())
-    
-    if status_error:
-        return jsonify({"error" : message_login}), status_error
-    
-    return jsonify(message_login), 200
-    
+    return jsonify(Service_login_post(request.get_json())), 200
 
 
-@app.route("/auth/register", methods=["POST"])
+@auth_blueprint.post("/register")
 @limiter.limit("30 per minute")
 def register_post():
-
-    message_new_user, status_error = Service_register_post(request.get_json())
-    
-    if status_error:
-        return jsonify({"error" : message_new_user}), status_error
-    
-    return jsonify(message_new_user), 201
+    return jsonify(Service_register_post(request.get_json())), 201
