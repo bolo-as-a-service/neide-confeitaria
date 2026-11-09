@@ -28,6 +28,7 @@ app.register_blueprint(products_blueprint)
 app.register_blueprint(category_blueprint)
 app.register_blueprint(orders_blueprint)
 
+app.config("JWT_SECRET_KEY")
 
 @app.errorhandler(AppError)
 def handle_app_error(e):
