@@ -1,10 +1,16 @@
+from extensions.extensions import flask_bcrypt, flask_jwt, limiter
+from flask_jwt_extended import JWTManager
+from utils.error_message import AppError
 from flask import Flask, jsonify
+from datetime import timedelta
 from flask_cors import CORS
 from db import db
-from utils.error_message import AppError
-from extensions.extensions import flask_bcrypt, flask_jwt, limiter
+
+import os
+
 
 app = Flask(__name__)
+
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
@@ -26,6 +32,11 @@ app.register_blueprint(products_blueprint)
 app.register_blueprint(category_blueprint)
 app.register_blueprint(orders_blueprint)
 
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes = 15)
+
+
+jwt = JWTManager(app)
 
 @app.errorhandler(AppError)
 def handle_app_error(e):
