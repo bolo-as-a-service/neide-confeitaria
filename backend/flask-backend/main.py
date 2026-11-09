@@ -1,14 +1,16 @@
-from flask import Flask, jsonify
-from flask_cors import CORS
-from db import db
-from datetime import timedelta
-from utils.error_message import AppError
 from extensions.extensions import flask_bcrypt, flask_jwt, limiter
 from flask_jwt_extended import JWTManager
+from utils.error_message import AppError
+from flask import Flask, jsonify
+from datetime import timedelta
+from flask_cors import CORS
+from db import db
+
 import os
 
 
 app = Flask(__name__)
+
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
