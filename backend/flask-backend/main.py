@@ -3,6 +3,8 @@ from flask_cors import CORS
 from db import db
 from utils.error_message import AppError
 from extensions.extensions import flask_bcrypt, flask_jwt, limiter
+from flask_jwt_extended import jwt_manager
+
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
