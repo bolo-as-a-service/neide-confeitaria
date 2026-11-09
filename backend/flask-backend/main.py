@@ -1,9 +1,11 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from db import db
+from datetime import timedelta
 from utils.error_message import AppError
 from extensions.extensions import flask_bcrypt, flask_jwt, limiter
-from flask_jwt_extended import jwt_manager
+from flask_jwt_extended import JWTManager
+import os
 
 
 app = Flask(__name__)
@@ -28,7 +30,11 @@ app.register_blueprint(products_blueprint)
 app.register_blueprint(category_blueprint)
 app.register_blueprint(orders_blueprint)
 
-app.config("JWT_SECRET_KEY")
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes = 15)
+
+
+jwt = JWTManager(app)
 
 @app.errorhandler(AppError)
 def handle_app_error(e):

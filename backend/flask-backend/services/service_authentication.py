@@ -1,8 +1,9 @@
-from models.models_users import User
 from extensions.extensions import flask_bcrypt
+from utils.error_message import AppError
+from models.models_users import User
 from db import db
 import re
-from utils.error_message import AppError
+
 
 
 def Service_login_post(data):
