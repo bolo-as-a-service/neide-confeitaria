@@ -6,7 +6,7 @@ class User(db.Model):
 
     phone_number = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(150), nullable=False)
-    password = db.Column(db.String(100),nullable=False)
+    password = db.Column(db.String(200),nullable=False)
     
     role = db.Column(db.String(10), default="customer")
 

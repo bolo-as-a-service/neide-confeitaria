@@ -95,4 +95,7 @@ def Service_login_post(data):
 
         raise AppError("WRONG_DATA_EMAIL_OR_PHONE")
 
-    return user.to_dict()
+
+    token = create_access_token(identity=str(user.id_user))
+
+    return token,user.to_dict()
