@@ -78,7 +78,7 @@ def Service_login_post(data):
     password = data.get("password")
 
     user = User.query.filter_by(email=credencial).first()
-
+    print(user)
     if not user:
         phone_caracters = set("0123456789+()- ")
 
@@ -87,6 +87,7 @@ def Service_login_post(data):
 
         standardised_phone = re.sub(r"[^0-9]", "", credencial)
         user = User.query.filter_by(phone_number=standardised_phone).first()
+    
 
     if not user or not flask_bcrypt.check_password_hash(user.password, password):
 
@@ -98,4 +99,4 @@ def Service_login_post(data):
 
     token = create_access_token(identity=str(user.id_user))
 
-    return token,user.to_dict()
+    return token,user.to_dict() 

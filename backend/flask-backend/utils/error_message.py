@@ -13,7 +13,8 @@ ERRORS = {
     ("ORDER_DONT_EXISTS") : ("Pedido não encontrado", 404),
     ("STATUS_ORDER_NOT_FOUND") : ("Status não fornecido ou status não encontrado", 404),
     #PRODUCT_ERRORS
-    ("PRODUCT_DONT_EXISTS") : ("O Produto não encontrado", 404)
+    ("PRODUCT_DONT_EXISTS") : ("O Produto não encontrado", 404),
+    ("NOT_AUTHORIZED") : ("Sem autorização", 400) #TEMPORARIO, O CORRETO SERIA RETORNAR 401
 }
 
 class AppError(Exception):
