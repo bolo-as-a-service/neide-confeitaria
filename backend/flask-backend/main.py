@@ -32,7 +32,7 @@ app.register_blueprint(products_blueprint)
 app.register_blueprint(category_blueprint)
 app.register_blueprint(orders_blueprint)
 
-app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY" , "chavedeexemplo") #necessita env
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY") #necessita .env (Exemplo: JWT_SECRET_KEY = "PaoDeQueijo")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes = 15)
 
 
