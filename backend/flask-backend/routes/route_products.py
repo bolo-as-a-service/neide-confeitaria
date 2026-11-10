@@ -1,4 +1,5 @@
 # routes/route_products.py
+from flask_jwt_extended import jwt_required
 from flask import Blueprint, jsonify, request
 from services.service_products import (
     Service_products_get,
@@ -18,6 +19,7 @@ def products_get():
 
 
 @products_blueprint.post("")
+@jwt_required()
 def products_post():
     return jsonify(Service_products_post(request.get_json())), 201
 
@@ -28,11 +30,13 @@ def get_products_by_id(id):
 
 
 @products_blueprint.put("/<int:id>")
+@jwt_required()
 def put_products_by_id(id):
     return jsonify(Service_put_products_by_id(id, request.get_json())), 200
 
 
 @products_blueprint.delete("/<int:id>")
+@jwt_required()
 def delete_product_by_id(id):
     Service_delete_product_by_id(id)
     return "", 204
