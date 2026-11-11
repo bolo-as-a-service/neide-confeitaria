@@ -5,6 +5,7 @@ from models.models_users import User
 from db import db
 import re
 
+
 def Service_register_post(data):
 
     if not data:
@@ -62,9 +63,6 @@ def Service_register_post(data):
     return new_user.to_dict()
 
 
-
-
-
 def Service_login_post(data):
 
     if not data:
@@ -78,7 +76,7 @@ def Service_login_post(data):
     password = data.get("password")
 
     user = User.query.filter_by(email=credencial).first()
-    print(user)
+
     if not user:
         phone_caracters = set("0123456789+()- ")
 
@@ -87,7 +85,6 @@ def Service_login_post(data):
 
         standardised_phone = re.sub(r"[^0-9]", "", credencial)
         user = User.query.filter_by(phone_number=standardised_phone).first()
-    
 
     if not user or not flask_bcrypt.check_password_hash(user.password, password):
 
@@ -96,7 +93,6 @@ def Service_login_post(data):
 
         raise AppError("WRONG_DATA_EMAIL_OR_PHONE")
 
-
     token = create_access_token(identity=str(user.id_user))
 
-    return token,user.to_dict() 
+    return token, user.to_dict()
