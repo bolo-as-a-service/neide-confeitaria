@@ -25,7 +25,7 @@ CORS(
     #CORS aceita que mandem JSON (Content-Type) e TOKEN (Authorization)
     allow_headers=["Content-Type", "Authorization"],
     #CORS nao aceita que mandem cookies
-    supports_credentials=False,
+    supports_credentials=True,
     #O navegador guarda a resposta no 10 min, antes de perguntar de novo
     max_age=600,
 )
