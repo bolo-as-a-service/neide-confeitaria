@@ -4,11 +4,12 @@ from models.models_users import User
 from models.models_product import Product
 from datetime import datetime
 from utils.error_message import AppError
-
+from flask_jwt_extended import get_jwt_identity
 from utils.validate_user import validateUser
 
 
 def Service_orders_post(data):
+    id_user = get_jwt_identity()
 
     delivery_date = None
     if data.get("deliveryDateTime"):
@@ -30,6 +31,9 @@ def Service_orders_post(data):
         deliveryDateTime=delivery_date,
     )
 
+    if id_user :
+        new_order.id_user = id_user
+
     items_list = data.get("items", [])
 
     for item in items_list:
@@ -49,6 +53,7 @@ def Service_orders_post(data):
     db.session.commit()
 
     return new_order.to_dict()
+
 
 
 def Service_orders_get(status_product):
@@ -82,9 +87,9 @@ def Service_get_order_by_id(id):
     return order.to_dict()
 
 
-def Service_get_orders_by_name(name):
-
-    orders = Orders.query.filter(User.name.ilike(f"%{name}%")).all()
+def Service_get_my_orders():
+    id_user = get_jwt_identity()
+    orders = Orders.query.filter(Orders.id_user == id_user).all()
     if not orders:
         return []
     else:

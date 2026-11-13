@@ -1,8 +1,10 @@
 from db import db
 from models.models_product import *
+from models.models_users import User
 
 class Orders(db.Model):
     id_orders = db.Column(db.Integer, primary_key=True)
+    id_user = db.Column(db.Integer, db.ForeignKey('user.id_user'),default=None)
     customer_name = db.Column(db.String(100), nullable=False)
     customer_phone = db.Column(db.String(100), nullable=False)
     delivery = db.Column(db.Boolean, nullable=False)
