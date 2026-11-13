@@ -2,7 +2,10 @@ from db import db
 from models.models_product import Product
 from models.models_users import User
 from utils.error_message import AppError
-from flask_jwt_extended import get_jwt_identity
+
+from utils.validate_user import validateUser
+
+
 def Service_products_get(id):
 
     if id:
@@ -14,14 +17,9 @@ def Service_products_get(id):
 
 
 def Service_products_post(data):
-    
-    id_user = get_jwt_identity()
-    user = db.session.get(User, id_user)
-            
-    if not user.role == "ADMIN":
-        raise AppError("NOT_AUTHORIZED")
 
-    
+    validateUser()
+
     new_product = Product(
         name=data.get("name"),
         price=data.get("price"),
@@ -45,17 +43,10 @@ def Service_get_products_by_id(id):
     return product.to_dict()
 
 
-
-
 def Service_put_products_by_id(id, data):
 
-    id_user = get_jwt_identity()
-    user = db.session.get(User, id_user)
-        
-    if not user.role == "ADMIN":
-        raise AppError("NOT_AUTHORIZED")
+    validateUser()
 
-    
     product = Product.query.get(id)
 
     if not product:
@@ -75,11 +66,7 @@ def Service_put_products_by_id(id, data):
 
 def Service_delete_product_by_id(id):
 
-    id_user = get_jwt_identity()
-    user = db.session.get(User, id_user)
-    
-    if not user.role == "ADMIN":
-        raise AppError("NOT_AUTHORIZED")
+    validateUser()
 
     product = Product.query.get(id)
 

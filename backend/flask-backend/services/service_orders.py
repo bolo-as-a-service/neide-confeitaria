@@ -5,6 +5,8 @@ from models.models_product import Product
 from datetime import datetime
 from utils.error_message import AppError
 from flask_jwt_extended import get_jwt_identity
+from utils.validate_user import validateUser
+
 
 def Service_orders_post(data):
     id_user = get_jwt_identity()
@@ -56,11 +58,7 @@ def Service_orders_post(data):
 
 def Service_orders_get(status_product):
 
-    id_user = get_jwt_identity()
-    user = db.session.get(User, id_user)
-        
-    if not user.role == "ADMIN":
-        raise AppError("NOT_AUTHORIZED")    
+    validateUser()
 
     if status_product:
         orders = (
@@ -80,12 +78,8 @@ def Service_orders_get(status_product):
 
 def Service_get_order_by_id(id):
 
-    id_user = get_jwt_identity()
-    user = db.session.get(User, id_user)
-        
-    if not user.role == "ADMIN":
-        raise AppError("NOT_AUTHORIZED")    
-    
+    validateUser()
+
     order = Orders.query.get(id)
 
     if not order:
@@ -103,12 +97,8 @@ def Service_get_my_orders():
 
 
 def Service_orders_advance_patch(id):
-    
-    id_user = get_jwt_identity()
-    user = db.session.get(User, id_user)
-        
-    if not user.role == "ADMIN":
-        raise AppError("NOT_AUTHORIZED")
+
+    validateUser()
 
     order = Orders.query.get_or_404(id)
 
@@ -130,15 +120,11 @@ def Service_orders_advance_patch(id):
 
 def Service_orders_change_patch(status, id):
 
-    id_user = get_jwt_identity()
-    user = db.session.get(User, id_user)
-        
-    if not user.role == "ADMIN":
-        raise AppError("NOT_AUTHORIZED")
-    
+    validateUser()
+
     if not status:
         raise AppError("STATUS_ORDER_NOT_FOUND")
-    #VERIFICAR SE O ID DO PEDIDO EXISTE ANTES DE TENTAR ALGO SE NAO DA 404.
+    # VERIFICAR SE O ID DO PEDIDO EXISTE ANTES DE TENTAR ALGO SE NAO DA 404.
     order = Orders.query.get_or_404(id)
 
     order.status = status

@@ -16,6 +16,7 @@ ERRORS = {
     ("PRODUCT_DONT_EXISTS") : ("O Produto não encontrado", 404),
     #JWT_ERROR
     ("NOT_AUTHORIZED") : ("Sem autorização", 400) #TEMPORARIO, O CORRETO SERIA RETORNAR 401
+
 }
 
 class AppError(Exception):
