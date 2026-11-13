@@ -4,7 +4,7 @@ from services.service_orders import (
     Service_orders_post,
     Service_orders_get,
     Service_get_order_by_id,
-    Service_get_orders_by_name,
+    Service_get_my_orders,
     Service_orders_advance_patch,
     Service_orders_change_patch,
 )
@@ -14,6 +14,7 @@ orders_blueprint = Blueprint("orders", __name__, url_prefix="/orders")
 
 
 @orders_blueprint.post("")
+@jwt_required(optional=True)
 def orders_post():
     return jsonify(Service_orders_post(request.get_json())), 201
 
@@ -30,10 +31,10 @@ def get_order_by_id(id):
     return jsonify(Service_get_order_by_id(id)), 200
 
 
-@orders_blueprint.get("/customer/<string:name>")
+@orders_blueprint.get("/mine")
 @jwt_required()
-def get_orders_by_name(name):
-    return jsonify(Service_get_orders_by_name(name)), 200
+def get_my_orders():
+    return jsonify(Service_get_my_orders()), 200
 
 
 @orders_blueprint.patch("/<int:id>/advance")

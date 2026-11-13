@@ -2,6 +2,7 @@ from extensions.extensions import flask_bcrypt, flask_jwt, limiter
 from flask_jwt_extended import JWTManager
 from utils.error_message import AppError
 from flask import Flask, jsonify
+from dotenv import load_dotenv
 from datetime import timedelta
 from flask_cors import CORS
 from db import db
@@ -31,6 +32,8 @@ app.register_blueprint(auth_blueprint)
 app.register_blueprint(products_blueprint)
 app.register_blueprint(category_blueprint)
 app.register_blueprint(orders_blueprint)
+
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes = 15)

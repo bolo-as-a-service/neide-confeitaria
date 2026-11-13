@@ -14,6 +14,7 @@ ERRORS = {
     ("STATUS_ORDER_NOT_FOUND") : ("Status não fornecido ou status não encontrado", 404),
     #PRODUCT_ERRORS
     ("PRODUCT_DONT_EXISTS") : ("O Produto não encontrado", 404),
+    #JWT_ERROR
     ("NOT_AUTHORIZED") : ("Sem autorização", 400) #TEMPORARIO, O CORRETO SERIA RETORNAR 401
 }
 
