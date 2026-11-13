@@ -63,13 +63,10 @@ def Service_orders_get(status_product):
     if status_product:
         orders = (
             Orders.query.filter(Orders.status == status_product)
-            .filter(Orders.status.not_in(["CANCELADO", "ENTREGUE"]))
             .all()
         )
     else:
-        orders = Orders.query.filter(
-            Orders.status.not_in(["CANCELADO", "ENTREGUE"])
-        ).all()
+        orders = Orders.query.all()
 
     if not orders:
         return None
