@@ -1,4 +1,4 @@
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, get_jwt_identity
 from extensions.extensions import flask_bcrypt
 from utils.error_message import AppError
 from models.models_users import User
@@ -96,3 +96,12 @@ def Service_login_post(data):
     token = create_access_token(identity=str(user.id_user))
 
     return token, user.to_dict()
+
+
+def Service_me_get():
+
+    id_user = get_jwt_identity()
+
+    user = User.query.filter_by(id_user=id_user).first()
+
+    return user.to_dict()
