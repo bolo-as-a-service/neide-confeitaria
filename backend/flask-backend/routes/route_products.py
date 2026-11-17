@@ -7,6 +7,7 @@ from services.service_products import (
     Service_get_products_by_id,
     Service_put_products_by_id,
     Service_delete_product_by_id,
+    Service_toggle_product,
 )
 
 products_blueprint = Blueprint("products", __name__, url_prefix="/products")
@@ -40,3 +41,8 @@ def put_products_by_id(id):
 def delete_product_by_id(id):
     Service_delete_product_by_id(id)
     return "", 204
+
+@products_blueprint.patch("/<int:id>/toggle")
+@jwt_required()
+def toggle_product(id):
+    return jsonify(Service_toggle_product(id)), 200
