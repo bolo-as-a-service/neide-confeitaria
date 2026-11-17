@@ -75,3 +75,22 @@ def Service_delete_product_by_id(id):
     db.session.delete(product)
     db.session.commit()
     return True
+
+def Service_toggle_product(id):
+    
+    validateUser()
+
+    product = Product.query.get(id)
+
+    if not product:
+        raise AppError("PRODUCT_DONT_EXISTS")
+
+    if product.available == True:
+        product.available = False
+    else:
+        product.available = True
+    print(product.available)
+    db.session.add(product)
+    db.session.commit()
+
+    return product.to_dict()
