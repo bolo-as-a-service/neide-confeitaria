@@ -43,11 +43,13 @@ from routes.route_authentication import auth_blueprint
 from routes.route_category import category_blueprint
 from routes.route_orders import orders_blueprint
 from routes.route_products import products_blueprint
+from routes.route_image import images_blueprint
 
 app.register_blueprint(auth_blueprint)
 app.register_blueprint(products_blueprint)
 app.register_blueprint(category_blueprint)
 app.register_blueprint(orders_blueprint)
+app.register_blueprint(images_blueprint)
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes = 15)

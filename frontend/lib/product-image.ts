@@ -26,7 +26,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
 };
 
 export function getApiBase(): string {
-  return (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/+$/, "");
+  return (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 }
 
 /** Foto da categoria a partir do nome (com fallback para "outros"). */
