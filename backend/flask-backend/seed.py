@@ -20,7 +20,7 @@ def Tables():
     if Product.query.count() == 0:
         db.session.add_all([
                 
-                Product(name="Bolo de Chocolate com Morango", price=55.00, id_category=1, ingredients = ["banana","maça","Sem morango"], description = ""),
+                Product(name="Bolo de Morango", price=55.00, id_category=1,ingredients =["anana","maça","Sem morango"], description = "", image_url="/images/uploads/BoloDeMorango.jpg"),
                 Product(name="Bolo de Cenoura com Calda de Chocolate", price=40.00, id_category=1, ingredients = [], description = ""),
                 Product(name="Bolo Red Velvet", price=67.00, id_category=1, ingredients = [], description = ""),
                 Product(name="Bolo de Ninho com Nutella", price=70.00, id_category=1, ingredients = [], description = ""),
@@ -37,8 +37,8 @@ def Tables():
                 Product(name="Coxinha de Frango com Catupiry", price=8.50, id_category=3, ingredients = [], description = ""),
                 Product(name="Empada de Palmito", price=9.00, id_category=3, ingredients = [], description = ""),
                 Product(name="Quiche de Alho-Poró", price=12.50, id_category=3, ingredients = [], description = ""),
-                Product(name="Esfiha de Carne", price=8.00, id_category=3, ingredients = [], description = ""),
-                Product(name="Pão de Queijo Recheado", price=10.00, id_category=3, ingredients = [], description = "")
+                Product(name="Esfiha de Carne", price=8.00, id_category=3, ingredients = [], description = "")
+        
             ])
         db.session.commit()
 
