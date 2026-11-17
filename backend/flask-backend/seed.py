@@ -10,35 +10,32 @@ def Tables():
     if Category.query.count() == 0:
             
         db.session.add_all([
-                Category(id_category=1, name="Bolos"),
-                Category(id_category=2, name="Doces e Sobremesas"),
-                Category(id_category=3, name="Salgados")
+                Category(id_category=1, name="Bolos caseiros"),
+                Category(id_category=2, name="Bolos vulcão"),
+                Category(id_category=3, name="Bolos Diet")
             ])
         db.session.commit()
 
     
     if Product.query.count() == 0:
         db.session.add_all([
+                Product(name="Bolo de Cenoura", price=65.00, id_category=1, ingredients=["Farinha", "Cenoura", "Chocolate"], description="Bolo de Cenoura com cobertura de chocolate fofinho", image_url="/images/uploads/BoloCenoura.jpg"),
+                Product(name="Bolo de Fubá", price=55.00, id_category=1, ingredients=["Fubá", "Leite", "Ovos"], description="Bolo de Fubá fofinho", image_url="/images/uploads/BoloFuba.jpg"),
+                Product(name="Bolo de Coco", price=58.00, id_category=1, ingredients=["Coco", "Farinha", "Leite"], description="Bolo de Coco fofinho"),
+                Product(name="Bolo de laranja", price=50.00, id_category=1, ingredients=["Laranja", "Farinha", "Leite"], description="Bolo de laranja fofinho", image_url="/images/uploads/BoloLaranja.jpg"),
+                Product(name="Bolo de Banana", price=32.00, id_category=1, ingredients=["Banana", "Farinha", "Leite"], description="Bolo de Banana fofinho"),
                 
-                Product(name="Bolo de Morango", price=55.00, id_category=1,ingredients =["anana","maça","Sem morango"], description = "", image_url="/images/uploads/BoloDeMorango.jpg"),
-                Product(name="Bolo de Cenoura com Calda de Chocolate", price=40.00, id_category=1, ingredients = [], description = ""),
-                Product(name="Bolo Red Velvet", price=67.00, id_category=1, ingredients = [], description = ""),
-                Product(name="Bolo de Ninho com Nutella", price=70.00, id_category=1, ingredients = [], description = ""),
-                Product(name="Bolo Formigueiro Caseiro", price=32.00, id_category=1,  ingredients = [], description = ""),
-                Product(name="Bolo de Limão Siciliano", price=48.00, id_category=1, ingredients = [], description = ""),
-                
-                Product(name="Brigadeiro Gourmet (Caixa com 6)", price=20.00, id_category=2, ingredients = [], description = ""),
-                Product(name="Beijinho Tradicional (Caixa com 6)", price=18.00, id_category=2, ingredients = [], description = ""),
-                Product(name="Fatia de Torta Holandesa", price=15.00, id_category=2, ingredients = [], description = ""),
-                Product(name="Pudim de Leite Condensado (Fatia)", price=12.00, id_category=2, ingredients = [], description = ""),
-                Product(name="Brownie de Chocolate com Nozes", price=14.00, id_category=2, ingredients = [], description = ""),
-                Product(name="Coxinha de Doce de Leite com Churros", price=10.00, id_category=2, ingredients = [], description = ""),
-                
-                Product(name="Coxinha de Frango com Catupiry", price=8.50, id_category=3, ingredients = [], description = ""),
-                Product(name="Empada de Palmito", price=9.00, id_category=3, ingredients = [], description = ""),
-                Product(name="Quiche de Alho-Poró", price=12.50, id_category=3, ingredients = [], description = ""),
-                Product(name="Esfiha de Carne", price=8.00, id_category=3, ingredients = [], description = "")
-        
+                Product(name="Bolo Vulcão de Brigadeiro", price=75.00, id_category=2, ingredients=["Chocolate", "Leite Condensado", "Creme de Leite", "Farinha"], description="Massa fofinha de chocolate com muita cobertura cremosa de brigadeiro gourmet"),
+                Product(name="Bolo Vulcão de Ninho com Nutella", price=85.00, id_category=2, ingredients=["Leite Ninho", "Nutella", "Farinha", "Leite"], description="Massa branca fofinha transbordando creme de Leite Ninho com calda de Nutella"),
+                Product(name="Bolo Vulcão de Cenoura", price=70.00, id_category=2, ingredients=["Cenoura", "Chocolate", "Farinha", "Ovos"], description="O clássico bolo de cenoura com uma avalanche de brigadeiro cremoso"),
+                Product(name="Bolo Vulcão de Prestígio", price=78.00, id_category=2, ingredients=["Chocolate", "Coco", "Leite Condensado", "Farinha"], description="Massa de chocolate bem molhadinha com cobertura cremosa de beijinho de coco"),
+                Product(name="Bolo Vulcão de Churros", price=75.00, id_category=2, ingredients=["Doce de Leite", "Canela", "Farinha", "Leite"], description="Massa aromatizada com canela e bastante cobertura de doce de leite cremoso"),
+                Product(name="Bolo Vulcão de Limão", price=68.00, id_category=2, ingredients=["Limão", "Leite Condensado", "Creme de Leite", "Farinha"], description="Massa cítrica levinha com mousse cremosa de limão e raspas"),
+
+                Product(name="Bolo Diet de Chocolate", price=72.00, id_category=3, ingredients=["Farinha Integral", "Cacau 100%", "Adoçante Culinário", "Ovos"], description="Bolo de chocolate fofinho e saboroso, zero adição de açúcar"),
+                Product(name="Bolo Diet de Banana com Aveia", price=65.00, id_category=3, ingredients=["Banana", "Aveia", "Canela", "Ovos"], description="Bolo natural adoçado com a própria fruta e toque de canela, zero açúcar"),
+                Product(name="Bolo Diet de Maçã com Nozes", price=75.00, id_category=3, ingredients=["Maçã", "Nozes", "Farinha Integral", "Adoçante Culinário"], description="Massa úmida com pedaços de maçã e crocância das nozes, zero açúcar"),
+                Product(name="Bolo Diet de Laranja", price=62.00, id_category=3, ingredients=["Laranja", "Farinha Integral", "Adoçante Culinário", "Ovos"], description="Bolo cítrico fofinho feito com suco natural de laranja, zero adição de açúcar")
             ])
         db.session.commit()
 
