@@ -8,7 +8,7 @@ class Category(db.Model):
 
     def to_dict(self):
         return {
-            "id_category": self.id_category,
+            "id": self.id_category,
             "name": self.name
         }
 

@@ -251,7 +251,7 @@ const realApi = {
 
   // Categories
   getCategories: () => request<BackendCategory[]>("/categories"),
-
+  
   createCategory: (data: { name: string }) =>
     request<BackendCategory>("/categories", {
       method: "POST",

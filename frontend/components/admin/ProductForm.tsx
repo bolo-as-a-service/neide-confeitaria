@@ -295,10 +295,15 @@ export function ProductForm({ onBack, editProduct, saving = false, onSave }: Pro
                   className="flex h-11 w-full rounded-lg border border-[var(--rose-200)] bg-white/90 px-4 py-2 text-sm text-[var(--ink)] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] appearance-none"
                 >
                   <option value="__none__">{categoriesLoaded ? "Sem categoria (aparece em Outros)" : "Carregando..."}</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
+                  {categories.map((cat) => {
+                    console.log("Category:", cat.name, "ID:", cat.id);
+                    return (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    );
+                  })}
+                  
                 </select>
+                
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                   <svg className="h-4 w-4 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
