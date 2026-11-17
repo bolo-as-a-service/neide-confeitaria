@@ -17,12 +17,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { api } from "@/lib/api";
+import { api, ApiError } from "@/lib/api";
 
 const registerSchema = z
   .object({
-    name: z.string().min(2, "Nome deve ter ao menos 2 caracteres"),
-    email: z.string().email("Insira um email válido"),
+    name: z.string().trim().min(2, "Nome deve ter ao menos 2 caracteres"),
+    email: z.string().trim().email("Insira um email válido"),
     phone: z.string().min(10, "Telefone inválido"),
     password: z.string().min(6, "Mínimo de 6 caracteres"),
     confirmPassword: z.string().min(1, "Confirme sua senha"),
@@ -57,14 +57,27 @@ export default function RegisterPage() {
     setError("");
     try {
       await api.register({
-        name: data.name,
-        email: data.email,
+        name: data.name.trim(),
+        email: data.email.trim(),
         phone: data.phone,
         password: data.password,
       });
       setIsSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao criar conta");
+      if (err instanceof ApiError && err.fieldErrors) {
+        // Espelha erros por campo do backend no formulário.
+        for (const [field, message] of Object.entries(err.fieldErrors)) {
+          const name = field as keyof RegisterFormValues;
+          if (name in form.getValues()) {
+            form.setError(name, { message });
+          }
+        }
+      }
+      setError(
+        err instanceof ApiError || err instanceof Error
+          ? err.message
+          : "Erro ao criar conta"
+      );
     } finally {
       setIsPending(false);
     }

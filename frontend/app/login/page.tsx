@@ -20,6 +20,35 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useAuth } from "@/lib/auth-context";
+import { ApiError } from "@/lib/api";
+
+/** Só aceita redireciono interno seguro (evita open redirect e `//evil`). */
+function getSafeNext(value: string | null): string | null {
+  if (!value) return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  if (value.includes("\\") || value.includes(" ")) return null;
+  return value;
+}
+
+function friendlyLoginError(err: unknown): string {
+  if (err instanceof ApiError) {
+    if (err.status === 0) return err.message;
+    return err.message;
+  }
+  return err instanceof Error ? err.message : "Erro ao fazer login";
+}
+
+/** Destino pós-login: respeita ?next= seguro; ADMIN nunca cai no cardápio. */
+function resolvePostLoginDestination(next: string | null, role: string): string {
+  const adminArea = next && next.startsWith("/admin");
+  if (role === "ADMIN") {
+    if (adminArea && next) return next;
+    return "/admin";
+  }
+  // Cliente: nunca entra em /admin; respeita ?next= (ex.: /meus-pedidos).
+  if (next && !adminArea) return next;
+  return "/cardapio";
+}
 
 const loginSchema = z.object({
   email: z.string().min(1, "Insira seu email ou telefone"),
@@ -42,17 +71,11 @@ function LoginForm() {
     defaultValues: { email: "", password: "", remember: false },
   });
 
-  // Se já está autenticado, respeita ?next= (apenas ADMIN em /admin) ou papel.
+  // Se já está autenticado, respeita ?next= seguro (apenas ADMIN em /admin).
   React.useEffect(() => {
     if (authLoading || !user) return;
-    const next = searchParams.get("next");
-    if (next && next.startsWith("/admin") && user.role === "ADMIN") {
-      router.replace(next);
-    } else if (user.role === "ADMIN") {
-      router.replace("/admin");
-    } else {
-      router.replace("/cardapio");
-    }
+    const next = getSafeNext(searchParams.get("next"));
+    router.replace(resolvePostLoginDestination(next, user.role));
   }, [user, authLoading, router, searchParams]);
 
   const handleSubmit = form.handleSubmit(async (data) => {
@@ -63,17 +86,11 @@ function LoginForm() {
         { email: data.email, password: data.password },
         data.remember ?? false
       );
-      const next = searchParams.get("next");
-      if (next && next.startsWith("/admin") && logged.role === "ADMIN") {
-        router.push(next);
-      } else if (logged.role === "ADMIN") {
-        router.push("/admin");
-      } else {
-        // USER (cliente) vai ao cardápio, não ao painel admin.
-        router.push("/cardapio");
-      }
+      const next = getSafeNext(searchParams.get("next"));
+      // replace: evita voltar ao /login no botão "voltar".
+      router.replace(resolvePostLoginDestination(next, logged.role));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao fazer login");
+      setError(friendlyLoginError(err));
     } finally {
       setIsPending(false);
     }

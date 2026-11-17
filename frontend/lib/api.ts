@@ -69,6 +69,16 @@ export function getAuthToken(): string | null {
   return memoryToken;
 }
 
+/** `true` quando o token está no persistent storage ("lembrar de mim"). */
+export function isAuthTokenPersistent(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(TOKEN_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
 export function setAuthToken(token: string | null, remember: boolean) {
   memoryToken = token;
   if (typeof window === "undefined") return;
@@ -99,14 +109,53 @@ function normalizeAuthResponse(body: BackendAuthResponse | BackendUser): Backend
   return { token: null, user: body as BackendUser };
 }
 
-/** Mensagem de erro do backend (`error` no baas, `message` no Flask). */
+/** Mensagem de erro do backend (`error` no Flask/AppError, `message` noutros). */
 function parseErrorMessage(body: unknown, fallback: string): string {
   if (typeof body === "object" && body !== null) {
     const record = body as Record<string, unknown>;
     if (typeof record.error === "string") return record.error;
     if (typeof record.message === "string") return record.message;
+    // Erros padrão do Flask-JWT (inglês): traduz para pt-BR amigável.
+    if (typeof record.msg === "string") return translateJwtMessage(record.msg);
   }
   return fallback;
+}
+
+/** Traduz mensagens padrão do Flask-JWT para pt-BR. */
+function translateJwtMessage(msg: string): string {
+  const lower = msg.toLowerCase();
+  if (lower.includes("missing authorization header")) {
+    return "Sessão expirada. Faça login novamente.";
+  }
+  if (
+    lower.includes("signature verification failed") ||
+    lower.includes("invalid header") ||
+    lower.includes("not enough segments") ||
+    lower.includes("invalid token") ||
+    lower.includes("failed to decode")
+  ) {
+    return "Sessão inválida. Faça login novamente.";
+  }
+  if (lower.includes("expired")) {
+    return "Sessão expirada. Faça login novamente.";
+  }
+  if (lower.includes("fresh token")) {
+    return "Sessão expirada. Faça login novamente.";
+  }
+  return "Sessão expirada. Faça login novamente.";
+}
+
+/** Fallback amigável quando o backend não traz mensagem (ex.: HTML do debug). */
+function fallbackStatusMessage(status: number): string {
+  if (status === 400) return "Dados inválidos. Confira os campos.";
+  if (status === 401) return "Sessão expirada. Faça login novamente.";
+  if (status === 403) return "Sem permissão para esta ação.";
+  if (status === 404) return "Recurso não encontrado.";
+  if (status === 409) return "Conflito: este registro já existe.";
+  if (status === 422) return "Dados inválidos. Confira os campos.";
+  if (status === 429) return "Muitas tentativas. Aguarde um pouco e tente de novo.";
+  if (status >= 500) return "Erro no servidor. Tente novamente mais tarde.";
+  return `HTTP ${status}`;
 }
 
 function parseFieldErrors(body: unknown): Record<string, string> | undefined {
@@ -129,29 +178,53 @@ async function request<T>(
 ): Promise<T> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  // Rotas de autenticação nunca devem derrubar a sessão ao falhar (ex.:
+  // login com senha errada não pode disparar logout global).
+  const isAuthRoute = path.startsWith("/auth/login") || path.startsWith("/auth/register");
   try {
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
     const token = getAuthToken();
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const mergedHeaders: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(options?.headers
+        ? options.headers instanceof Headers
+          ? Object.fromEntries(options.headers.entries())
+          : Array.isArray(options.headers)
+            ? Object.fromEntries(options.headers)
+            : (options.headers as Record<string, string>)
+        : {}),
+    };
+    if (token && !mergedHeaders["Authorization"]) {
+      mergedHeaders["Authorization"] = `Bearer ${token}`;
+    }
+    const { headers: _ignored, ...restOptions } = options ?? {};
+    void _ignored;
     const res = await fetch(`${BASE_URL}${path}`, {
-      headers,
-      ...options,
+      ...restOptions,
+      headers: mergedHeaders,
       // Authorization acima é substituído se options trouxer headers próprios.
       signal: controller.signal,
     });
     if (res.status === 401) {
-      onUnauthorized?.();
-      throw new ApiError(401, "Sessão expirada. Faça login novamente.");
+      if (!isAuthRoute) onUnauthorized?.();
+      const body = await res.json().catch(() => null);
+      throw new ApiError(401, parseErrorMessage(body, fallbackStatusMessage(401)), parseFieldErrors(body));
     }
     if (!res.ok) {
       const body = await res.json().catch(() => null);
-      throw new ApiError(res.status, parseErrorMessage(body, `HTTP ${res.status}`), parseFieldErrors(body));
+      throw new ApiError(res.status, parseErrorMessage(body, fallbackStatusMessage(res.status)), parseFieldErrors(body));
     }
     if (res.status === 204) return undefined as T;
     return res.json();
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") {
       throw new ApiError(0, "Tempo de resposta esgotado. Tente novamente.");
+    }
+    if (err instanceof ApiError) throw err;
+    if (err instanceof TypeError) {
+      throw new ApiError(
+        0,
+        "Não foi possível conectar ao servidor. Verifique sua conexão e se o backend está rodando."
+      );
     }
     throw err;
   } finally {
@@ -273,7 +346,8 @@ const realApi = {
       });
       if (res.status === 401) {
         onUnauthorized?.();
-        throw new ApiError(401, "Sessão expirada. Faça login novamente.");
+        const body = await res.json().catch(() => null);
+        throw new ApiError(401, parseErrorMessage(body, fallbackStatusMessage(401)));
       }
       if (!res.ok) {
         const body = await res.json().catch(() => null);
@@ -283,6 +357,13 @@ const realApi = {
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
         throw new ApiError(0, "Tempo de resposta esgotado. Tente novamente.");
+      }
+      if (err instanceof ApiError) throw err;
+      if (err instanceof TypeError) {
+        throw new ApiError(
+          0,
+          "Não foi possível conectar ao servidor. Verifique sua conexão e se o backend está rodando."
+        );
       }
       throw err;
     } finally {

@@ -34,6 +34,13 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   async headers() {
+    // React/Turbopack usam eval() em desenvolvimento (reconstrução de
+    // callstacks). Em produção o React nunca usa eval, então a diretiva
+    // fica restrita ao dev.
+    const isDev = process.env.NODE_ENV !== "production";
+    const scriptSrc = isDev
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+      : "script-src 'self' 'unsafe-inline'";
     return [
       {
         source: "/:path*",
@@ -50,7 +57,7 @@ const nextConfig: NextConfig = {
             value: [
               "default-src 'self'",
               // Next.js exige 'unsafe-inline' para scripts/estilos de hidratação.
-              "script-src 'self' 'unsafe-inline'",
+              scriptSrc,
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               `img-src 'self' data: blob: ${apiHost} https://maps.google.com https://maps.gstatic.com`,
@@ -87,5 +94,4 @@ const nextConfig: NextConfig = {
   ,
 };
 
-console.log("OK")
 export default nextConfig;

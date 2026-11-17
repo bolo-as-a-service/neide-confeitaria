@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { api, getAuthToken, setAuthToken, setOnUnauthorized } from "@/lib/api";
+import { ApiError, api, getAuthToken, isAuthTokenPersistent, setAuthToken, setOnUnauthorized } from "@/lib/api";
 import type { BackendUser } from "@/lib/types";
 
 export type AuthUser = BackendUser;
@@ -108,13 +108,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { user: me } = await api.getMe();
         if (!cancelled) {
           setUser(me);
-          writeAuthCookie(me, true);
+          // Preserva o "lembrar de mim": token persistente (localStorage)
+          // mantém cookie persistente; token de sessão mantém cookie de sessão.
+          writeAuthCookie(me, isAuthTokenPersistent());
         }
-      } catch {
-        setAuthToken(null, false);
-        if (!cancelled) {
-          setUser(null);
-          writeAuthCookie(null, false);
+      } catch (err) {
+        // Só derruba a sessão quando o token é inválido/expirado. Falha de
+        // rede ou 5xx não deve deslogar o usuário.
+        const invalidSession =
+          err instanceof ApiError && (err.status === 401 || err.status === 422);
+        if (invalidSession) {
+          setAuthToken(null, false);
+          if (!cancelled) {
+            setUser(null);
+            writeAuthCookie(null, false);
+          }
+        } else if (!cancelled) {
+          // Sem /me (ex.: backend fora do ar): mantém estado atual para não
+          // deslogar à força; a página decide o que exibir.
+          try {
+            const cached = readCachedUser();
+            if (cached) {
+              setUser(cached);
+              writeAuthCookie(cached, true);
+            }
+          } catch {
+            // ignora: segue sem usuário em cache
+          }
         }
       } finally {
         if (!cancelled) setIsLoading(false);
