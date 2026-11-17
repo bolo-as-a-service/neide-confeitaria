@@ -6,7 +6,7 @@ import type { NextConfig } from "next";
  */
 function apiImagePattern(): { protocol: "http" | "https"; hostname: string; port?: string } | null {
   try {
-    const url = new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080");
+    const url = new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000");
     if (url.protocol !== "http:" && url.protocol !== "https:") return null;
     return {
       protocol: url.protocol === "https:" ? "https" : "http",
@@ -22,9 +22,9 @@ const apiPattern = apiImagePattern();
 
 const apiHost = (() => {
   try {
-    return new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080").origin;
+    return new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000").origin;
   } catch {
-    return "http://localhost:8080";
+    return "http://localhost:5000";
   }
 })();
 
@@ -72,14 +72,20 @@ const nextConfig: NextConfig = {
       {
         protocol: "http",
         hostname: "localhost",
-        port: "8080",
+        port: "5000",
       },
+      
       {
         protocol: "https",
         hostname: "apineide.gsrodriguesz.me",
       },
     ],
-  },
+    dangerouslyAllowLocalIP:true,
+
+
+  }
+  ,
 };
 
+console.log("OK")
 export default nextConfig;

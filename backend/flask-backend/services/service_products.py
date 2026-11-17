@@ -19,8 +19,8 @@ def Service_products_get(id):
 def Service_products_post(data):
 
     validateUser()
-
     new_product = Product(
+        image_url=data.get("imageUrl"),
         name=data.get("name"),
         price=data.get("price"),
         id_category=data.get("categoryId"),
