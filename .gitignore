@@ -42,3 +42,14 @@ next-env.d.ts
 
 # changelog local de revisão (não versionado por decisão do solicitante)
 CHANGELOG.md
+
+
+# database
+*.db
+
+#pycache
+__pycache__/
+*.pyc
+
+#env
+*.env
