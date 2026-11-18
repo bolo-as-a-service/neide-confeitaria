@@ -10,7 +10,10 @@ export function cn(...inputs: ClassValue[]) {
  * Retorna NaN se inválido.
  */
 export function parsePriceInput(raw: string): number {
-  const normalized = raw.trim().replace(/\s/g, "").replace(/\./g, "").replace(",", ".");
+  const cleaned = raw.trim().replace(/\s/g, "");
+  const normalized = cleaned.includes(",")
+    ? cleaned.replace(/\./g, "").replace(",", ".")
+    : cleaned;
   if (!/^\d+(\.\d{1,2})?$/.test(normalized)) return NaN;
   return Number(normalized);
 }
