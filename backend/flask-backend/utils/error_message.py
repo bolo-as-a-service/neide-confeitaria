@@ -15,7 +15,9 @@ ERRORS = {
     #PRODUCT_ERRORS
     ("PRODUCT_DONT_EXISTS") : ("O Produto não encontrado", 404),
     #JWT_ERROR
-    ("NOT_AUTHORIZED") : ("Sem autorização", 400) #TEMPORARIO, O CORRETO SERIA RETORNAR 401
+    ("NOT_AUTHORIZED") : ("Sem autorização", 400), #TEMPORARIO, O CORRETO SERIA RETORNAR 401
+    #UPLOADS_ERROR
+    ("INVALID_IMAGE") : ("Imagem invalida", 400)
 
 }
 
