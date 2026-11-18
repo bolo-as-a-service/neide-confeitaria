@@ -19,11 +19,13 @@ def Service_products_get(id):
 def Service_products_post(data):
 
     validateUser()
+    
+
     new_product = Product(
         image_url=data.get("imageUrl"),
         name=data.get("name"),
         price=data.get("price"),
-        id_category=data.get("categoryId"),
+        id_category=data["category"]["id"],
         description=data.get("description"),
         ingredients=data.get("ingredients"),
     )
@@ -54,9 +56,10 @@ def Service_put_products_by_id(id, data):
 
     product.name = data.get("name")
     product.price = data.get("price")
-    product.id_category = data.get("categoryId")
+    product.id_category = data["category"]["id"]
     product.description = data.get("description")
     product.ingredients = data.get("ingredients")
+
 
     db.session.add(product)
     db.session.commit()
