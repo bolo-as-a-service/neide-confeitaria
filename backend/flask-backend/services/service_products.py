@@ -58,6 +58,7 @@ def Service_put_products_by_id(id, data):
     product.description = data.get("description")
     product.ingredients = data.get("ingredients")
 
+
     db.session.add(product)
     db.session.commit()
 
