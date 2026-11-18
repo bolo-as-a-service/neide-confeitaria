@@ -112,6 +112,7 @@ export default function AdminPedidosPage() {
     setOrdersByStatus((prev) => ({
       ...prev,
       FILA: prev.FILA?.filter((o) => o.id !== order.id) || [],
+      CANCELADO: [...(prev.CANCELADO || []), { ...order }],
     }));
     try {
       await api.updateOrderStatus(Number(order.id), "CANCELADO");
@@ -133,6 +134,7 @@ export default function AdminPedidosPage() {
     setOrdersByStatus((prev) => ({
       ...prev,
       PRONTO: prev.PRONTO?.filter((o) => o.id !== order.id) || [],
+      ENTREGUE: [...(prev.ENTREGUE || []), { ...order }],
     }));
     try {
       await api.updateOrderStatus(Number(order.id), "ENTREGUE");
