@@ -21,9 +21,9 @@ def Tables():
         db.session.add_all([
                 Product(name="Bolo de Cenoura", price=65.00, id_category=1, ingredients=["Farinha", "Cenoura", "Chocolate"], description="Bolo de Cenoura com cobertura de chocolate fofinho", image_url="/images/uploads/BoloCenoura.jpg"),
                 Product(name="Bolo de Fubá", price=55.00, id_category=1, ingredients=["Fubá", "Leite", "Ovos"], description="Bolo de Fubá fofinho", image_url="/images/uploads/BoloFuba.jpg"),
-                Product(name="Bolo de Coco", price=58.00, id_category=1, ingredients=["Coco", "Farinha", "Leite"], description="Bolo de Coco fofinho"),
+                Product(name="Bolo de Coco", price=58.00, id_category=1, ingredients=["Coco", "Farinha", "Leite"], description="Bolo de Coco fofinho", image_url="/images/uploads/BoloCoco.jpg"),
                 Product(name="Bolo de laranja", price=50.00, id_category=1, ingredients=["Laranja", "Farinha", "Leite"], description="Bolo de laranja fofinho", image_url="/images/uploads/BoloLaranja.jpg"),
-                Product(name="Bolo de Banana", price=32.00, id_category=1, ingredients=["Banana", "Farinha", "Leite"], description="Bolo de Banana fofinho"),
+                Product(name="Bolo de Banana", price=32.00, id_category=1, ingredients=["Banana", "Farinha", "Leite"], description="Bolo de Banana fofinho", image_url="/images/uploads/BoloBanana.jpg"),
                 
                 Product(name="Bolo Vulcão de Brigadeiro", price=75.00, id_category=2, ingredients=["Chocolate", "Leite Condensado", "Creme de Leite", "Farinha"], description="Massa fofinha de chocolate com muita cobertura cremosa de brigadeiro gourmet"),
                 Product(name="Bolo Vulcão de Ninho com Nutella", price=85.00, id_category=2, ingredients=["Leite Ninho", "Nutella", "Farinha", "Leite"], description="Massa branca fofinha transbordando creme de Leite Ninho com calda de Nutella"),
