@@ -23,6 +23,7 @@ class Orders(db.Model):
     def to_dict(self):
         return{
             'id': self.id_orders,
+            'userId': self.id_user,
             'customerName': self.customer_name,
             'phone': self.customer_phone,
             'delivery': self.delivery,
@@ -36,7 +37,7 @@ class Orders(db.Model):
             'deliveryDateTime': self.deliveryDateTime.isoformat() if self.deliveryDateTime else None,
             'createdAt': self.createdAt.isoformat() if self.createdAt else None,
 
-            'order_items': [item.to_dict() for item in self.items]
+            'items': [item.to_dict() for item in self.items]
             }       
 
 
