@@ -29,10 +29,10 @@ interface AdminProductTableProps {
 }
 
 const categoryTagStyles: Record<string, string> = {
-  rose: "bg-[var(--rose-100)] text-red-600",
-  red: "bg-red-500 text-white",
-  green: "bg-green-500 text-white",
-  amber: "bg-amber-500 text-white",
+  rose: "bg-[var(--rose-100)] text-[var(--brand-800)] border border-[var(--rose-200)]",
+  red: "bg-red-100 text-red-700 border border-red-200",
+  green: "bg-green-100 text-green-800 border border-green-200",
+  amber: "bg-amber-100 text-amber-800 border border-amber-200",
 };
 
 export function AdminProductTable({
@@ -71,19 +71,19 @@ export function AdminProductTable({
     <div>
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted)]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted)]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Buscar Produto"
-            className="w-full h-10 pl-10 pr-4 rounded-lg border border-gray-200 bg-white text-sm text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+            placeholder="Buscar bolo, doce..."
+            className="w-full h-11 pl-11 pr-4 rounded-full border border-[var(--rose-200)] bg-white text-sm text-[var(--ink)] placeholder:text-[var(--muted)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-[var(--brand-600)]"
           />
         </div>
         <select
           value={categoryFilter}
           onChange={(e) => onCategoryFilterChange(e.target.value)}
-          className="h-10 px-4 rounded-lg border border-gray-200 bg-white text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+          className="h-11 px-4 rounded-full border border-[var(--rose-200)] bg-white text-sm font-medium text-[var(--ink)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
         >
           <option value="">Todas as categorias</option>
           {categories.map((cat) => (
@@ -95,18 +95,18 @@ export function AdminProductTable({
       </div>
 
       <div>
-        <div className="hidden lg:grid grid-cols-[1fr_140px_100px_80px] gap-4 px-4 py-3 bg-gray-50 rounded-lg text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">
+        <div className="hidden lg:grid grid-cols-[1fr_140px_100px_80px] gap-4 px-4 py-3 bg-[var(--brand-900)] text-[var(--cream)] rounded-2xl text-xs font-bold uppercase tracking-widest mb-2">
           <span>Produto</span>
           <span>Categoria</span>
           <span>Preço</span>
           <span className="text-center">Ações</span>
         </div>
 
-        <div className="space-y-3 lg:space-y-2">
+        <div className="space-y-3 lg:space-y-2.5">
           {filteredProducts.map((product) => (
             <div
               key={product.id}
-              className="lg:grid grid-cols-[1fr_140px_100px_80px] gap-4 items-center px-4 py-3 bg-white rounded-lg shadow-sm border border-gray-100"
+              className="lg:grid grid-cols-[1fr_140px_100px_80px] gap-4 items-center px-4 py-3 bg-white rounded-2xl shadow-[0_6px_20px_-12px_rgba(75,40,32,0.3)] border border-[var(--rose-200)] card-lift"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[var(--rose-50)] flex-shrink-0">
@@ -128,8 +128,8 @@ export function AdminProductTable({
                 </div>
               </div>
 
-              <div className="flex lg:hidden items-center justify-between mt-2 pt-2 border-t border-gray-100">
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex lg:hidden items-center justify-between gap-2 mt-2 pt-2 border-t border-dashed border-[var(--rose-200)]">
+              <div className="flex items-center gap-2 flex-wrap min-w-0">
                 <span
                   className={cn(
                     "inline-block px-3 py-1 rounded-full text-xs font-semibold",
@@ -147,7 +147,7 @@ export function AdminProductTable({
                   {formattedPrice(product.price)}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => onToggle?.(product)}
                   className={cn(

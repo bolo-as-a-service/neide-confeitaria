@@ -30,10 +30,11 @@ export function AdminHeader() {
     router.push("/login");
   };
   return (
-    <header className="bg-white border-b border-gray-200">
-      <div className="flex items-center justify-between px-6 h-16">
+    <header className="bg-white/95 backdrop-blur border-b border-[var(--rose-200)] sticky top-0 z-30">
+      <div className="flex items-center justify-between px-4 sm:px-6 h-16">
         <span className="font-script text-[var(--brand-900)] text-2xl lg:text-3xl leading-none">
           Neide Confeitaria
+          <span className="ml-2 hidden sm:inline-block align-middle rounded-full bg-[var(--rose-100)] px-2.5 py-1 font-body text-[10px] font-bold uppercase tracking-widest text-[var(--brand-800)]">Admin</span>
         </span>
 
         <div className="hidden lg:flex items-center gap-3 text-sm text-[var(--muted)]">
@@ -41,18 +42,18 @@ export function AdminHeader() {
             <MapPin className="h-4 w-4" />
             <span>{settings.address}</span>
           </div>
-          <span className="text-gray-300">|</span>
+          <span className="text-[var(--rose-200)]">|</span>
           <div className="flex items-center gap-1.5">
             <Clock className="h-4 w-4" />
             <span>{settings.openTime} - {settings.closeTime}</span>
           </div>
-          <span className="text-gray-300">|</span>
+          <span className="text-[var(--rose-200)]">|</span>
           <div className="flex items-center gap-1.5">
             <Phone className="h-4 w-4" />
             <span>{settings.phone}</span>
           </div>
-          <span className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border ${settings.isOpen ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-600 border-red-200"}`}>
-            <span className={`w-2 h-2 rounded-full ${settings.isOpen ? "bg-green-500" : "bg-red-500"}`} />
+          <span className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold border ${settings.isOpen ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-600 border-red-200"}`}>
+            <span className={`h-2 w-2 rounded-full ${settings.isOpen ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
             {settings.isOpen ? "ABERTO" : "FECHADO"}
           </span>
         </div>

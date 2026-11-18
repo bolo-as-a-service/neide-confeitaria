@@ -16,6 +16,8 @@ import { useCart, CartItem } from "@/lib/cart-context";
 import { cn, normalizeSearchText, slugifyCategory } from "@/lib/utils";
 import { productImageSrc } from "@/lib/product-image";
 import { api } from "@/lib/api";
+import { DEFAULT_STORE_SETTINGS, loadStoreSettings } from "@/lib/store-settings";
+import { CakeSlice, Clock } from "lucide-react";
 import type { BackendCategory, BackendProduct } from "@/lib/types";
 
 const CATEGORY_ICONS: Record<string, { label: string; icon: string }> = {
@@ -57,6 +59,17 @@ export default function CardapioPage() {
   const [loadError, setLoadError] = React.useState("");
   const { items, addItem, updateItem, updateQuantity, removeItem } = useCart();
   const [editItem, setEditItem] = React.useState<CartItem | null>(null);
+  const [storeSettings, setStoreSettings] = React.useState(DEFAULT_STORE_SETTINGS);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) setStoreSettings(loadStoreSettings());
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -162,8 +175,12 @@ export default function CardapioPage() {
   );
 
   const handleAddToCart = (product: Product) => {
-    addItem(product);
+    addItem(product, 1, "", { silent: isMobile });
     if (isMobile) setCartOpen(true);
+  };
+
+  const handleQuickAdd = (product: Product) => {
+    addItem(product);
   };
 
   const handleAddToCartFromModal = (product: Product, quantity: number, observations: string) => {
@@ -175,6 +192,25 @@ export default function CardapioPage() {
   };
 
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Sugestões "complete com..." — vendeáveis fora da sacola.
+  const suggestions = React.useMemo(() => {
+    const inCart = new Set(items.map((i) => i.product.id));
+    return backendProducts
+      .filter((p) => p.available && !inCart.has(String(p.id)))
+      .slice(0, 3)
+      .map(mapProduct);
+  }, [backendProducts, items]);
+
+  const handleCategoryChange = (id: string) => {
+    setActiveCategory(id);
+    // Leva a lista para baixo da faixa fixa de categorias.
+    requestAnimationFrame(() => {
+      document
+        .getElementById("cardapio-list")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
   if (loading) {
     return (
@@ -224,31 +260,55 @@ export default function CardapioPage() {
           "flex-1 transition-all duration-300 ease-in-out min-w-0",
           cartOpen ? "lg:max-w-[calc(100%-380px)] lg:px-4" : "lg:pr-4"
         )}>
+          <div className="max-w-[1020px] mx-auto px-4 sm:px-6 pt-2">
+            <div className="px-4 pt-2 pb-1 text-center">
+              <p className="font-script text-[2rem] leading-none text-[var(--brand-700)]">feitos para adoçar seu dia</p>
+              <h1 className="mt-1 font-display text-2xl sm:text-[1.7rem] font-bold text-[var(--brand-900)] tracking-tight">
+                Nosso cardápio artesanal
+              </h1>
+              <div className="mt-3 inline-flex flex-wrap items-center justify-center gap-2 text-xs">
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-bold border ${storeSettings.isOpen ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-600 border-red-200"}`}>
+                  <span className={`h-2 w-2 rounded-full ${storeSettings.isOpen ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
+                  {storeSettings.isOpen ? "Aberto agora" : "Fechado no momento"}
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-[var(--rose-200)] px-3 py-1.5 font-semibold text-[var(--brand-800)]">
+                  <Clock className="h-3.5 w-3.5" />
+                  {storeSettings.openTime} – {storeSettings.closeTime}
+                </span>
+              </div>
+            </div>
+          </div>
+          <CategoryTabs activeCategory={activeCategory} onCategoryChange={handleCategoryChange} categories={frontendCategories as Category[]} />
           <div className="max-w-[1020px] mx-auto px-4 sm:px-6 pb-12">
-            <CategoryTabs activeCategory={activeCategory} onCategoryChange={setActiveCategory} categories={frontendCategories as Category[]} />
             <SearchBar value={searchQuery} onChange={setSearchQuery} />
 
-            {visibleCategoryIds.map((category) => {
+            <div id="cardapio-list" className="scroll-mt-64">
+            {visibleCategoryIds.map((category, catIdx) => {
               const products = productsByCategory[category.id] || [];
               return (
                 <ProductCategorySection
                   key={category.id}
+                  sectionId={`cat-${category.id}`}
                   title={category.label}
                   products={products}
                   onAddClick={handleAddToCart}
                   onDetailClick={setSelectedProduct}
+                  eagerFirst={catIdx === 0}
                 />
               );
             })}
             {visibleCategoryIds.length === 0 && (
-              <div className="px-4 py-16 text-center">
-                <p className="font-display text-lg font-bold text-[var(--brand-800)]">
-                  Nenhum produto encontrado
+              <div className="mx-4 my-6 px-6 py-14 text-center bg-white rounded-[var(--radius-card-lg)] border border-dashed border-[var(--ring)] shadow-sm">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--rose-100)]">
+                  <CakeSlice className="h-8 w-8 text-[var(--brand-700)]" />
+                </div>
+                <p className="font-display text-xl font-bold text-[var(--brand-900)]">
+                  Nenhum doce encontrado
                 </p>
-                <p className="mt-1 text-sm text-[var(--muted)]">
+                <p className="mx-auto mt-1.5 max-w-sm text-sm text-[var(--muted)]">
                   {searching
                     ? `Sem resultados para "${searchQuery.trim()}". Tente outro termo ou categoria.`
-                    : "Ainda não há produtos nesta categoria."}
+                    : "Ainda não há delícias nesta categoria — volte em breve."}
                 </p>
                 {searching && (
                   <button
@@ -256,13 +316,14 @@ export default function CardapioPage() {
                       setSearchQuery("");
                       setActiveCategory("todos");
                     }}
-                    className="mt-4 text-sm font-semibold text-[var(--brand-700)] underline underline-offset-2 hover:text-[var(--brand-800)]"
+                    className="mt-4 inline-flex items-center rounded-full bg-[var(--brand-900)] px-5 py-2.5 text-sm font-bold text-[var(--cream)] hover:bg-[var(--brand-800)] transition-colors"
                   >
                     Limpar busca
                   </button>
                 )}
               </div>
             )}
+            </div>
           </div>
         </div>
 
@@ -274,6 +335,8 @@ export default function CardapioPage() {
           onRemoveItem={removeItem}
             onEditItem={(item: CartItem) => setEditItem(item)}
           onCheckout={handleCheckout}
+          suggestions={suggestions}
+          onQuickAdd={handleQuickAdd}
         />
       </main>
 

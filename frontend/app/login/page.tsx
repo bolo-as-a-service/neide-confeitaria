@@ -97,7 +97,7 @@ function LoginForm() {
   });
 
   return (
-    <div className="flex min-h-screen flex-row items-center justify-center overflow-hidden bg-[var(--page-bg)] px-4">
+    <div className="flex min-h-screen justify-center overflow-y-auto bg-[var(--page-bg)] px-4 py-8">
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0"
@@ -106,31 +106,39 @@ function LoginForm() {
         <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-[var(--rose-200)]/40 blur-[140px]" />
       </div>
 
-      <div className="z-10 w-full flex flex-col lg:flex-row items-stretch justify-center max-w-[90%] lg:max-w-[65%] bg-white/85 rounded-3xl border border-[var(--rose-200)] gap-3">
-        <div className="text-center bg-[#31130c] p-8 lg:p-12 rounded-3xl lg:w-[50%] flex flex-col justify-between">
-          <div className="flex flex-col items-center justify-center mt-12">
+      <div className="z-10 m-auto w-full flex flex-col lg:flex-row items-stretch justify-center max-w-[90%] lg:max-w-[880px] bg-white rounded-[var(--radius-hero)] border border-[var(--rose-200)] shadow-[0_24px_60px_-24px_rgba(75,40,32,0.4)] overflow-hidden">
+        <div className="text-center bg-[#31130c] texture-sprinkles p-8 lg:p-12 lg:w-[46%] flex flex-col justify-between relative overflow-hidden">
+          <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[var(--brand-700)]/40 blur-2xl" />
+          <div aria-hidden className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-[#8a3b35]/30 blur-2xl" />
+          <div className="relative flex flex-col items-center justify-center mt-8 lg:mt-12">
+            <span className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[var(--cream)]/12 ring-1 ring-white/25 font-script text-3xl text-[var(--cream)]">N</span>
             <h1 className="font-script text-4xl lg:text-6xl leading-none text-[var(--page-bg)]">
               Neide
             </h1>
-            <p className="mt-1 font-display text-[0.65rem] uppercase tracking-[0.45em] text-[var(--page-bg)]">
+            <p className="mt-1 font-display text-[0.65rem] uppercase tracking-[0.45em] text-[var(--rose-200)]">
               Confeitaria
             </p>
-            <p className="mt-3 text-sm text-[var(--page-bg)] animate-[fadeUp_0.7s_ease-out_0.2s_both]">
+            <div className="mt-4 flex items-center gap-1.5" aria-hidden>
+              <span className="h-1.5 w-1.5 rounded-full bg-[#f1baad]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#f9efec]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#c08d82]" />
+            </div>
+            <p className="mt-3 max-w-[26ch] text-sm leading-relaxed text-[var(--page-bg)]/90 animate-[fadeUp_0.7s_ease-out_0.2s_both]">
               Acesse sua conta para acompanhar seus pedidos e preferências.
             </p>
           </div>
 
-          <div className="mt-8 text-center animate-[fadeUp_0.7s_ease-out_0.5s_both]">
+          <div className="relative mt-8 text-center animate-[fadeUp_0.7s_ease-out_0.5s_both]">
             <Link
               href="/"
-              className="text-xs font-medium text-[var(--page-bg)] underline-offset-2 hover:text-[var(--page-bg)] hover:underline"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--rose-200)] underline-offset-4 hover:text-white hover:underline"
             >
               ← Voltar para o cardápio
             </Link>
           </div>
         </div>
 
-        <div className="p-6 lg:p-8 lg:w-[50%]">
+        <div className="p-6 sm:p-8 lg:p-10 lg:w-[54%]">
           <div className="mb-6">
             <h2 className="font-display text-2xl font-semibold text-[var(--brand-900)]">
               Login

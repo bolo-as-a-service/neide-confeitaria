@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { ClipboardList, User, Check, ChefHat, Package, Truck, Ban, Loader2 } from "lucide-react";
+import { ClipboardList, User, Check, ChefHat, Package, Truck, Ban } from "lucide-react";
 import { KanbanColumn } from "@/components/admin/KanbanColumn";
 import { Order } from "@/components/admin/OrderCard";
 import { ErrorState } from "@/components/ui/error-state";
+import { KanbanSkeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import type { BackendOrder, BackendOrderItem } from "@/lib/types";
@@ -144,8 +145,17 @@ export default function AdminPedidosPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-[var(--brand-700)]" />
+      <div className="max-w-full">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-1">
+            <ClipboardList className="h-5 w-5 lg:h-6 lg:w-6 text-[var(--brand-700)]" />
+            <h1 className="text-xl lg:text-2xl font-bold text-[var(--ink)]">Pedidos</h1>
+          </div>
+          <p className="text-sm text-[var(--muted)] ml-9">
+            Acompanhe e gerencie todos os pedidos
+          </p>
+        </div>
+        <KanbanSkeleton columns={4} />
       </div>
     );
   }

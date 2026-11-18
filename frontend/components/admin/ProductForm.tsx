@@ -139,7 +139,7 @@ export function ProductForm({ onBack, editProduct, saving = false, onSave }: Pro
           <div className="flex items-center gap-3 sm:gap-4">
             <button
               onClick={onBack}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-gray-200 bg-white flex items-center justify-center text-[var(--ink)] hover:bg-gray-50 transition-colors flex-shrink-0"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[var(--rose-200)] bg-white flex items-center justify-center text-[var(--brand-800)] hover:bg-[var(--rose-50)] transition-colors flex-shrink-0"
             >
               <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
@@ -175,10 +175,10 @@ export function ProductForm({ onBack, editProduct, saving = false, onSave }: Pro
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+      <div className="bg-white rounded-[var(--radius-card-lg)] shadow-[0_14px_36px_-18px_rgba(75,40,32,0.4)] border border-[var(--rose-200)] p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-6">
-          <ClipboardList className="h-5 w-5 text-red-500" />
-          <h2 className="text-base font-semibold text-[var(--ink)]">Informações Básicas</h2>
+          <ClipboardList className="h-5 w-5 text-[var(--brand-700)]" />
+          <h2 className="text-base font-bold text-[var(--brand-900)]">Informações básicas</h2>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -344,7 +344,7 @@ export function ProductForm({ onBack, editProduct, saving = false, onSave }: Pro
                   {ingredients.map((ing, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-100 rounded-full text-xs text-[var(--ink)]"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-[var(--rose-50)] border border-[var(--rose-200)] rounded-full text-xs font-medium text-[var(--brand-800)]"
                     >
                       {ing}
                       <button

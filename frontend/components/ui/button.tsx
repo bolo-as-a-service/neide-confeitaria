@@ -15,7 +15,8 @@ const buttonVariants = cva(
                     "bg-[var(--rose-100)] text-[var(--brand-800)] hover:bg-[var(--rose-200)]",
                 outline:
                     "border border-[var(--rose-200)] text-[var(--brand-800)] hover:bg-[var(--rose-100)]",
-                ghost: "text-[var(--cream)] hover:bg-white/10",
+                ghost: "text-[var(--brand-800)] hover:bg-[var(--rose-100)]",
+                ghostOnDark: "text-[var(--cream)] hover:bg-white/10",
                 destructive: "bg-red-600 text-white hover:bg-red-700",
             },
             size: {

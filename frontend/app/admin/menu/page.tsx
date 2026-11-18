@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ErrorState } from "@/components/ui/error-state";
+import { AdminProductTableSkeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { categoryColorForCategory, parsePriceInput } from "@/lib/utils";
@@ -155,8 +156,12 @@ export default function AdminMenuPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-[var(--brand-700)]" />
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-6 rounded-[var(--radius-card-lg)] bg-[var(--brand-900)] texture-sprinkles text-[var(--cream)] p-5 sm:p-6 shadow-[0_18px_40px_-20px_rgba(43,21,20,0.65)]">
+          <div className="h-7 w-56 rounded-full bg-white/15 animate-pulse" />
+          <div className="mt-2 h-4 w-72 max-w-full rounded-full bg-white/10 animate-pulse" />
+        </div>
+        <AdminProductTableSkeleton rows={6} />
       </div>
     );
   }
@@ -181,23 +186,23 @@ export default function AdminMenuPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-3">
-            <Cake className="h-5 w-5 lg:h-6 lg:w-6 text-[var(--brand-700)]" />
-            <h1 className="text-xl lg:text-2xl font-bold text-[var(--ink)]">Menu de Produtos</h1>
+      <div className="mb-6 rounded-[var(--radius-card-lg)] bg-[var(--brand-900)] texture-sprinkles text-[var(--cream)] p-5 sm:p-6 flex items-center justify-between gap-4 shadow-[0_18px_40px_-20px_rgba(43,21,20,0.65)]">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <Cake className="h-5 w-5 text-[var(--rose-200)]" />
+            <h1 className="text-xl lg:text-2xl font-bold tracking-tight">Menu de produtos</h1>
           </div>
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 lg:gap-2 bg-[var(--brand-700)] hover:bg-[var(--brand-800)] text-[var(--cream)] px-3 lg:px-4 py-2 lg:py-2.5 rounded-lg text-xs lg:text-sm font-semibold transition-colors whitespace-nowrap"
-          >
-            <Plus className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
-            Novo Produto
-          </button>
+          <p className="mt-1 text-sm text-[var(--rose-100)]/85">
+            Gerencie os doces disponíveis no cardápio
+          </p>
         </div>
-        <p className="text-sm text-[var(--muted)]">
-          Gerencie os produtos disponíveis no cardápio
-        </p>
+        <button
+          onClick={() => setShowForm(true)}
+          className="flex items-center gap-1.5 bg-[var(--cream)] hover:bg-white text-[var(--brand-900)] px-4 py-2.5 rounded-full text-xs lg:text-sm font-bold transition-all hover:-translate-y-px shadow whitespace-nowrap"
+        >
+          <Plus className="h-4 w-4" strokeWidth={3} />
+          Novo produto
+        </button>
       </div>
 
       <AdminProductTable

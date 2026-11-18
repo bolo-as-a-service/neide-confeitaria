@@ -44,7 +44,8 @@ export function AdminSidebar() {
   };
 
   return (
-    <aside className="hidden lg:flex w-60 bg-gray-50 border-r border-gray-200 flex-col py-6 px-3 gap-1">
+    <aside className="hidden lg:flex w-60 bg-white border-r border-[var(--rose-200)] flex-col py-6 px-3 gap-1.5">
+      <p className="px-4 pb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Confeitaria</p>
       {sidebarItems.map((item) => {
         const active = isActive(item);
         return (
@@ -52,13 +53,13 @@ export function AdminSidebar() {
             key={item.id}
             href={item.href}
             className={cn(
-              "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors relative",
+              "flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all relative",
               active
-                ? "bg-[var(--rose-100)] text-[var(--brand-800)] border-l-4 border-red-500"
-                : "text-[var(--muted)] hover:bg-gray-100 hover:text-[var(--ink)] border-l-4 border-transparent"
+                ? "bg-[var(--brand-900)] text-[var(--cream)] shadow-[0_10px_24px_-12px_rgba(43,21,20,0.7)]"
+                : "text-[var(--muted)] hover:bg-[var(--rose-50)] hover:text-[var(--brand-900)]"
             )}
           >
-            <span className={cn(active ? "text-[var(--brand-800)]" : "text-[var(--muted)]")}>
+            <span className={cn("flex h-9 w-9 items-center justify-center rounded-xl", active ? "bg-white/15 text-[var(--cream)]" : "bg-[var(--rose-100)] text-[var(--brand-700)]")}>
               {item.icon}
             </span>
             {item.label}

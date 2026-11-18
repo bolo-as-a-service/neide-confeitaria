@@ -47,10 +47,10 @@ export function OrderCard({ order, variant, onRecusar, onAceitar, onIniciarPrepa
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 space-y-3">
+    <div className="bg-white rounded-2xl shadow-[0_8px_24px_-14px_rgba(75,40,32,0.35)] border border-[var(--rose-200)] p-4 space-y-3 card-lift">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-bold text-[var(--ink)]">Pedido #{order.number}</span>
-        <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full border", typeTagStyles[order.type])}>
+        <span className="text-sm font-bold text-[var(--brand-900)]">Pedido #{order.number}</span>
+        <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border", typeTagStyles[order.type])}>
           {order.type}
         </span>
       </div>
@@ -81,12 +81,12 @@ export function OrderCard({ order, variant, onRecusar, onAceitar, onIniciarPrepa
       </button>
 
       {expanded && (
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 rounded-xl bg-[var(--rose-50)]/70 p-2.5">
           {order.items.map((item, idx) => (
             <div key={idx}>
-              <div className="flex justify-between text-xs">
-                <span className="text-[var(--ink)]">
-                  {item.name} <span className="text-[var(--muted)]">({item.quantity}x • {formattedPrice(item.price)})</span>
+              <div className="flex justify-between text-xs gap-2">
+                <span className="text-[var(--ink)] truncate">
+                  {item.quantity}x {item.name} <span className="text-[var(--muted)]">• {formattedPrice(item.price)}</span>
                 </span>
               </div>
               {item.observation && (
@@ -98,13 +98,14 @@ export function OrderCard({ order, variant, onRecusar, onAceitar, onIniciarPrepa
       )}
 
       {order.generalObservations && (
-        <div className="bg-gray-50 rounded-lg p-2 text-xs text-[var(--muted)] italic">
+        <div className="bg-[var(--rose-50)] border border-dashed border-[var(--rose-200)] rounded-xl p-2.5 text-xs text-[var(--brand-800)] italic">
           {order.generalObservations}
         </div>
       )}
 
-      <div className="text-sm font-bold text-[var(--brand-800)] pt-1 border-t border-gray-100">
-        {formattedPrice(order.total)}
+      <div className="flex items-baseline justify-between pt-2 border-t border-dashed border-[var(--rose-200)]">
+        <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--muted)]">Total</span>
+        <span className="font-display text-base font-extrabold text-[var(--brand-800)]">{formattedPrice(order.total)}</span>
       </div>
 
       <div className="flex gap-2 pt-1">

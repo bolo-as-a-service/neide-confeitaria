@@ -45,20 +45,20 @@ export default function AdminExtraPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-1">
-          <Settings className="h-5 w-5 lg:h-6 lg:w-6 text-[var(--brand-700)]" />
-          <h1 className="text-xl lg:text-2xl font-bold text-[var(--ink)]">Extra</h1>
+      <div className="mb-6 rounded-[var(--radius-card-lg)] bg-[var(--brand-900)] texture-sprinkles text-[var(--cream)] p-5 sm:p-6 shadow-[0_18px_40px_-20px_rgba(43,21,20,0.65)]">
+        <div className="flex items-center gap-2.5">
+          <Settings className="h-5 w-5 text-[var(--rose-200)]" />
+          <h1 className="text-xl lg:text-2xl font-bold tracking-tight">Extra</h1>
         </div>
-        <p className="text-sm text-[var(--muted)] ml-9">
+        <p className="mt-1 text-sm text-[var(--rose-100)]/85">
           Configure as informações da loja
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
-        <div className="flex items-center gap-2 pb-4 border-b border-gray-100">
+      <div className="bg-white rounded-[var(--radius-card-lg)] shadow-[0_14px_36px_-18px_rgba(75,40,32,0.4)] border border-[var(--rose-200)] p-6 space-y-6">
+        <div className="flex items-center gap-2 pb-4 border-b border-dashed border-[var(--rose-200)]">
           <Store className="h-5 w-5 text-[var(--brand-700)]" />
-          <h2 className="text-base font-semibold text-[var(--ink)]">Dados da Loja</h2>
+          <h2 className="text-base font-bold text-[var(--brand-900)]">Dados da loja</h2>
         </div>
 
         <div>
@@ -149,8 +149,8 @@ export default function AdminExtraPage() {
           </button>
         </div>
 
-        <div className="pt-4 border-t border-gray-100 flex justify-end">
-          <Button onClick={handleSave}>
+        <div className="pt-4 border-t border-dashed border-[var(--rose-200)] flex justify-end">
+          <Button onClick={handleSave} className="rounded-full px-8 h-11 font-bold">
             Salvar configurações
           </Button>
         </div>

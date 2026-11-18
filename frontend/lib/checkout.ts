@@ -7,6 +7,21 @@ import { z } from "zod";
  */
 export const DELIVERY_FEE = 7.9;
 
+/** Pedidos de entrega a partir deste subtotal ganham frete grátis. */
+export const FREE_DELIVERY_THRESHOLD = 120;
+
+/** Taxa efetiva: 0 para retirada ou quando o subtotal atinge o frete grátis. */
+export function deliveryFeeFor(subtotal: number, wantsDelivery: boolean): number {
+  if (!wantsDelivery) return 0;
+  if (subtotal >= FREE_DELIVERY_THRESHOLD) return 0;
+  return DELIVERY_FEE;
+}
+
+/** Quanto falta para o frete grátis (0 quando já atingido). */
+export function remainingForFreeShipping(subtotal: number): number {
+  return Math.max(0, FREE_DELIVERY_THRESHOLD - subtotal);
+}
+
 /** Remove tudo que não for dígito. */
 export function stripPhoneDigits(value: string): string {
   return value.replace(/\D/g, "").slice(0, 11);

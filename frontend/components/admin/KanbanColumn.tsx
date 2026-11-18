@@ -19,30 +19,30 @@ interface KanbanColumnProps {
 }
 
 const headerStyles: Record<string, string> = {
-  fila: "bg-[var(--rose-100)] text-[var(--brand-800)]",
-  aprovados: "bg-yellow-50 text-yellow-800",
-  fazendo: "bg-blue-50 text-blue-800",
-  prontos: "bg-green-50 text-green-800",
-  entregues: "bg-teal-50 text-teal-800",
-  cancelados: "bg-gray-100 text-gray-600",
+  fila: "bg-amber-100/80 text-amber-900",
+  aprovados: "bg-blue-100/80 text-blue-900",
+  fazendo: "bg-orange-100/80 text-orange-900",
+  prontos: "bg-green-100/80 text-green-900",
+  entregues: "bg-teal-100/80 text-teal-900",
+  cancelados: "bg-stone-200/70 text-stone-600",
 };
 
 const countStyles: Record<string, string> = {
-  fila: "bg-[var(--brand-700)] text-white",
-  aprovados: "bg-yellow-500 text-white",
-  fazendo: "bg-blue-500 text-white",
-  prontos: "bg-green-500 text-white",
+  fila: "bg-[var(--brand-900)] text-[var(--cream)]",
+  aprovados: "bg-blue-600 text-white",
+  fazendo: "bg-orange-500 text-white",
+  prontos: "bg-green-600 text-white",
   entregues: "bg-teal-600 text-white",
-  cancelados: "bg-gray-400 text-white",
+  cancelados: "bg-stone-400 text-white",
 };
 
 const bodyStyles: Record<string, string> = {
-  fila: "bg-[var(--rose-50)]",
-  aprovados: "bg-yellow-50/50",
-  fazendo: "bg-blue-50/50",
+  fila: "bg-[var(--rose-50)]/70",
+  aprovados: "bg-blue-50/50",
+  fazendo: "bg-orange-50/50",
   prontos: "bg-green-50/50",
   entregues: "bg-teal-50/50",
-  cancelados: "bg-gray-50",
+  cancelados: "bg-stone-100/60",
 };
 
 export function KanbanColumn({
@@ -59,8 +59,8 @@ export function KanbanColumn({
   onMarcarEntregue,
 }: KanbanColumnProps) {
   return (
-    <div className="flex-shrink-0 w-80 flex flex-col rounded-xl overflow-hidden border border-gray-200">
-      <div className={cn("flex items-center gap-2 px-4 py-3", headerStyles[variant])}>
+    <div className="flex-shrink-0 w-[calc(100vw-4.5rem)] max-w-80 sm:w-80 flex flex-col rounded-[var(--radius-card)] overflow-hidden border border-[var(--rose-200)] bg-white shadow-[0_10px_28px_-16px_rgba(75,40,32,0.35)]">
+      <div className={cn("flex items-center gap-2 px-4 py-3 border-b border-black/5", headerStyles[variant])}>
         {icon}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold">{title}</p>
@@ -71,7 +71,7 @@ export function KanbanColumn({
         </span>
       </div>
 
-      <div className={cn("flex-1 p-3 space-y-3 overflow-y-auto", bodyStyles[variant])}>
+      <div className={cn("flex-1 p-3 space-y-3 overflow-y-auto min-h-[120px] max-h-[70vh] texture-dots-light", bodyStyles[variant])}>
         {orders.map((order) => (
           <OrderCard
             key={order.id}
@@ -85,7 +85,10 @@ export function KanbanColumn({
           />
         ))}
         {orders.length === 0 && (
-          <p className="text-xs text-center py-8 text-[var(--muted)]">Nenhum pedido</p>
+          <div className="text-center py-10 px-4">
+            <p className="font-script text-2xl text-[var(--muted)]/70">vazio por aqui</p>
+            <p className="text-xs text-center text-[var(--muted)]">Nenhum pedido nesta etapa</p>
+          </div>
         )}
       </div>
     </div>

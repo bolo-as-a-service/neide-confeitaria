@@ -45,10 +45,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
+                    "flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all",
                     active
-                      ? "bg-[var(--rose-100)] text-[var(--brand-800)]"
-                      : "text-[var(--muted)] hover:bg-gray-100"
+                      ? "bg-[var(--brand-900)] text-[var(--cream)] shadow-md"
+                      : "bg-white border border-[var(--rose-200)] text-[var(--muted)] hover:text-[var(--brand-900)]"
                   )}
                 >
                   {item.icon}

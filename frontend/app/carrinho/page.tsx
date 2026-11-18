@@ -3,20 +3,25 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowLeft, Minus, Plus, Edit3, Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowLeft, Minus, Plus, Edit3, Trash2, AlertTriangle, Loader2, ShoppingBag, Bike, Store, Check, MoonStar } from "lucide-react";
 import { Header } from "@/components/menu/Header";
 import { Button } from "@/components/ui/button";
+import { Price, formatBRL } from "@/components/ui/price";
+import { FreeShippingProgress } from "@/components/menu/FreeShippingProgress";
 import { useCart, CartItem } from "@/lib/cart-context";
 import { ProductModal } from "@/components/menu/ProductModal";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import {
-  DELIVERY_FEE,
+  FREE_DELIVERY_THRESHOLD,
+  deliveryFeeFor,
   firstCheckoutError,
   maskPhone,
   stripPhoneDigits,
   validateCheckout,
 } from "@/lib/checkout";
+import { DEFAULT_STORE_SETTINGS, loadStoreSettings } from "@/lib/store-settings";
 import { productBlurPlaceholder } from "@/lib/utils";
 import {
   Dialog,
@@ -47,7 +52,20 @@ export default function CarrinhoPage() {
     deliveryDateTime: deliveryDate,
   });
   const isFormValid = Object.keys(formErrors).length === 0;
-  const deliveryFee = deliveryOption === "sim" ? DELIVERY_FEE : 0;
+  const wantsDelivery = deliveryOption === "sim";
+
+  const [storeSettings, setStoreSettings] = React.useState(DEFAULT_STORE_SETTINGS);
+  const storeOpen = storeSettings.isOpen;
+
+  React.useEffect(() => {
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) setStoreSettings(loadStoreSettings());
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const [editItem, setEditItem] = React.useState<CartItem | null>(null);
   const [deleteItem, setDeleteItem] = React.useState<CartItem | null>(null);
@@ -65,17 +83,8 @@ export default function CarrinhoPage() {
   // Itens pausados no admin depois de adicionados não podem ser comprados.
   const unavailableItems = items.filter((item) => item.product.available === false);
 
-  const formattedTotal = new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(total);
-
-  const formattedItemTotal = (price: number, quantity: number) =>
-    new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(price * quantity);
-
+  const freeShipping = total >= FREE_DELIVERY_THRESHOLD;
+  const deliveryFee = deliveryFeeFor(total, wantsDelivery);
   const grandTotal = total + deliveryFee;
 
   const handleFinalize = async () => {
@@ -97,6 +106,10 @@ export default function CarrinhoPage() {
     }
     if (unavailableItems.length > 0) {
       toast.error("Remova os itens pausados do carrinho para continuar.");
+      return;
+    }
+    if (!storeOpen) {
+      toast.error(`Estamos fechados no momento — abrimos das ${storeSettings.openTime} às ${storeSettings.closeTime}.`);
       return;
     }
 
@@ -135,13 +148,35 @@ export default function CarrinhoPage() {
       <Header cartCount={cartCount} onCartClick={() => router.push("/carrinho")} />
 
       <main className="max-w-[1020px] mx-auto px-4 py-6 pb-12">
-        <button
-          onClick={() => router.push("/cardapio")}
-          className="w-10 h-10 rounded-full bg-[var(--brand-700)] flex items-center justify-center text-white hover:bg-[var(--brand-800)] transition-colors mb-6"
-          aria-label="Voltar"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-4 mb-6">
+          <button
+            onClick={() => router.push("/cardapio")}
+            className="w-10 h-10 rounded-full bg-[var(--brand-900)] text-[var(--cream)] flex items-center justify-center hover:bg-[var(--brand-800)] hover:-translate-x-px transition-all shadow-sm"
+            aria-label="Voltar ao cardápio"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <div>
+            <h1 className="font-display text-2xl font-bold text-[var(--brand-900)] leading-tight">Seu pedido</h1>
+            <p className="text-sm text-[var(--muted)]">Confira, preencha e receba com carinho</p>
+          </div>
+        </div>
+
+        <ol className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-2 text-xs font-bold" aria-label="Etapas do pedido">
+          {["Sacola", "Dados e entrega", "Confirmação"].map((step, i) => {
+            const active = i === (items.length === 0 ? 0 : 1);
+            const done = i === 0 && items.length > 0;
+            return (
+              <li key={step} className="flex items-center gap-2">
+                <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${done ? "bg-green-600 border-green-600 text-white" : active ? "bg-[var(--brand-900)] border-[var(--brand-900)] text-[var(--cream)]" : "bg-white border-[var(--rose-200)] text-[var(--muted)]"}`}>
+                  {done ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : i + 1}
+                </span>
+                <span className={active || done ? "text-[var(--brand-900)]" : "text-[var(--muted)]"}>{step}</span>
+                {i < 2 && <span className="mx-1 hidden h-px w-8 bg-[var(--rose-200)] min-[480px]:block sm:w-14" />}
+              </li>
+            );
+          })}
+        </ol>
 
         <div className="space-y-6">
           {unavailableItems.length > 0 && (
@@ -150,11 +185,26 @@ export default function CarrinhoPage() {
               {unavailableItems.map((i) => i.product.name).join(", ")}.
             </div>
           )}
-          <div className="bg-white rounded-2xl border border-[var(--rose-200)] shadow-sm overflow-hidden">
-            <div className="p-6 pb-4">
-              <h2 className="font-display text-lg font-bold text-[var(--brand-800)] uppercase tracking-wide mb-5">
-                ITENS DO PEDIDO
+          {!storeOpen && (
+            <div className="flex items-start gap-3 rounded-2xl border border-[var(--rose-200)] bg-[var(--brand-900)] texture-sprinkles text-[var(--cream)] px-5 py-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
+                <MoonStar className="h-5 w-5" />
+              </span>
+              <div className="text-sm">
+                <p className="font-bold">Nossa cozinha está descansando.</p>
+                <p className="mt-0.5 text-[var(--rose-100)]/90">
+                  Abrimos das {storeSettings.openTime} às {storeSettings.closeTime} — você pode montar o pedido, mas a finalização está pausada até lá.
+                </p>
+              </div>
+            </div>
+          )}
+          <div className="bg-white rounded-[var(--radius-card-lg)] border border-[var(--rose-200)] shadow-[0_10px_30px_-16px_rgba(75,40,32,0.3)] overflow-hidden card-lift">
+            <div className="p-4 sm:p-6 sm:pb-4 pb-4">
+              <h2 className="font-display text-lg font-bold text-[var(--brand-900)] uppercase tracking-wide mb-1 flex items-center gap-2">
+                <ShoppingBag className="h-5 w-5 text-[var(--brand-700)]" />
+                Itens do pedido
               </h2>
+              <p className="text-xs text-[var(--muted)] mb-5">{cartCount} {cartCount === 1 ? "doce" : "doces"} na sacola</p>
 
               {items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -168,10 +218,13 @@ export default function CarrinhoPage() {
                 </div>
               ) : (
                 <div className="space-y-5">
-                  {items.map((item) => (
-                    <div
+                  {items.map((item, idx) => (
+                    <motion.div
                       key={item.id}
-                      className="pb-5 last:pb-0 border-b border-[var(--rose-200)] last:border-b-0"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: Math.min(idx * 0.05, 0.3) }}
+                      className="pb-5 last:pb-0 border-b border-dashed border-[var(--rose-200)] last:border-b-0"
                     >
                       <div className="flex gap-4">
                         <div className="w-16 h-16 rounded-xl bg-[var(--rose-50)] overflow-hidden flex-shrink-0 relative">
@@ -198,7 +251,7 @@ export default function CarrinhoPage() {
                                 )}
                               </h3>
                               <p className="text-sm text-[var(--muted)] mt-0.5">
-                                {item.quantity}x • {formattedItemTotal(item.product.price, 1)}
+                                {item.quantity}x • <Price value={item.product.price} />
                               </p>
                             </div>
                             <div className="flex items-center gap-1 flex-shrink-0">
@@ -226,7 +279,7 @@ export default function CarrinhoPage() {
                             </p>
                           )}
 
-                          <div className="flex items-center justify-between mt-3">
+                          <div className="flex flex-wrap items-center justify-between gap-y-2 mt-3">
                             <div className="flex items-center border border-[var(--rose-200)] rounded-lg overflow-hidden">
                               <button
                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -247,51 +300,58 @@ export default function CarrinhoPage() {
                                 <Plus className="h-3.5 w-3.5" />
                               </button>
                             </div>
-                            <span className="font-display text-lg font-bold text-[var(--brand-800)]">
-                              {formattedItemTotal(item.product.price, item.quantity)}
-                            </span>
+                            <Price
+                              value={item.product.price * item.quantity}
+                              className="font-display text-lg font-bold text-[var(--brand-800)]"
+                            />
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}
             </div>
 
             {items.length > 0 && (
-              <div className="bg-[var(--rose-50)] px-6 py-4 space-y-1">
-                <div className="flex items-center justify-between text-sm text-[var(--muted)]">
+              <>
+                {wantsDelivery && (
+                  <div className="px-6 pt-5">
+                    <FreeShippingProgress subtotal={total} />
+                  </div>
+                )}
+                <div className="bg-[var(--brand-900)] texture-sprinkles px-6 py-5 space-y-1.5 text-[var(--cream)]">
+                <div className="flex items-center justify-between text-sm text-[var(--rose-100)]">
                   <span>Subtotal</span>
-                  <span>{formattedTotal}</span>
+                  <Price value={total} className="font-semibold text-white" />
                 </div>
-                <div className="flex items-center justify-between text-sm text-[var(--muted)]">
+                <div className="flex items-center justify-between text-sm text-[var(--rose-100)]">
                   <span>Entrega</span>
                   <span>
-                    {deliveryFee === 0
+                    {!wantsDelivery
                       ? "Grátis (retirada)"
-                      : new Intl.NumberFormat("pt-BR", {
-                          style: "currency",
-                          currency: "BRL",
-                        }).format(deliveryFee)}
+                      : freeShipping
+                        ? "Grátis"
+                        : formatBRL(deliveryFee)}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-display text-lg font-bold text-[var(--brand-800)]">TOTAL :</span>
-                  <span className="font-display text-xl font-extrabold text-[var(--brand-800)]">
-                    {new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(grandTotal)}
-                  </span>
+                <div className="flex items-center justify-between border-t border-white/15 pt-3">
+                  <span className="font-display text-base font-bold uppercase tracking-widest">Total</span>
+                  <Price value={grandTotal} className="font-display text-2xl font-extrabold" />
                 </div>
+                {wantsDelivery && freeShipping && (
+                  <p className="text-[11px] font-semibold text-green-300">
+                    Frete grátis aplicado no seu pedido!
+                  </p>
+                )}
               </div>
+              </>
             )}
           </div>
 
           {items.length > 0 && (
             <>
-              <div className="bg-white rounded-2xl border border-[var(--rose-200)] shadow-sm p-6 space-y-5">
+              <div className="bg-white rounded-2xl border border-[var(--rose-200)] shadow-sm p-4 sm:p-6 space-y-5">
                 <h2 className="font-display text-lg font-bold text-[var(--brand-800)] uppercase tracking-wide">
                   SEUS DADOS
                 </h2>
@@ -338,34 +398,36 @@ export default function CarrinhoPage() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl border border-[var(--rose-200)] shadow-sm p-6">
-                <h2 className="font-display text-lg font-bold text-[var(--brand-800)] uppercase tracking-wide mb-6">
-                  DESEJA RECEBER O PEDIDO EM CASA?
+              <div className="bg-white rounded-[var(--radius-card-lg)] border border-[var(--rose-200)] shadow-[0_10px_30px_-16px_rgba(75,40,32,0.3)] p-4 sm:p-6">
+                <h2 className="font-display text-lg font-bold text-[var(--brand-900)] uppercase tracking-wide mb-5">
+                  Deseja receber em casa?
                 </h2>
 
-                <div className="flex items-center gap-8 mb-6" role="radiogroup" aria-label="Deseja receber o pedido em casa?">
-                  <label className="flex items-center gap-2.5 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="delivery-option"
-                      value="nao"
-                      checked={deliveryOption === "nao"}
-                      onChange={() => setDeliveryOption("nao")}
-                      className="h-5 w-5 accent-[var(--brand-700)]"
-                    />
-                    <span className="text-sm text-[var(--ink)]">NÃO</span>
-                  </label>
-                  <label className="flex items-center gap-2.5 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="delivery-option"
-                      value="sim"
-                      checked={deliveryOption === "sim"}
-                      onChange={() => setDeliveryOption("sim")}
-                      className="h-5 w-5 accent-[var(--brand-700)]"
-                    />
-                    <span className="text-sm text-[var(--ink)]">SIM</span>
-                  </label>
+                <div className="grid grid-cols-2 gap-3 mb-6" role="radiogroup" aria-label="Deseja receber o pedido em casa?">
+                  {[
+                    { value: "sim" as const, icon: Bike, title: "Entrega", desc: "Receber em casa" },
+                    { value: "nao" as const, icon: Store, title: "Retirada", desc: "Buscar na loja" },
+                  ].map((opt) => {
+                    const selected = deliveryOption === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => setDeliveryOption(opt.value)}
+                        className={`flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all ${selected ? "border-[var(--brand-700)] bg-[var(--rose-50)] shadow-sm" : "border-[var(--rose-200)] bg-white hover:border-[var(--ring)]"}`}
+                      >
+                        <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${selected ? "bg-[var(--brand-900)] text-[var(--cream)]" : "bg-[var(--rose-100)] text-[var(--brand-700)]"}`}>
+                          <opt.icon className="h-5 w-5" />
+                        </span>
+                        <span>
+                          <span className="block text-sm font-bold text-[var(--ink)]">{opt.title}</span>
+                          <span className="block text-xs text-[var(--muted)]">{opt.desc}</span>
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 {deliveryOption === "sim" ? (
@@ -500,34 +562,41 @@ export default function CarrinhoPage() {
                   </div>
                 )}
 
-                <div className="mt-6 flex justify-center">
+                <div className="mt-6 flex flex-col items-center gap-2">
                   <Button
                     onClick={handleFinalize}
-                    disabled={submitting || items.length === 0 || !isFormValid || unavailableItems.length > 0}
+                    disabled={submitting || items.length === 0 || !isFormValid || unavailableItems.length > 0 || !storeOpen}
                     title={
                       items.length === 0
                         ? "Adicione itens ao carrinho"
-                        : unavailableItems.length > 0
-                          ? "Remova os itens pausados para continuar"
-                          : !isFormValid
-                            ? (firstCheckoutError({
-                                customerName,
-                                customerPhone,
-                                delivery: deliveryOption === "sim",
-                                address,
-                                deliveryDateTime: deliveryDate,
-                              }) ?? "Preencha os dados corretamente")
-                            : undefined
+                        : !storeOpen
+                          ? `Estamos fechados — abrimos das ${storeSettings.openTime} às ${storeSettings.closeTime}`
+                          : unavailableItems.length > 0
+                            ? "Remova os itens pausados para continuar"
+                            : !isFormValid
+                              ? (firstCheckoutError({
+                                  customerName,
+                                  customerPhone,
+                                  delivery: deliveryOption === "sim",
+                                  address,
+                                  deliveryDateTime: deliveryDate,
+                                }) ?? "Preencha os dados corretamente")
+                              : undefined
                     }
-                    className="w-full max-w-md h-14 text-lg font-bold rounded-xl uppercase tracking-wide disabled:cursor-not-allowed"
+                    className="w-full max-w-md h-14 text-base font-bold rounded-full uppercase tracking-widest shadow-[0_12px_28px_-10px_rgba(116,49,45,0.7)] disabled:cursor-not-allowed"
                     size="lg"
                   >
                     {submitting ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
                     ) : (
-                      "FAZER PEDIDO"
+                      `Fazer pedido • ${formatBRL(grandTotal)}`
                     )}
                   </Button>
+                  {!storeOpen && items.length > 0 && (
+                    <p className="text-xs text-[var(--muted)] text-center">
+                      Finalização pausada — abrimos das {storeSettings.openTime} às {storeSettings.closeTime}.
+                    </p>
+                  )}
                 </div>
               </div>
             </>
