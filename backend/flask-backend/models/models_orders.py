@@ -9,11 +9,11 @@ class Orders(db.Model):
     customer_phone = db.Column(db.String(100), nullable=False)
     delivery = db.Column(db.Boolean, nullable=False)
 
-    address = db.Column(db.String(100), nullable=True)
+    address = db.Column(db.String(100), nullable=False, default="Rua 7, Bragança Paulista" )
     latitude= db.Column(db.String(200), nullable=True)
     longitude= db.Column(db.String(200), nullable=True)
 
-    observation= db.Column(db.String(150), nullable=True)
+    observation= db.Column(db.String(150),default="", nullable=False)
     status= db.Column(db.String(20), nullable = False, default="PENDING")
     deliveryDateTime= db.Column(db.DateTime, nullable = True)
     createdAt = db.Column(db.DateTime, server_default=db.func.current_timestamp())
@@ -49,7 +49,7 @@ class Items(db.Model):
     unit_price= db.Column(db.Float, nullable = False)
 
     quantity = db.Column(db.Integer, nullable=False)
-    observation = db.Column(db.String(150), nullable=True)
+    observation = db.Column(db.String(150),default="", nullable=False)
 
     product = db.relationship('Product')
 
