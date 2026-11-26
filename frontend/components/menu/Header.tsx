@@ -28,33 +28,33 @@ export function Header({ cartCount, onCartClick }: HeaderProps) {
           <div className="flex items-center justify-between gap-3">
             <div className="flex-1" />
 
-            <a href="/cardapio" className="group flex items-center gap-2.5" aria-label="Neide Confeitaria — cardápio">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--cream)]/12 ring-1 ring-white/20 font-script text-xl leading-none pt-0.5 group-hover:scale-105 transition-transform">
+            <a href="/cardapio" className="group -my-2 flex items-center gap-2 py-2" aria-label="Neide Confeitaria — cardápio">
+              <span className="hidden h-8 w-8 items-center justify-center rounded-full bg-[var(--cream)]/12 pt-0.5 font-script text-lg leading-none ring-1 ring-white/20 transition-transform group-hover:scale-105 min-[360px]:flex min-[360px]:h-9 min-[360px]:w-9 min-[360px]:text-xl">
                 N
               </span>
-              <span className="font-script text-2xl md:text-[1.7rem] whitespace-nowrap leading-none pt-1">
+              <span className="whitespace-nowrap pt-1 font-script text-xl leading-none min-[360px]:text-2xl md:text-[1.7rem]">
                 Neide Confeitaria
               </span>
             </a>
 
             <div className="flex flex-1 items-center justify-end gap-2">
               {!isLoading && user ? (
-                <>
-                  <div className="relative hidden md:block">
+                <div className="relative">
                   <button
                     type="button"
                     onClick={() => setMenuOpen((v) => !v)}
-                    className="flex h-10 items-center gap-2 rounded-full bg-white/10 py-1.5 pl-1.5 pr-2.5 ring-1 ring-white/25 transition-all hover:bg-white/20"
+                    className="flex h-10 w-10 items-center justify-center gap-2 rounded-full bg-white/10 ring-1 ring-white/25 transition-all hover:bg-white/20 md:w-auto md:justify-start md:py-1.5 md:pl-1.5 md:pr-2.5"
                     aria-haspopup="menu"
                     aria-expanded={menuOpen}
+                    aria-label={`Abrir menu da conta de ${user.name}`}
                   >
                     <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--cream)] font-display text-sm font-bold text-[var(--brand-900)]">
                       {(user.name || "N").charAt(0).toUpperCase()}
                     </span>
-                    <span className="max-w-28 truncate text-sm font-semibold">
+                    <span className="hidden max-w-28 truncate text-sm font-semibold md:inline">
                       {user.role === "ADMIN" ? "Painel Admin" : user.name.split(" ")[0]}
                     </span>
-                    <ChevronDown className={`h-4 w-4 opacity-70 transition-transform ${menuOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown className={`hidden h-4 w-4 opacity-70 transition-transform md:block ${menuOpen ? "rotate-180" : ""}`} />
                   </button>
                   {menuOpen && (
                     <>
@@ -78,7 +78,7 @@ export function Header({ cartCount, onCartClick }: HeaderProps) {
                             role="menuitem"
                             href={user.role === "ADMIN" ? "/admin" : "/meus-pedidos"}
                             onClick={() => setMenuOpen(false)}
-                            className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium hover:bg-[var(--rose-100)] transition-colors"
+                            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-[var(--rose-100)] transition-colors"
                           >
                             <User className="h-4 w-4" />
                             {user.role === "ADMIN" ? "Painel Admin" : "Meus pedidos"}
@@ -87,7 +87,7 @@ export function Header({ cartCount, onCartClick }: HeaderProps) {
                             type="button"
                             role="menuitem"
                             onClick={handleLogout}
-                            className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
                           >
                             <LogOut className="h-4 w-4" />
                             Sair
@@ -97,21 +97,14 @@ export function Header({ cartCount, onCartClick }: HeaderProps) {
                     </>
                   )}
                 </div>
-                  <Link
-                    href={user.role === "ADMIN" ? "/admin" : "/meus-pedidos"}
-                    className="md:hidden flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/25 hover:bg-white/20 transition-colors"
-                    aria-label={user.role === "ADMIN" ? "Painel Admin" : "Meus pedidos"}
-                  >
-                    <User className="h-4 w-4" />
-                  </Link>
-                </>
               ) : (
                 <Link
                   href="/login"
-                  className="hidden md:inline-flex h-10 items-center gap-2 rounded-full bg-white/5 px-4 text-sm font-semibold ring-1 ring-white/25 hover:bg-white/15 transition-all"
+                  aria-label="Entrar na conta"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-sm font-semibold ring-1 ring-white/25 transition-all hover:bg-white/15 md:w-auto md:gap-2 md:px-4"
                 >
                   <User className="h-4 w-4" />
-                  Entrar
+                  <span className="hidden md:inline">Entrar</span>
                 </Link>
               )}
               <span aria-hidden className="hidden h-6 w-px bg-white/20 sm:block" />

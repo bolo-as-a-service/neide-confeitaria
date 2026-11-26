@@ -97,7 +97,7 @@ function LoginForm() {
   });
 
   return (
-    <div className="flex min-h-screen justify-center overflow-y-auto bg-[var(--page-bg)] px-4 py-8">
+    <div className="flex min-h-dvh justify-center overflow-y-auto bg-[var(--page-bg)] px-4 py-8">
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0"
@@ -196,7 +196,7 @@ function LoginForm() {
                         <button
                           type="button"
                           onClick={() => setShowPassword((v) => !v)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--ink)]"
+                          className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--rose-100)] hover:text-[var(--ink)]"
                           tabIndex={-1}
                           aria-label={showPassword ? "Esconder senha" : "Mostrar senha"}
                         >

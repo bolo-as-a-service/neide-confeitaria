@@ -94,7 +94,7 @@ export function ProductCard({ product, onAddClick, onDetailClick, className, pri
           <Button
             variant="default"
             size="sm"
-            className="h-9 px-3.5 gap-1.5 text-xs font-bold rounded-full shadow-[0_6px_16px_-8px_rgba(116,49,45,0.7)] hover:shadow-[0_10px_20px_-8px_rgba(116,49,45,0.8)] hover:-translate-y-px active:translate-y-0 transition-all"
+            className="h-10 px-3.5 gap-1.5 text-xs font-bold rounded-full shadow-[0_6px_16px_-8px_rgba(116,49,45,0.7)] hover:shadow-[0_10px_20px_-8px_rgba(116,49,45,0.8)] hover:-translate-y-px active:translate-y-0 transition-all"
             onClick={(e) => {
               e.stopPropagation();
               onAddClick(product);

@@ -60,7 +60,10 @@ function isValidStoredItem(value: unknown): value is CartItem {
   const product = item.product as Record<string, unknown> | undefined;
   if (typeof product !== "object" || product === null) return false;
   if (typeof product.id !== "string" && typeof product.id !== "number") return false;
-  if (typeof product.name !== "string" || typeof product.price !== "number") return false;
+  if (typeof product.name !== "string") return false;
+  // O backend serializa DECIMAL como string ("55.00"); aceita as duas formas.
+  if (product.price === null || product.price === undefined) return false;
+  if (!Number.isFinite(Number(product.price))) return false;
   if (typeof product.image !== "string" || typeof product.category !== "string") return false;
   return true;
 }
@@ -77,6 +80,11 @@ export function loadStoredCart(): CartItem[] {
       .filter(isValidStoredItem)
       .map((item) => ({
         ...item,
+        product: {
+          ...item.product,
+          id: String(item.product.id),
+          price: Number(item.product.price),
+        },
         quantity: Math.floor(item.quantity),
         observations: normalizeObservations(item.observations),
       }));

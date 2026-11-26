@@ -104,4 +104,29 @@ describe("persistência localStorage (issue #19)", () => {
     expect(loaded[0].quantity).toBe(2);
     expect(loaded[0].observations).toBe("ok");
   });
+
+  it("aceita preço decimal serializado como string (backend Flask) e normaliza o produto", () => {
+    globalThis.localStorage.setItem(
+      CART_STORAGE_KEY,
+      JSON.stringify([
+        {
+          id: "legacy-1",
+          product: {
+            id: 1,
+            name: "Bolo de Morango",
+            price: "55.00",
+            image: "/images/uploads/BoloDeMorango.jpg",
+            category: "bolos",
+            available: true,
+          },
+          quantity: 1,
+          observations: "",
+        },
+      ])
+    );
+    const loaded = loadStoredCart();
+    expect(loaded).toHaveLength(1);
+    expect(loaded[0].product.price).toBe(55);
+    expect(loaded[0].product.id).toBe("1");
+  });
 });

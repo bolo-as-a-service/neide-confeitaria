@@ -349,7 +349,8 @@ export function ProductForm({ onBack, editProduct, saving = false, onSave }: Pro
                       {ing}
                       <button
                         onClick={() => handleRemoveIngredient(index)}
-                        className="w-4 h-4 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+                        className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 transition-colors hover:bg-gray-300"
+                        aria-label={`Remover ingrediente ${ing}`}
                       >
                         <X className="h-3 w-3" />
                       </button>

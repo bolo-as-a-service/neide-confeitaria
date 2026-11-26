@@ -74,7 +74,7 @@ export function OrderCard({ order, variant, onRecusar, onAceitar, onIniciarPrepa
 
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-1 text-xs text-[var(--brand-700)] font-medium"
+        className="flex min-h-10 items-center gap-1 text-xs text-[var(--brand-700)] font-medium"
       >
         {expanded ? "Ocultar" : "Ver"} itens
         <ChevronDown className={cn("h-3 w-3 transition-transform", expanded && "rotate-180")} />
@@ -113,13 +113,13 @@ export function OrderCard({ order, variant, onRecusar, onAceitar, onIniciarPrepa
           <>
             <Button
               variant="outline"
-              className="flex-1 h-8 text-xs border-red-300 text-red-600 hover:bg-red-50"
+              className="flex-1 h-10 text-xs border-red-300 text-red-600 hover:bg-red-50"
               onClick={() => onRecusar?.(order)}
             >
               Recusar
             </Button>
             <Button
-              className="flex-1 h-8 text-xs bg-green-600 hover:bg-green-700 text-white"
+              className="flex-1 h-10 text-xs bg-green-600 hover:bg-green-700 text-white"
               onClick={() => onAceitar?.(order)}
             >
               Aceitar
@@ -129,7 +129,7 @@ export function OrderCard({ order, variant, onRecusar, onAceitar, onIniciarPrepa
         {variant === "aprovados" && (
           <Button
             variant="outline"
-            className="flex-1 h-8 text-xs border-green-500 text-green-600 hover:bg-green-50"
+            className="flex-1 h-10 text-xs border-green-500 text-green-600 hover:bg-green-50"
             onClick={() => onIniciarPreparo?.(order)}
           >
             Iniciar preparo
@@ -138,7 +138,7 @@ export function OrderCard({ order, variant, onRecusar, onAceitar, onIniciarPrepa
         {variant === "fazendo" && (
           <Button
             variant="outline"
-            className="flex-1 h-8 text-xs border-blue-500 text-blue-600 hover:bg-blue-50"
+            className="flex-1 h-10 text-xs border-blue-500 text-blue-600 hover:bg-blue-50"
             onClick={() => onMarcarPronto?.(order)}
           >
             Marcar como pronto
@@ -147,7 +147,7 @@ export function OrderCard({ order, variant, onRecusar, onAceitar, onIniciarPrepa
         {variant === "prontos" && (
           <Button
             variant="outline"
-            className="flex-1 h-8 text-xs border-green-500 text-green-600 hover:bg-green-50"
+            className="flex-1 h-10 text-xs border-green-500 text-green-600 hover:bg-green-50"
             onClick={() => onMarcarEntregue?.(order)}
           >
             Marcar como entregue

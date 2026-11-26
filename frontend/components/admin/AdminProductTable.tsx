@@ -128,7 +128,7 @@ export function AdminProductTable({
                 </div>
               </div>
 
-              <div className="flex lg:hidden items-center justify-between gap-2 mt-2 pt-2 border-t border-dashed border-[var(--rose-200)]">
+              <div className="flex lg:hidden flex-wrap items-center justify-between gap-2 mt-2 pt-2 border-t border-dashed border-[var(--rose-200)]">
               <div className="flex items-center gap-2 flex-wrap min-w-0">
                 <span
                   className={cn(
@@ -147,11 +147,11 @@ export function AdminProductTable({
                   {formattedPrice(product.price)}
                 </span>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   onClick={() => onToggle?.(product)}
                   className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+                    "flex h-10 w-10 items-center justify-center rounded-full transition-colors",
                     product.available === false
                       ? "bg-gray-100 text-gray-400 hover:bg-gray-200"
                       : "bg-blue-50 text-blue-600 hover:bg-blue-100"
@@ -163,14 +163,14 @@ export function AdminProductTable({
                 </button>
                 <button
                   onClick={() => onEdit?.(product)}
-                  className="w-8 h-8 rounded-full bg-green-50 text-green-600 hover:bg-green-100 flex items-center justify-center transition-colors"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-green-600 transition-colors hover:bg-green-100"
                   aria-label={`Editar ${product.name}`}
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => onDelete?.(product)}
-                  className="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-500 transition-colors hover:bg-red-100"
                   aria-label={`Excluir ${product.name}`}
                 >
                   <Trash2 className="h-4 w-4" />

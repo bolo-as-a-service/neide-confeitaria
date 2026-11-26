@@ -17,7 +17,7 @@ export default function PedidoConfirmadoPage() {
   }, [clearCart]);
 
   return (
-    <div className="min-h-screen bg-[var(--page-bg)] font-body flex flex-col">
+    <div className="min-h-dvh bg-[var(--page-bg)] font-body flex flex-col">
       <Header cartCount={0} onCartClick={() => { }} />
 
       <main className="flex-1 flex items-center justify-center px-4 py-10">

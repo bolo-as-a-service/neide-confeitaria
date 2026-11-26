@@ -69,9 +69,9 @@ export function ShoppingCartSidebar({
           exit={{ x: 60, opacity: 0 }}
           transition={{ type: "spring", stiffness: 320, damping: 32 }}
           className={cn(
-            "fixed top-0 right-0 h-full w-full max-w-sm bg-[#fffdfc] shadow-2xl z-50",
+            "fixed inset-y-0 right-0 h-dvh w-full max-w-sm bg-[#fffdfc] shadow-2xl z-50",
             "flex flex-col",
-            "lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)] lg:shrink-0 lg:max-w-[380px] lg:shadow-[0_16px_40px_-16px_rgba(75,40,32,0.35)] lg:rounded-[var(--radius-card-lg)] lg:border lg:border-[var(--rose-200)] lg:overflow-hidden"
+            "lg:sticky lg:top-[124px] lg:h-[calc(100dvh-140px)] lg:shrink-0 lg:max-w-[380px] lg:shadow-[0_16px_40px_-16px_rgba(75,40,32,0.35)] lg:rounded-[var(--radius-card-lg)] lg:border lg:border-[var(--rose-200)] lg:overflow-hidden"
           )}
         >
           <div className="flex items-center justify-between p-4 border-b border-[var(--rose-200)] bg-[var(--rose-50)]/60">
@@ -86,7 +86,7 @@ export function ShoppingCartSidebar({
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-full text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--rose-100)] transition-colors"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--rose-100)] hover:text-[var(--ink)]"
               aria-label="Fechar carrinho"
             >
               <X className="h-5 w-5" />
@@ -126,7 +126,7 @@ export function ShoppingCartSidebar({
                         </h3>
                         <button
                           onClick={() => onRemoveItem(item.id)}
-                          className="p-1 rounded-full text-[var(--muted)] hover:text-red-500 hover:bg-red-50 transition-colors"
+                          className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-red-50 hover:text-red-500"
                           aria-label="Remover item"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -148,7 +148,7 @@ export function ShoppingCartSidebar({
                             size="icon"
                             onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
                             disabled={item.quantity <= 1}
-                            className="h-8 w-8 text-[var(--brand-700)] hover:bg-[var(--rose-100)] disabled:opacity-50 rounded-full"
+                            className="h-9 w-9 text-[var(--brand-700)] hover:bg-[var(--rose-100)] disabled:opacity-50 rounded-full"
                             aria-label="Diminuir quantidade"
                           >
                             <Minus className="h-3.5 w-3.5" />
@@ -161,7 +161,7 @@ export function ShoppingCartSidebar({
                             variant="ghost"
                             size="icon"
                             onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                            className="h-8 w-8 text-[var(--brand-700)] hover:bg-[var(--rose-100)] rounded-full"
+                            className="h-9 w-9 text-[var(--brand-700)] hover:bg-[var(--rose-100)] rounded-full"
                             aria-label="Aumentar quantidade"
                           >
                             <Plus className="h-3.5 w-3.5" strokeWidth={3} />
@@ -171,7 +171,7 @@ export function ShoppingCartSidebar({
                           variant="ghost"
                           size="sm"
                           onClick={() => onEditItem(item)}
-                          className="h-8 px-3 gap-1.5 text-xs text-[var(--brand-700)] hover:bg-[var(--rose-100)]"
+                          className="h-9 px-3 gap-1.5 text-xs text-[var(--brand-700)] hover:bg-[var(--rose-100)]"
                           aria-label="Editar item"
                         >
                           <Edit className="h-3.5 w-3.5" />
@@ -219,7 +219,7 @@ export function ShoppingCartSidebar({
                           variant="secondary"
                           size="sm"
                           onClick={() => onQuickAdd(s)}
-                          className="h-8 rounded-full px-3 text-xs font-bold shrink-0"
+                          className="h-9 w-9 shrink-0 rounded-full px-0 text-xs font-bold"
                           aria-label={`Adicionar ${s.name} à sacola`}
                         >
                           <Plus className="h-3.5 w-3.5" strokeWidth={3} />

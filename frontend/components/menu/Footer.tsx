@@ -55,12 +55,12 @@ export function Footer() {
             </div>
           </div>
 
-          <nav className="flex flex-col items-center md:items-start gap-2 text-sm" aria-label="Navegação">
+          <nav className="flex flex-col items-center gap-1 text-sm md:items-start" aria-label="Navegação">
             <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--rose-200)]/70 mb-1">Passeie</span>
-            <a href="/cardapio" className="hover:text-white hover:underline underline-offset-4 transition-colors">Cardápio</a>
-            <a href="/carrinho" className="hover:text-white hover:underline underline-offset-4 transition-colors">Carrinho</a>
-            <a href="/meus-pedidos" className="hover:text-white hover:underline underline-offset-4 transition-colors">Meus pedidos</a>
-            <a href="/login" className="hover:text-white hover:underline underline-offset-4 transition-colors">Minha conta</a>
+            <a href="/cardapio" className="inline-flex min-h-9 items-center hover:text-white hover:underline underline-offset-4 transition-colors">Cardápio</a>
+            <a href="/carrinho" className="inline-flex min-h-9 items-center hover:text-white hover:underline underline-offset-4 transition-colors">Carrinho</a>
+            <a href="/meus-pedidos" className="inline-flex min-h-9 items-center hover:text-white hover:underline underline-offset-4 transition-colors">Meus pedidos</a>
+            <a href="/login" className="inline-flex min-h-9 items-center hover:text-white hover:underline underline-offset-4 transition-colors">Minha conta</a>
           </nav>
 
           <div className="flex flex-col items-center md:items-start gap-2.5 text-sm text-[var(--rose-100)]">

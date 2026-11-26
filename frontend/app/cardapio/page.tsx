@@ -37,7 +37,7 @@ function mapProduct(p: BackendProduct): Product {
   return {
     id: String(p.id),
     name: p.name,
-    price: p.price,
+    price: Number(p.price) || 0,
     image: productImageSrc(p),
     category: categoryName,
     description: p.description,
@@ -214,7 +214,7 @@ export default function CardapioPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--page-bg)] font-body">
+      <div className="min-h-dvh bg-[var(--page-bg)] font-body">
         <Header cartCount={cartCount} onCartClick={() => setCartOpen(true)} />
         <main className="flex flex-1 w-full max-w-full lg:max-w-[85%] mx-auto">
           <div className="flex-1 min-w-0">
@@ -237,7 +237,7 @@ export default function CardapioPage() {
 
   if (loadError) {
     return (
-      <div className="min-h-screen bg-[var(--page-bg)] font-body">
+      <div className="min-h-dvh bg-[var(--page-bg)] font-body">
         <Header cartCount={cartCount} onCartClick={() => setCartOpen(true)} />
         <main className="max-w-[1020px] mx-auto px-4 sm:px-6 pb-12">
           <ErrorState
@@ -252,7 +252,7 @@ export default function CardapioPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--page-bg)] font-body">
+    <div className="min-h-dvh bg-[var(--page-bg)] font-body">
       <Header cartCount={cartCount} onCartClick={() => setCartOpen(true)} />
 
       <main className="flex flex-1 w-full max-w-full lg:max-w-[85%] mx-auto">

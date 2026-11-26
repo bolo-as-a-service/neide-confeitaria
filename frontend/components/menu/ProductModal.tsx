@@ -102,7 +102,7 @@ function ProductModalContent({
   if (!product) return null;
 
   return (
-      <DialogContent className="max-h-[90vh] max-w-lg p-0 overflow-hidden grid-rows-[auto_1fr] rounded-[var(--radius-card-lg)]">
+      <DialogContent className="max-h-[90dvh] max-w-lg p-0 overflow-hidden grid-rows-[auto_1fr] rounded-[var(--radius-card-lg)]">
       <DialogHeader className="p-4 sm:p-6 pb-0 sm:pb-0">
         <DialogTitle className="font-display text-[1.35rem] font-bold text-[var(--brand-900)] leading-tight pr-8">
           {product.name}

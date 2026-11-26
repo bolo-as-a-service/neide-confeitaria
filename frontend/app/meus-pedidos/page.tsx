@@ -97,14 +97,14 @@ export default function MeusPedidosPage() {
 
   if (authLoading || !user) {
     return (
-      <div className="min-h-screen bg-[var(--page-bg)] flex items-center justify-center">
+      <div className="min-h-dvh bg-[var(--page-bg)] flex items-center justify-center">
         <p className="text-sm text-[var(--muted)]">Verificando acesso…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[var(--page-bg)] font-body">
+    <div className="min-h-dvh bg-[var(--page-bg)] font-body">
       <Header cartCount={0} onCartClick={() => router.push("/carrinho")} />
 
       <main className="max-w-[1020px] mx-auto px-4 sm:px-6 py-6 pb-12">
@@ -140,7 +140,7 @@ export default function MeusPedidosPage() {
                   role="tab"
                   aria-selected={selected}
                   onClick={() => setFilter(opt.id)}
-                  className={`inline-flex shrink-0 items-center gap-2 rounded-full border-2 px-4 py-2 text-xs font-bold transition-all ${
+                  className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full border-2 px-4 py-2 text-xs font-bold transition-all ${
                     selected
                       ? "border-[var(--brand-900)] bg-[var(--brand-900)] text-[var(--cream)] shadow-md"
                       : "border-[var(--rose-200)] bg-white text-[var(--brand-800)] hover:border-[var(--brand-600)]"

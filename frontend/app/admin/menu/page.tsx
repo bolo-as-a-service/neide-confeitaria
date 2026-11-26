@@ -26,7 +26,7 @@ function toAdminProduct(p: BackendProduct): AdminProduct {
     id: String(p.id),
     name: p.name,
     description: p.description || "",
-    price: p.price,
+    price: Number(p.price) || 0,
     image: productImageSrc(p),
     category: catName,
     categoryColor: categoryColorForCategory(catName),
@@ -186,7 +186,7 @@ export default function AdminMenuPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="mb-6 rounded-[var(--radius-card-lg)] bg-[var(--brand-900)] texture-sprinkles text-[var(--cream)] p-5 sm:p-6 flex items-center justify-between gap-4 shadow-[0_18px_40px_-20px_rgba(43,21,20,0.65)]">
+      <div className="mb-6 rounded-[var(--radius-card-lg)] bg-[var(--brand-900)] texture-sprinkles text-[var(--cream)] p-5 sm:p-6 flex flex-col items-start gap-4 shadow-[0_18px_40px_-20px_rgba(43,21,20,0.65)] sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2.5">
             <Cake className="h-5 w-5 text-[var(--rose-200)]" />
@@ -198,7 +198,7 @@ export default function AdminMenuPage() {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-1.5 bg-[var(--cream)] hover:bg-white text-[var(--brand-900)] px-4 py-2.5 rounded-full text-xs lg:text-sm font-bold transition-all hover:-translate-y-px shadow whitespace-nowrap"
+          className="flex min-h-10 w-full items-center justify-center gap-1.5 bg-[var(--cream)] hover:bg-white text-[var(--brand-900)] px-4 py-2.5 rounded-full text-xs lg:text-sm font-bold transition-all hover:-translate-y-px shadow whitespace-nowrap sm:w-auto"
         >
           <Plus className="h-4 w-4" strokeWidth={3} />
           Novo produto

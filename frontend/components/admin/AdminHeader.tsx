@@ -65,6 +65,7 @@ export function AdminHeader() {
             className="flex items-center gap-2 border border-gray-200 rounded-lg px-2 lg:px-3 py-1.5 cursor-pointer hover:bg-gray-50 transition-colors"
             aria-haspopup="menu"
             aria-expanded={open}
+            aria-label={open ? "Fechar menu da conta" : "Abrir menu da conta"}
           >
             <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-[var(--brand-800)] flex items-center justify-center flex-shrink-0">
               <User className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
@@ -76,17 +77,26 @@ export function AdminHeader() {
             <ChevronDown className="h-4 w-4 text-[var(--muted)]" />
           </button>
           {open && (
-            <div role="menu" className="absolute right-0 mt-2 w-44 rounded-xl border border-gray-200 bg-white shadow-lg p-1.5 z-50">
+            <>
               <button
                 type="button"
-                role="menuitem"
-                onClick={handleLogout}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-              >
-                <LogOut className="h-4 w-4" />
-                Sair
-              </button>
-            </div>
+                aria-hidden
+                tabIndex={-1}
+                onClick={() => setOpen(false)}
+                className="fixed inset-0 z-10 cursor-default"
+              />
+              <div role="menu" className="absolute right-0 z-20 mt-2 w-44 rounded-xl border border-gray-200 bg-white shadow-lg p-1.5">
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sair
+                </button>
+              </div>
+            </>
           )}
         </div>
       </div>

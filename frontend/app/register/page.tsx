@@ -85,7 +85,7 @@ export default function RegisterPage() {
 
   if (isSuccess) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--page-bg)] px-4">
+      <div className="flex min-h-dvh flex-col items-center justify-center bg-[var(--page-bg)] px-4">
         <div className="animate-[popIn_0.6s_ease-out] text-center">
           <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--brand-700)] shadow-lg shadow-[var(--brand-700)]/20">
             <Sparkles className="h-10 w-10 text-[var(--cream)]" />
@@ -117,7 +117,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen justify-center overflow-y-auto bg-[var(--page-bg)] px-4 py-8">
+    <div className="flex min-h-dvh justify-center overflow-y-auto bg-[var(--page-bg)] px-4 py-8">
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0"
@@ -254,7 +254,7 @@ export default function RegisterPage() {
                         <button
                           type="button"
                           onClick={() => setShowPassword((v) => !v)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--ink)]"
+                          className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--rose-100)] hover:text-[var(--ink)]"
                           tabIndex={-1}
                           aria-label={showPassword ? "Esconder senha" : "Mostrar senha"}
                         >
@@ -289,7 +289,7 @@ export default function RegisterPage() {
                         <button
                           type="button"
                           onClick={() => setShowConfirm((v) => !v)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--ink)]"
+                          className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-[var(--muted)] transition-colors hover:bg-[var(--rose-100)] hover:text-[var(--ink)]"
                           tabIndex={-1}
                           aria-label={
                             showConfirm ? "Esconder senha" : "Mostrar senha"

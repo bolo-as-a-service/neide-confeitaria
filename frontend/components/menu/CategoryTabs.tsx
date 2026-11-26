@@ -60,7 +60,7 @@ export function CategoryTabs({ activeCategory, onCategoryChange, categories }: C
   React.useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
-    const STICK_TOP = 115;
+    const STICK_TOP = 116;
     const onScroll = () => {
       const next = sentinel.getBoundingClientRect().bottom < STICK_TOP;
       setStuck((prev) => (prev === next ? prev : next));
@@ -101,7 +101,7 @@ export function CategoryTabs({ activeCategory, onCategoryChange, categories }: C
   return (
     <>
       <div ref={sentinelRef} aria-hidden className="h-px" />
-      <div className={`sticky top-[115px] z-30 bg-[var(--page-bg)] border-b transition-shadow duration-300 ${stuck ? "border-[var(--rose-200)] shadow-[0_12px_24px_-14px_rgba(75,40,32,0.35)]" : "border-transparent shadow-none"}`}>
+      <div className={`sticky top-[116px] z-30 bg-[var(--page-bg)] border-b transition-shadow duration-300 ${stuck ? "border-[var(--rose-200)] shadow-[0_12px_24px_-14px_rgba(75,40,32,0.35)]" : "border-transparent shadow-none"}`}>
       <div className="max-w-[1020px] mx-auto px-4 sm:px-6">
         <div ref={stripRef} className="flex gap-3 overflow-x-auto pt-3 pb-4 scrollbar-hide snap-x">
         {renderButton("todos", "Todas", <LayoutGrid className="h-5 w-5" />)}

@@ -16,7 +16,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-[var(--page-bg)] font-body flex items-center justify-center px-4">
+    <div className="min-h-dvh bg-[var(--page-bg)] font-body flex items-center justify-center px-4">
       <ErrorState
         title="Algo deu errado"
         message={error.message || "Ocorreu um erro inesperado nesta página."}

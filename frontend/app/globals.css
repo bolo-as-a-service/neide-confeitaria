@@ -39,6 +39,24 @@ body {
   scroll-behavior: smooth;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/*
+ * iOS Safari dá zoom automático ao focar campos com fonte menor que 16px.
+ * No mobile, força 16px nos campos de texto (mantém os controles compactos
+ * no desktop, onde o Tailwind aplica text-sm).
+ */
+@media (max-width: 639px), (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 ::selection {
   background: var(--brand-700);
   color: var(--cream);

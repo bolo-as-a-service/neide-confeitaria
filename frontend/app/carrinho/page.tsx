@@ -144,14 +144,14 @@ export default function CarrinhoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--page-bg)] font-body">
+    <div className="min-h-dvh bg-[var(--page-bg)] font-body">
       <Header cartCount={cartCount} onCartClick={() => router.push("/carrinho")} />
 
       <main className="max-w-[1020px] mx-auto px-4 py-6 pb-12">
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => router.push("/cardapio")}
-            className="w-10 h-10 rounded-full bg-[var(--brand-900)] text-[var(--cream)] flex items-center justify-center hover:bg-[var(--brand-800)] hover:-translate-x-px transition-all shadow-sm"
+            className="w-10 h-10 shrink-0 rounded-full bg-[var(--brand-900)] text-[var(--cream)] flex items-center justify-center hover:bg-[var(--brand-800)] hover:-translate-x-px transition-all shadow-sm"
             aria-label="Voltar ao cardápio"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -211,7 +211,7 @@ export default function CarrinhoPage() {
                   <p className="text-[var(--muted)]">Seu carrinho está vazio</p>
                   <button
                     onClick={() => router.push("/cardapio")}
-                    className="mt-2 text-sm text-[var(--brand-700)] underline hover:text-[var(--brand-800)] transition-colors"
+                    className="mt-1 inline-flex min-h-10 items-center px-2 text-sm text-[var(--brand-700)] underline transition-colors hover:text-[var(--brand-800)]"
                   >
                     Adicionar produtos
                   </button>
@@ -257,14 +257,14 @@ export default function CarrinhoPage() {
                             <div className="flex items-center gap-1 flex-shrink-0">
                               <button
                                 onClick={() => setEditItem(item)}
-                                className="p-1.5 rounded-full text-blue-500 hover:bg-blue-50 transition-colors"
+                                className="flex h-9 w-9 items-center justify-center rounded-full text-blue-500 transition-colors hover:bg-blue-50"
                                 aria-label="Editar item"
                               >
                                 <Edit3 className="h-4 w-4" />
                               </button>
                               <button
                                 onClick={() => setDeleteItem(item)}
-                                className="p-1.5 rounded-full text-red-500 hover:bg-red-50 transition-colors"
+                                className="flex h-9 w-9 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50"
                                 aria-label="Remover item"
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -284,7 +284,7 @@ export default function CarrinhoPage() {
                               <button
                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
                                 disabled={item.quantity <= 1}
-                                className="h-8 w-8 flex items-center justify-center text-[var(--brand-700)] hover:bg-[var(--rose-100)] disabled:opacity-50 transition-colors"
+                                className="h-9 w-9 flex items-center justify-center text-[var(--brand-700)] hover:bg-[var(--rose-100)] disabled:opacity-50 transition-colors"
                                 aria-label="Diminuir quantidade"
                               >
                                 <Minus className="h-3.5 w-3.5" />
@@ -294,7 +294,7 @@ export default function CarrinhoPage() {
                               </span>
                               <button
                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                className="h-8 w-8 flex items-center justify-center text-[var(--brand-700)] hover:bg-[var(--rose-100)] transition-colors"
+                                className="h-9 w-9 flex items-center justify-center text-[var(--brand-700)] hover:bg-[var(--rose-100)] transition-colors"
                                 aria-label="Aumentar quantidade"
                               >
                                 <Plus className="h-3.5 w-3.5" />
@@ -583,7 +583,7 @@ export default function CarrinhoPage() {
                                 }) ?? "Preencha os dados corretamente")
                               : undefined
                     }
-                    className="w-full max-w-md h-14 text-base font-bold rounded-full uppercase tracking-widest shadow-[0_12px_28px_-10px_rgba(116,49,45,0.7)] disabled:cursor-not-allowed"
+                    className="w-full max-w-md h-14 text-sm min-[360px]:text-base font-bold rounded-full uppercase tracking-wider min-[360px]:tracking-widest shadow-[0_12px_28px_-10px_rgba(116,49,45,0.7)] disabled:cursor-not-allowed"
                     size="lg"
                   >
                     {submitting ? (
